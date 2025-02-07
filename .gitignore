@@ -1,1 +1,5 @@
+# Ignore Visual Studio related files
+.vs/
+
+# Ignore all .db files
 *.db
