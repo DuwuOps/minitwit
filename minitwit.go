@@ -2,20 +2,55 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
+
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // configuration
-var DATABASE = "./tmp/minitwit.db"
+var (
+    DATABASE  = "./tmp/minitwit.db"
+    PER_PAGE  = 30
+    SECRET_KEY = []byte("development key") // to parallel the Python "SECRET_KEY"
+)
+var Db *sql.DB
 
-// TODO: Choose new web framework
-// create our little application :)
-// app = Flask(__name__)
+func main() {
+	app := echo.New()
+
+	app.Renderer = NewTemplateRenderer()
+
+	// initDB
+	db, err := initDB()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer db.Close()
+	Db = db
+
+	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
+
+	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+        Root: "static", // static folder
+    }))
+
+	setupRoutes(app)
+
+	app.Logger.Fatal(app.Start(":8000"))
+}
 
 func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
@@ -79,21 +114,223 @@ func queryDB(db *sql.DB, query string, singleResult bool) (*sql.Rows, error) {
 	return rows, nil
 }
 
-// Example
-func main() {
-	db, err := initDB()
-	if err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
-	defer db.Close()
+// ==========================
+// Start: Routes
+func setupRoutes(app *echo.Echo) {
+	app.GET("/", Timeline)
+    app.GET("/public", PublicTimeline)
 
-	fmt.Println("Database initialized successfully")
+    app.GET("/login", Login)
+    app.POST("/login", Login)
 
-	rows, err := queryDB(db, "select * from user", false)
-	if err != nil {
-		log.Fatalf("Failed to query database: %v", err)
-	}
-	defer rows.Close()
+    app.GET("/register", Register)
+    app.POST("/register", Register)
 
-	fmt.Println("Query executed successfully")
+    app.GET("/logout", Logout)
+
+    app.POST("/add_message", AddMessage)
+
+    app.GET("/:username", UserTimeline)
+
+    app.GET("/:username/follow", FollowUser)
+    app.GET("/:username/unfollow", UnfollowUser)
 }
+// End: Routes
+// ==========================
+
+// ==========================
+// Start: Handlers
+func Timeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func PublicTimeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func Login(c echo.Context) error {
+    _, loggedIn := getSessionUserID(c)
+    if loggedIn {
+        return c.Redirect(http.StatusFound, "/")
+    }
+
+    var errorMessage string
+    if c.Request().Method == http.MethodPost {
+        username := c.FormValue("username")
+        password := c.FormValue("password")
+
+        var dbUser struct {
+            UserID int
+            PwHash string
+        }
+        err := Db.QueryRow(`
+            SELECT user_id, pw_hash FROM user
+            WHERE username = ?
+        `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
+
+        if errors.Is(err, sql.ErrNoRows) {
+            errorMessage = "Invalid username"
+        } else if err != nil {
+            return err
+        } else {
+            if !checkPasswordHash(dbUser.PwHash, password) {
+                errorMessage = "Invalid password"
+            } else {
+                addFlash(c, "You were logged in")
+                setSessionUserID(c, dbUser.UserID)
+                return c.Redirect(http.StatusFound, "/")
+            }
+        }
+    }
+
+    data := map[string]interface{}{
+        "error": errorMessage,
+        "flashes": getFlashes(c),
+    }
+    return c.Render(http.StatusOK, "login.html", data)
+}
+
+func Register(c echo.Context) error {
+    _, loggedIn := getSessionUserID(c)
+    if loggedIn {
+        return c.Redirect(http.StatusFound, "/")
+    }
+
+    var errorMessage string
+    if c.Request().Method == http.MethodPost {
+        username := c.FormValue("username")
+        email := c.FormValue("email")
+        password := c.FormValue("password")
+        password2 := c.FormValue("password2")
+
+        switch {
+        case username == "":
+            errorMessage = "You have to enter a username"
+        case email == "" || !strings.Contains(email, "@"):
+            errorMessage = "You have to enter a valid email address"
+        case password == "":
+            errorMessage = "You have to enter a password"
+        case password != password2:
+            errorMessage = "The two passwords do not match"
+        default:
+            existingID, err := getUserId(username)
+            if err != nil {
+                return err
+            }
+            if existingID != 0 {
+                errorMessage = "The username is already taken"
+            } else {
+                hash, err := generatePasswordHash(password)
+                if err != nil {
+                    return err
+                }
+                _, err = Db.Exec(`
+                    INSERT INTO user (username, email, pw_hash)
+                    VALUES (?, ?, ?)
+                `, username, email, hash)
+                if err != nil {
+                    return err
+                }
+
+                addFlash(c, "You were successfully registered and can login now")
+                return c.Redirect(http.StatusFound, "/login")
+            }
+        }
+    }
+
+    data := map[string]interface{}{
+        "error":   errorMessage,
+        "flashes": getFlashes(c),
+    }
+    return c.Render(http.StatusOK, "register.html", data)
+}
+
+func Logout(c echo.Context) error {
+    addFlash(c, "You were logged out")
+    clearSessionUserID(c)
+    return c.Redirect(http.StatusFound, "/public")
+}
+
+func UserTimeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func FollowUser(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func UnfollowUser(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func AddMessage(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+// End: Routes
+// ==========================
+
+// ==========================
+// Start: Helpers
+func generatePasswordHash(password string) (string, error) {
+    hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    return string(hashBytes), err
+}
+
+func checkPasswordHash(hashedPassword, plainPassword string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+    return err == nil
+}
+
+func getUserId(username string) (int, error) {
+    var id int
+    err := Db.QueryRow(`SELECT user_id FROM user WHERE username = ?`, username).Scan(&id)
+    if errors.Is(err, sql.ErrNoRows) {
+        return 0, nil // user not found
+    } 
+    if err != nil {
+        return 0, err
+    }
+    return id, nil
+}
+
+func addFlash(c echo.Context, message string) {
+    sess, _ := session.Get("session", c)
+    flashes, ok := sess.Values["flashes"].([]string)
+    if !ok {
+        flashes = []string{}
+    }
+    flashes = append(flashes, message)
+    sess.Values["flashes"] = flashes
+    sess.Save(c.Request(), c.Response())
+}
+
+func getFlashes(c echo.Context) []string {
+    sess, _ := session.Get("session", c)
+    flashes, ok := sess.Values["flashes"].([]string)
+    if !ok {
+        return []string{}
+    }
+    sess.Values["flashes"] = []string{}
+    sess.Save(c.Request(), c.Response())
+    return flashes
+}
+
+func getSessionUserID(c echo.Context) (int, bool) {
+    sess, _ := session.Get("session", c)
+    userID, ok := sess.Values["user_id"].(int)
+    return userID, ok
+}
+
+func setSessionUserID(c echo.Context, userID int) {
+    sess, _ := session.Get("session", c)
+    sess.Values["user_id"] = userID
+    sess.Save(c.Request(), c.Response())
+}
+
+func clearSessionUserID(c echo.Context) {
+    sess, _ := session.Get("session", c)
+    delete(sess.Values, "user_id")
+    sess.Save(c.Request(), c.Response())
+}
+// End: Helpers
+// ==========================
