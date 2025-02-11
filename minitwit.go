@@ -266,7 +266,7 @@ func UnfollowUser(c echo.Context) error {
 func AddMessage(c echo.Context) error {
 	return errors.New("Not implemented yet") //TODO
 }
-// End: Routes
+// End: Handlers
 // ==========================
 
 // ==========================
