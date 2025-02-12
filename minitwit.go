@@ -4,11 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -332,5 +334,21 @@ func clearSessionUserID(c echo.Context) {
     delete(sess.Values, "user_id")
     sess.Save(c.Request(), c.Response())
 }
+
+type TemplateRenderer struct {
+    templates *template.Template
+}
+
+func NewTemplateRenderer() *TemplateRenderer {
+    tmpl := template.Must(template.ParseGlob(filepath.Join("templates", "*.html")))
+    return &TemplateRenderer{
+        templates: tmpl,
+    }
+}
+
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+    return t.templates.ExecuteTemplate(w, name, data)
+}
+
 // End: Helpers
 // ==========================
