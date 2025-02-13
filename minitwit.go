@@ -71,13 +71,13 @@ func initDB() (*sql.DB, error) {
 }
 
 // Note: Method signature and return type have been modified
-func queryDB(db *sql.DB, query string, singleResult bool) (*sql.Rows, error) {
+func queryDB(db *sql.DB, query string, singleResult bool, args ...any) (*sql.Rows, error) {
 	//Queries the database and returns a list of QueryResults.
 	if db == nil {
 		return nil, fmt.Errorf("database connection is nil")
 	}
 
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
