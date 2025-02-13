@@ -129,7 +129,7 @@ func Timeline(c echo.Context) error {
     log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
     loggedIn, _ := isUserLoggedIn(c)
     if !loggedIn {
-        return c.Redirect(http.StatusOK, "/public")
+        return c.Redirect(http.StatusFound, "/public")
     }
 
     sessionUserId, _ := getSessionUserID(c)
