@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/echo"
 	_ "github.com/mattn/go-sqlite3"
@@ -14,6 +16,7 @@ import (
 
 // configuration
 var DATABASE = "./tmp/minitwit.db"
+var Db *sql.DB
 
 // TODO: Choose new web framework
 // create our little application :)
@@ -138,13 +141,107 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-    return errors.New("Not implemented yet") //TODO
+    loggedIn, err := isUserLoggedIn(c)
+	if err != nil {
+		return err
+	}
+    if loggedIn {
+        return c.Redirect(http.StatusFound, "/")
+    }
+
+    var errorMessage string
+    if c.Request().Method == http.MethodPost {
+        username := c.FormValue("username")
+        email := c.FormValue("email")
+        password := c.FormValue("password")
+        password2 := c.FormValue("password2")
+
+        switch {
+        case username == "":
+            errorMessage = "You have to enter a username"
+        case email == "" || !strings.Contains(email, "@"):
+            errorMessage = "You have to enter a valid email address"
+        case password == "":
+            errorMessage = "You have to enter a password"
+        case password != password2:
+            errorMessage = "The two passwords do not match"
+        default:
+            existingID, err := getUserId(username)
+            if err != nil {
+                return err
+            }
+            if existingID != 0 {
+                errorMessage = "The username is already taken"
+            } else {
+                hash, err := generatePasswordHash(password)
+                if err != nil {
+                    return err
+                }
+                _, err = Db.Exec(`
+                    INSERT INTO user (username, email, pw_hash)
+                    VALUES (?, ?, ?)
+                `, username, email, hash)
+                if err != nil {
+                    return err
+                }
+
+                addFlash(c, "You were successfully registered and can login now")
+                return c.Redirect(http.StatusFound, "/login")
+            }
+        }
+    }
+
+	flashes, err := getFlashes(c)
+	if err != nil {
+		return err
+	}
+
+    data := map[string]interface{}{
+        "error":   errorMessage,
+        "flashes": flashes,
+    }
+    return c.Render(http.StatusOK, "register.html", data)
 }
 
 func Logout(c echo.Context) error {
     return errors.New("Not implemented yet") //TODO
 }
 // End: Route-Handlers
+// ==========================
+
+
+// ==========================
+// Start: Helpers
+
+// Take a context and returns whether the current user is logged in
+func isUserLoggedIn(c echo.Context) (bool, error) {
+    return false, errors.New("Not implemented yet") //TODO
+}
+
+// Takes a username and return the user's id
+func getUserId(username string) (int, error) {
+    return 0, errors.New("Not implemented yet") //TODO
+}
+
+func generatePasswordHash(password string) (string, error) {
+    return "", errors.New("Not implemented yet") //TODO
+}
+
+// Takes a message to be flashed and a context
+// Flashes a message to the next request
+func addFlash(c echo.Context, message string) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+// Takes a context
+// Returns empties the flashes in the given context and returns the flashes in a list of strings
+func getFlashes(c echo.Context) ([]string, error) {
+	var strs []string
+    return strs, errors.New("Not implemented yet") //TODO
+}
+
+
+// End: Helpers
 // ==========================
 
 
@@ -155,6 +252,7 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
+	Db = db
 
 	fmt.Println("Database initialized successfully")
 
