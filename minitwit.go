@@ -148,7 +148,7 @@ func Timeline(c echo.Context) error {
     }
 
     data := map[string]interface{}{
-        "messages" : rows,
+		"Messages": msgs,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -166,7 +166,7 @@ func PublicTimeline(c echo.Context) error {
     }
 
     data := map[string]interface{}{
-        "messages" : rows,
+		"Messages": msgs,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -226,8 +226,8 @@ func Login(c echo.Context) error {
 	flashes, _ := getFlashes(c)
 
     data := map[string]interface{}{
-        "error": errorMessage,
-        "flashes": flashes,
+		"Error":   errorMessage,
+		"Flashes": flashes,
     }
     return c.Render(http.StatusOK, "login.html", data)
 }
@@ -280,8 +280,8 @@ func Register(c echo.Context) error {
 	flashes, _ := getFlashes(c)
 
     data := map[string]interface{}{
-        "error":   errorMessage,
-        "flashes": flashes,
+		"Error":   errorMessage,
+		"Flashes": flashes,
     }
     return c.Render(http.StatusOK, "register.html", data)
 }
@@ -365,12 +365,12 @@ func addFlash(c echo.Context, message string) error {
 	if err != nil {
 		return err
 	}
-    flashes, ok := sess.Values["flashes"].([]string)
+	flashes, ok := sess.Values["Flashes"].([]string)
     if !ok {
         flashes = []string{}
     }
     flashes = append(flashes, message)
-    sess.Values["flashes"] = flashes
+	sess.Values["Flashes"] = flashes
     sess.Save(c.Request(), c.Response())
 	return nil
 }
@@ -382,11 +382,11 @@ func getFlashes(c echo.Context) ([]string, error) {
 	if err != nil {
 		return []string{}, err
 	}
-	flashes, ok := sess.Values["flashes"].([]string)
+	flashes, ok := sess.Values["Flashes"].([]string)
     if !ok {
         return []string{}, nil
     }
-    sess.Values["flashes"] = []string{}
+	sess.Values["Flashes"] = []string{}
     sess.Save(c.Request(), c.Response())
     return flashes, nil
 }
