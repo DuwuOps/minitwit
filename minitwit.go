@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/labstack/echo"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -79,6 +81,72 @@ func queryDB(db *sql.DB, query string, singleResult bool) (*sql.Rows, error) {
 
 	return rows, nil
 }
+
+
+// ==========================
+// Start: Routes
+func setupRoutes(app *echo.Echo) {
+	app.GET("/", Timeline)
+
+    app.GET("/public", PublicTimeline)
+	app.GET("/:username", UserTimeline)
+
+	app.GET("/:username/follow", FollowUser)
+    app.GET("/:username/unfollow", UnfollowUser)
+
+	app.POST("/add_message", AddMessage)
+
+    app.GET("/login", Login)
+    app.POST("/login", Login)
+
+    app.GET("/register", Register)
+    app.POST("/register", Register)
+
+    app.GET("/logout", Logout)	
+}
+// End: Routes
+// ==========================
+
+// ==========================
+// Start: Route-Handlers
+func Timeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func PublicTimeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func UserTimeline(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func FollowUser(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func UnfollowUser(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func AddMessage(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
+func Login(c echo.Context) error {
+    return errors.New("Not implemented yet") //TODO
+}
+
+func Register(c echo.Context) error {
+    return errors.New("Not implemented yet") //TODO
+}
+
+func Logout(c echo.Context) error {
+    return errors.New("Not implemented yet") //TODO
+}
+// End: Route-Handlers
+// ==========================
+
 
 // Example
 func main() {
