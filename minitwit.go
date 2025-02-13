@@ -24,6 +24,7 @@ import (
 // configuration
 var DATABASE = "./tmp/minitwit.db"
 var SECRET_KEY = []byte("development key") // to parallel the Python "SECRET_KEY"
+var PER_PAGE  = 30
 var Db *sql.DB
 
 // TODO: Choose new web framework
@@ -120,8 +121,39 @@ func setupRoutes(app *echo.Echo) {
 
 // ==========================
 // Start: Route-Handlers
+
+// Shows a users timeline or if no user is logged in it will
+// redirect to the public timeline.  This timeline shows the user's
+// messages as well as all the messages of followed users.
 func Timeline(c echo.Context) error {
-	return errors.New("Not implemented yet") //TODO
+    log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
+    loggedIn, _ := isUserLoggedIn(c)
+    fmt.Printf("loggedIn: %v\n", loggedIn)
+    if !loggedIn {
+        return c.Redirect(http.StatusOK, "/public")
+    }
+
+    sessionUserId, _ := getSessionUserID(c)
+    fmt.Printf("sessionUserId: %v\n", sessionUserId)
+    rows, err := queryDB(Db, `select message.*, user.* from message, user
+                          where message.flagged = 0 and message.author_id = user.user_id and (
+                              user.user_id = ? or
+                              user.user_id in (select whom_id from follower
+                                                      where who_id = ?))
+                          order by message.pub_date desc limit ?`, 
+                          false,
+                          sessionUserId, sessionUserId, PER_PAGE,
+                        )
+    
+    if err != nil {
+        fmt.Printf("err: %v\n", err)
+        return err
+    }
+
+    data := map[string]interface{}{
+        "messages" : rows,
+    }
+    return c.Render(http.StatusOK, "timeline.html", data)
 }
 
 func PublicTimeline(c echo.Context) error {
@@ -268,6 +300,15 @@ func setSessionUserID(c echo.Context, userID int) error {
     sess.Values["user_id"] = userID
     sess.Save(c.Request(), c.Response())
 	return nil
+}
+
+func getSessionUserID(c echo.Context) (int, error) {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return 0, err
+	}
+    id, _ := sess.Values["user_id"].(int)
+	return id, nil
 }
 
 func clearSessionUserID(c echo.Context) error {
