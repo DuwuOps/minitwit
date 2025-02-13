@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo-contrib/session"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -215,7 +216,9 @@ func Logout(c echo.Context) error {
 
 // Take a context and returns whether the current user is logged in
 func isUserLoggedIn(c echo.Context) (bool, error) {
-    return false, errors.New("Not implemented yet") //TODO
+	sess, err := session.Get("session", c)
+    _, ok := sess.Values["user_id"].(int)
+    return ok, err
 }
 
 // Takes a username and return the user's id
