@@ -244,14 +244,34 @@ func generatePasswordHash(password string) (string, error) {
 // Takes a message to be flashed and a context
 // Flashes a message to the next request
 func addFlash(c echo.Context, message string) error {
-	return errors.New("Not implemented yet") //TODO
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return err
+	}
+    flashes, ok := sess.Values["flashes"].([]string)
+    if !ok {
+        flashes = []string{}
+    }
+    flashes = append(flashes, message)
+    sess.Values["flashes"] = flashes
+    sess.Save(c.Request(), c.Response())
+	return nil
 }
 
 // Takes a context
 // Returns empties the flashes in the given context and returns the flashes in a list of strings
 func getFlashes(c echo.Context) ([]string, error) {
-	var strs []string
-    return strs, errors.New("Not implemented yet") //TODO
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return []string{}, err
+	}
+	flashes, ok := sess.Values["flashes"].([]string)
+    if !ok {
+        return []string{}, nil
+    }
+    sess.Values["flashes"] = []string{}
+    sess.Save(c.Request(), c.Response())
+    return flashes, nil
 }
 
 
