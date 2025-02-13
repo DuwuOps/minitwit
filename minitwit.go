@@ -35,18 +35,18 @@ func initDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to create database directory: %w", err)
 	}
 
-	//Creates the database tables.
+	// Establish connection to database
 	db, err := connectDB()
 	if err != nil {
 		return nil, err
 	}
 
+	// Creates the database tables (and file if it does not exist yet).
 	sqlFile, err := os.ReadFile("./schema.sql")
 	if err != nil {
 		db.Close()
 		return nil, fmt.Errorf("failed to read schema file: %w", err)
 	}
-
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
 		db.Close()
