@@ -10,14 +10,18 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gorilla/sessions"
+
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // configuration
 var DATABASE = "./tmp/minitwit.db"
+var SECRET_KEY = []byte("development key") // to parallel the Python "SECRET_KEY"
 var Db *sql.DB
 
 // TODO: Choose new web framework
@@ -347,14 +351,17 @@ func getFlashes(c echo.Context) ([]string, error) {
     sess.Save(c.Request(), c.Response())
     return flashes, nil
 }
-
-
 // End: Helpers
 // ==========================
 
-
-// Example
+// Main method
 func main() {
+	// Create app as an instance of Echo
+	app := echo.New()
+
+	// Add template-renderer to app
+	// app.Renderer = TODO
+
 	db, err := initDB()
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -362,13 +369,13 @@ func main() {
 	defer db.Close()
 	Db = db
 
-	fmt.Println("Database initialized successfully")
+	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
-	rows, err := queryDB(db, "select * from user", false)
-	if err != nil {
-		log.Fatalf("Failed to query database: %v", err)
-	}
-	defer rows.Close()
+	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+        Root: "static", // static folder
+    }))
 
-	fmt.Println("Query executed successfully")
+	setupRoutes(app)
+
+	app.Logger.Fatal(app.Start(":8000"))
 }
