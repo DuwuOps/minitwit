@@ -10,9 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // configuration
@@ -234,8 +235,10 @@ func getUserId(username string) (int, error) {
     return id, nil
 }
 
+// Takes a password-string and returns a hashed version of the password-string
 func generatePasswordHash(password string) (string, error) {
-    return "", errors.New("Not implemented yet") //TODO
+    hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    return string(hashBytes), err
 }
 
 // Takes a message to be flashed and a context
