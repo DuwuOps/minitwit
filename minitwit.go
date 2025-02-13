@@ -138,8 +138,55 @@ func AddMessage(c echo.Context) error {
 	return errors.New("Not implemented yet") //TODO
 }
 
+// Logs the user in.
 func Login(c echo.Context) error {
-    return errors.New("Not implemented yet") //TODO
+    loggedIn, err := isUserLoggedIn(c)
+	if err != nil {
+		return err
+	}
+    if loggedIn {
+        return c.Redirect(http.StatusFound, "/")
+    }
+
+    var errorMessage string
+    if c.Request().Method == http.MethodPost {
+        username := c.FormValue("username")
+        password := c.FormValue("password")
+
+        var dbUser struct {
+            UserID int
+            PwHash string
+        }
+        err := Db.QueryRow(`
+            SELECT user_id, pw_hash FROM user
+            WHERE username = ?
+        `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
+
+        if errors.Is(err, sql.ErrNoRows) {
+            errorMessage = "Invalid username"
+        } else if err != nil {
+            return err
+        } else {
+            if !checkPasswordHash(dbUser.PwHash, password) {
+                errorMessage = "Invalid password"
+            } else {
+                addFlash(c, "You were logged in")
+                setSessionUserID(c, dbUser.UserID)
+                return c.Redirect(http.StatusFound, "/")
+            }
+        }
+    }
+
+	flashes, err := getFlashes(c)
+	if err != nil {
+		return err
+	}
+
+    data := map[string]interface{}{
+        "error": errorMessage,
+        "flashes": flashes,
+    }
+    return c.Render(http.StatusOK, "login.html", data)
 }
 
 func Register(c echo.Context) error {
@@ -214,6 +261,13 @@ func Logout(c echo.Context) error {
 
 // ==========================
 // Start: Helpers
+func checkPasswordHash(hashedPassword, plainPassword string) bool {
+    return false
+}
+
+func setSessionUserID(c echo.Context, userID int) error {
+	return errors.New("Not implemented yet") //TODO
+}
 
 // Take a context and returns whether the current user is logged in
 func isUserLoggedIn(c echo.Context) (bool, error) {
