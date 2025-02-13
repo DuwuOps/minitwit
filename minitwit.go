@@ -351,7 +351,9 @@ type TemplateRenderer struct {
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
+    tmpl := template.Must(t.templates.Clone())
+    tmpl = template.Must(tmpl.ParseFiles(filepath.Join("templates", name)))
+    return tmpl.ExecuteTemplate(w, name, data)
 }
 
 // Create and return a new instance of a TemplateRenderer
