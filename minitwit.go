@@ -253,7 +253,9 @@ func Register(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
-    return errors.New("Not implemented yet") //TODO
+    addFlash(c, "You were logged out")
+    clearSessionUserID(c)
+    return c.Redirect(http.StatusFound, "/public")
 }
 // End: Route-Handlers
 // ==========================
@@ -275,6 +277,10 @@ func setSessionUserID(c echo.Context, userID int) error {
     sess.Values["user_id"] = userID
     sess.Save(c.Request(), c.Response())
 	return nil
+}
+
+func clearSessionUserID(c echo.Context) error {
+    return errors.New("Not implemented yet") //TODO
 }
 
 // Take a context and returns whether the current user is logged in
