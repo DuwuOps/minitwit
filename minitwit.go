@@ -268,7 +268,13 @@ func checkPasswordHash(hashedPassword, plainPassword string) bool {
 }
 
 func setSessionUserID(c echo.Context, userID int) error {
-	return errors.New("Not implemented yet") //TODO
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return err
+	}
+    sess.Values["user_id"] = userID
+    sess.Save(c.Request(), c.Response())
+	return nil
 }
 
 // Take a context and returns whether the current user is logged in
