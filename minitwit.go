@@ -19,12 +19,6 @@ var DATABASE = "./tmp/minitwit.db"
 
 func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
-
-	dir := filepath.Dir(DATABASE)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create database directory: %w", err)
-	}
-
 	db, err := sql.Open("sqlite3", DATABASE)
 	if err != nil {
 		db.Close()
@@ -34,6 +28,13 @@ func connectDB() (*sql.DB, error) {
 }
 
 func initDB() (*sql.DB, error) {
+	// Create tmp directory
+	dir := filepath.Dir(DATABASE)
+	err := os.MkdirAll(dir, 0755)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create database directory: %w", err)
+	}
+
 	//Creates the database tables.
 	db, err := connectDB()
 	if err != nil {
