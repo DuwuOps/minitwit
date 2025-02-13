@@ -171,8 +171,50 @@ func PublicTimeline(c echo.Context) error {
     return c.Render(http.StatusOK, "timeline.html", data)
 }
 
+// Display's a users tweets.
 func UserTimeline(c echo.Context) error {
-	return errors.New("Not implemented yet") //TODO
+	username := c.Param("username")
+	profileUser, err := queryDB(Db, "select user_id from user where username = ?", true, username)
+	if err != nil {
+		return err
+	}
+	if profileUser == nil {
+		c.String(http.StatusNotFound, "Not found")
+	}
+	var UserID int
+	profileUserId := profileUser.Scan(&UserID)
+
+	followed := false
+	loggedIn, _ := isUserLoggedIn(c)
+	if loggedIn {
+		sessionUserId, _ := getSessionUserID(c)
+		follow_result, err := queryDB(Db, `select 1 from follower where
+             follower.who_id = ? and follower.whom_id = ?`,
+			true,
+			sessionUserId, profileUserId)
+		if err != nil {
+			return err
+		}
+		followed = follow_result != nil
+	}
+
+	rows, err := queryDB(Db, `select message.*, user.* from message, user where
+                            user.user_id = message.author_id and user.user_id = ?
+                            order by message.pub_date desc limit ?`,
+		false,
+		profileUserId, PER_PAGE,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	data := map[string]interface{}{
+		"Messages":    rows,
+		"Followed":    followed,
+		"ProfileUser": followed,
+	}
+	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
 func FollowUser(c echo.Context) error {
