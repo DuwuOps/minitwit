@@ -128,13 +128,11 @@ func setupRoutes(app *echo.Echo) {
 func Timeline(c echo.Context) error {
     log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
     loggedIn, _ := isUserLoggedIn(c)
-    fmt.Printf("loggedIn: %v\n", loggedIn)
     if !loggedIn {
         return c.Redirect(http.StatusOK, "/public")
     }
 
     sessionUserId, _ := getSessionUserID(c)
-    fmt.Printf("sessionUserId: %v\n", sessionUserId)
     rows, err := queryDB(Db, `select message.*, user.* from message, user
                           where message.flagged = 0 and message.author_id = user.user_id and (
                               user.user_id = ? or
@@ -146,7 +144,6 @@ func Timeline(c echo.Context) error {
                         )
     
     if err != nil {
-        fmt.Printf("err: %v\n", err)
         return err
     }
 
