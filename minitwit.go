@@ -223,7 +223,15 @@ func isUserLoggedIn(c echo.Context) (bool, error) {
 
 // Takes a username and return the user's id
 func getUserId(username string) (int, error) {
-    return 0, errors.New("Not implemented yet") //TODO
+	var id int
+    err := Db.QueryRow(`SELECT user_id FROM user WHERE username = ?`, username).Scan(&id)
+    if errors.Is(err, sql.ErrNoRows) {
+        return 0, nil // user not found
+    } 
+    if err != nil {
+        return 0, err
+    }
+    return id, nil
 }
 
 func generatePasswordHash(password string) (string, error) {
