@@ -280,7 +280,13 @@ func setSessionUserID(c echo.Context, userID int) error {
 }
 
 func clearSessionUserID(c echo.Context) error {
-    return errors.New("Not implemented yet") //TODO
+    sess, err := session.Get("session", c)
+	if err != nil {
+		return err
+	}
+    delete(sess.Values, "user_id")
+    sess.Save(c.Request(), c.Response())
+	return nil
 }
 
 // Take a context and returns whether the current user is logged in
