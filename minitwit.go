@@ -146,10 +146,7 @@ func AddMessage(c echo.Context) error {
 
 // Logs the user in.
 func Login(c echo.Context) error {
-    loggedIn, err := isUserLoggedIn(c)
-	if err != nil {
-		return err
-	}
+    loggedIn, _ := isUserLoggedIn(c)
     if loggedIn {
         return c.Redirect(http.StatusFound, "/")
     }
@@ -183,10 +180,7 @@ func Login(c echo.Context) error {
         }
     }
 
-	flashes, err := getFlashes(c)
-	if err != nil {
-		return err
-	}
+	flashes, _ := getFlashes(c)
 
     data := map[string]interface{}{
         "error": errorMessage,
@@ -196,10 +190,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-    loggedIn, err := isUserLoggedIn(c)
-	if err != nil {
-		return err
-	}
+    loggedIn, _ := isUserLoggedIn(c)
     if loggedIn {
         return c.Redirect(http.StatusFound, "/")
     }
@@ -221,10 +212,7 @@ func Register(c echo.Context) error {
         case password != password2:
             errorMessage = "The two passwords do not match"
         default:
-            existingID, err := getUserId(username)
-            if err != nil {
-                return err
-            }
+            existingID, _ := getUserId(username)
             if existingID != 0 {
                 errorMessage = "The username is already taken"
             } else {
@@ -246,10 +234,7 @@ func Register(c echo.Context) error {
         }
     }
 
-	flashes, err := getFlashes(c)
-	if err != nil {
-		return err
-	}
+	flashes, _ := getFlashes(c)
 
     data := map[string]interface{}{
         "error":   errorMessage,
