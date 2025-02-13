@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -354,13 +356,38 @@ func getFlashes(c echo.Context) ([]string, error) {
 // End: Helpers
 // ==========================
 
+
+// ==========================
+// Begin: Template Rendering
+
+// Implementation of echo.Renderer interface
+type TemplateRenderer struct {
+    templates *template.Template
+}
+
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+// Create and return a new instance of a TemplateRenderer
+func NewTemplateRenderer() *TemplateRenderer {
+	tmpl := template.Must(template.ParseGlob(filepath.Join("templates", "*.html")))
+    return &TemplateRenderer{
+        templates: tmpl,
+    }
+}
+
+// End: Template Rendering
+// ==========================
+
+
 // Main method
 func main() {
 	// Create app as an instance of Echo
 	app := echo.New()
 
 	// Add template-renderer to app
-	// app.Renderer = TODO
+	app.Renderer = NewTemplateRenderer()
 
 	db, err := initDB()
 	if err != nil {
