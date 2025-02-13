@@ -261,8 +261,10 @@ func Logout(c echo.Context) error {
 
 // ==========================
 // Start: Helpers
+// Securely check that the given stored password hash matches the given password.
 func checkPasswordHash(hashedPassword, plainPassword string) bool {
-    return false
+    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+    return err == nil
 }
 
 func setSessionUserID(c echo.Context, userID int) error {
