@@ -1,49 +1,52 @@
-{% extends "layout.html" %}
-{% block title %}
-  {% if request.endpoint == 'public_timeline' %}
+{{ template "layout.html" . }}
+
+{{ define "title" }}
+  {{ if eq .Endpoint "public_timeline" }}
     Public Timeline
-  {% elif request.endpoint == 'user_timeline' %}
-    {{ profile_user.username }}'s Timeline
-  {% else %}
+  {{ else if eq .Endpoint "user_timeline" }}
+    {{ .ProfileUser.Username }}'s Timeline
+  {{ else }}
     My Timeline
-  {% endif %}
-{% endblock %}
-{% block body %}
-  <h2>{{ self.title() }}</h2>
-  {% if g.user %}
-    {% if request.endpoint == 'user_timeline' %}
-      <div class=followstatus>
-      {% if g.user.user_id == profile_user.user_id %}
+  {{ end }}
+{{ end }}
+
+{{ define "body" }}
+  <h2>{{ template "title" . }}</h2>
+
+  {{ if .User }}
+    {{ if eq .Endpoint "user_timeline" }}
+      <div class="followstatus">
+      {{ if eq .User.UserID .ProfileUser.UserID }}
         This is you!
-      {% elif followed %}
+      {{ else if .Followed }}
         You are currently following this user.
-        <a class=unfollow href="{{ url_for('unfollow_user', username=profile_user.username)
-          }}">Unfollow user</a>.
-      {% else %}
+        <a class="unfollow" href="/{{ .ProfileUser.Username }}/unfollow">Unfollow user</a>.
+      {{ else }}
         You are not yet following this user.
-        <a class=follow href="{{ url_for('follow_user', username=profile_user.username)
-          }}">Follow user</a>.
-      {% endif %}
+        <a class="follow" href="/{{ .ProfileUser.Username }}/follow">Follow user</a>.
+      {{ end }}
       </div>
-    {% elif request.endpoint == 'timeline' %}
-      <div class=twitbox>
-        <h3>What's on your mind {{ g.user.username }}?</h3>
-        <form action="{{ url_for('add_message') }}" method=post>
-          <p><input type=text name=text size=60><!--
-          --><input type=submit value="Share">
+    {{ else if eq .Endpoint "timeline" }}
+      <div class="twitbox">
+        <h3>What's on your mind, {{ .User.Username }}?</h3>
+        <form action="/add_message" method="post">
+          <p><input type="text" name="text" size="60">
+          <input type="submit" value="Share">
         </form>
       </div>
-    {% endif %}
-  {% endif %}
-  <ul class=messages>
-  {% for message in messages %}
-    <li><img src="{{ message.email|gravatar(size=48) }}"><p>
-      <strong><a href="{{ url_for('user_timeline', username=message.username)
-      }}">{{ message.username }}</a></strong>
-      {{ message.text }}
-      <small>&mdash; {{ message.pub_date|datetimeformat }}</small>
-  {% else %}
-    <li><em>There's no message so far.</em>
-  {% endfor %}
+    {{ end }}
+  {{ end }}
+
+  <ul class="messages">
+  {{ range .Messages }}
+    <li>
+      <p>
+        <strong><a href="/{{ .Username }}">{{ .Username }}</a></strong>
+        {{ .Text }}
+      </p>
+    </li>
+  {{ else }}
+    <li><em>There's no message so far.</em></li>
+  {{ end }}
   </ul>
-{% endblock %}
+{{ end }}
