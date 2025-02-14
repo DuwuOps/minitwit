@@ -194,9 +194,14 @@ func Timeline(c echo.Context) error {
 		return err
 	}
 
+	user, err := getCurrentUser(c)
+	if err != nil {
+		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
+	}
 
     data := map[string]interface{}{
 		"Messages": msgs,
+		"User": user,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -273,11 +278,16 @@ func UserTimeline(c echo.Context) error {
 		return err
 	}
 
+	user, err := getCurrentUser(c)
+	if err != nil {
+		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
+	}
 
 	data := map[string]interface{}{
 		"Messages":    msgs,
 		"Followed":    followed,
 		"ProfileUser": followed,
+		"User": user,
 	}
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -301,15 +311,15 @@ func Login(c echo.Context) error {
         return c.Redirect(http.StatusFound, "/")
     }
 
+	var dbUser user
+
     var errorMessage string
     if c.Request().Method == http.MethodPost {
         username := c.FormValue("username")
         password := c.FormValue("password")
 
-        var dbUser struct {
-            UserID int
-            PwHash string
-        }
+		dbUser.Username = username
+
         err := Db.QueryRow(`
             SELECT user_id, pw_hash FROM user
             WHERE username = ?
@@ -336,6 +346,7 @@ func Login(c echo.Context) error {
     data := map[string]interface{}{
 		"Error":   errorMessage,
 		"Flashes": flashes,
+		"User": dbUser,
     }
     return c.Render(http.StatusOK, "login.html", data)
 }
