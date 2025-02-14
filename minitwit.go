@@ -180,6 +180,12 @@ func Timeline(c echo.Context) error {
         return err
     }
 
+    msgs, err := rowsToMapList(rows)
+    if err != nil {
+		return err
+	}
+
+
     data := map[string]interface{}{
 		"Messages": msgs,
     }
@@ -193,7 +199,12 @@ func PublicTimeline(c echo.Context) error {
                             false,
                             PER_PAGE,
                         )
+	if err != nil {
+		return err
+	}
+
     
+	msgs, err := rowsToMapList(rows)
     if err != nil {
         return err
     }
@@ -242,8 +253,14 @@ func UserTimeline(c echo.Context) error {
 		return err
 	}
 
+	msgs, err := rowsToMapList(rows)
+    if err != nil {
+		return err
+	}
+
+
 	data := map[string]interface{}{
-		"Messages":    rows,
+		"Messages":    msgs,
 		"Followed":    followed,
 		"ProfileUser": followed,
 	}
