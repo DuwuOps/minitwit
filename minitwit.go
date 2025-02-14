@@ -27,10 +27,6 @@ var SECRET_KEY = []byte("development key") // to parallel the Python "SECRET_KEY
 var PER_PAGE  = 30
 var Db *sql.DB
 
-// TODO: Choose new web framework
-// create our little application :)
-// app = Flask(__name__)
-
 func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
 	db, err := sql.Open("sqlite3", DATABASE)
