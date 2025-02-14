@@ -35,6 +35,7 @@ func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
 	db, err := sql.Open("sqlite3", DATABASE)
 	if err != nil {
+		fmt.Printf("sql.Open returned error: %v\n", err)
 		db.Close()
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -46,23 +47,27 @@ func initDB() (*sql.DB, error) {
 	dir := filepath.Dir(DATABASE)
 	err := os.MkdirAll(dir, 0755)
 	if err != nil {
+		fmt.Printf("os.MkdirAll returned error: %v\n", err)
 		return nil, fmt.Errorf("failed to create database directory: %w", err)
 	}
 
 	// Establish connection to database
 	db, err := connectDB()
 	if err != nil {
+		fmt.Printf("connectDB returned error: %v\n", err)
 		return nil, err
 	}
 
 	// Creates the database tables (and file if it does not exist yet).
 	sqlFile, err := os.ReadFile("./schema.sql")
 	if err != nil {
+		fmt.Printf("os.ReadFile returned error: %v\n", err)
 		db.Close()
 		return nil, fmt.Errorf("failed to read schema file: %w", err)
 	}
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
+		fmt.Printf("db.Exec returned error: %v\n", err)
 		db.Close()
 		log.Printf("%q: %s\n", err, sqlFile)
 		return nil, fmt.Errorf("failed to execute schema: %w", err)
@@ -80,6 +85,7 @@ func queryDB(db *sql.DB, query string, singleResult bool, args ...any) (*sql.Row
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
+		fmt.Printf("db.Query returned error: %v\n", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
@@ -109,6 +115,7 @@ func rowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
         
         // Scan the result into the column pointers...
         if err := rows.Scan(columnPointers...); err != nil {
+            fmt.Printf("rows.Scan returned error: %v\n", err)
             return nil, err
         }
 
@@ -177,11 +184,13 @@ func Timeline(c echo.Context) error {
                         )
     
     if err != nil {
+        fmt.Printf("queryDB returned error: %v\n", err)
         return err
     }
 
     msgs, err := rowsToMapList(rows)
     if err != nil {
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
 		return err
 	}
 
@@ -200,12 +209,14 @@ func PublicTimeline(c echo.Context) error {
                             PER_PAGE,
                         )
 	if err != nil {
+		fmt.Printf("queryDB returned error: %v\n", err)
 		return err
 	}
 
     
 	msgs, err := rowsToMapList(rows)
     if err != nil {
+        fmt.Printf("rowsToMapList returned error: %v\n", err)
         return err
     }
 
@@ -220,6 +231,7 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	profileUser, err := queryDB(Db, "select user_id from user where username = ?", true, username)
 	if err != nil {
+		fmt.Printf("queryDB returned error: %v\n", err)
 		return err
 	}
 	if profileUser == nil {
@@ -237,6 +249,7 @@ func UserTimeline(c echo.Context) error {
 			true,
 			sessionUserId, profileUserId)
 		if err != nil {
+			fmt.Printf("queryDB returned error: %v\n", err)
 			return err
 		}
 		followed = follow_result != nil
@@ -250,11 +263,13 @@ func UserTimeline(c echo.Context) error {
 	)
 
 	if err != nil {
+		fmt.Printf("queryDB returned error: %v\n", err)
 		return err
 	}
 
 	msgs, err := rowsToMapList(rows)
     if err != nil {
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
 		return err
 	}
 
@@ -303,6 +318,7 @@ func Login(c echo.Context) error {
         if errors.Is(err, sql.ErrNoRows) {
             errorMessage = "Invalid username"
         } else if err != nil {
+            fmt.Printf("Db.QueryRow returned error: %v\n", err)
             return err
         } else {
             if !checkPasswordHash(dbUser.PwHash, password) {
@@ -353,6 +369,7 @@ func Register(c echo.Context) error {
             } else {
                 hash, err := generatePasswordHash(password)
                 if err != nil {
+                    fmt.Printf("generatePasswordHash returned error: %v\n", err)
                     return err
                 }
                 _, err = Db.Exec(`
@@ -360,6 +377,7 @@ func Register(c echo.Context) error {
                     VALUES (?, ?, ?)
                 `, username, email, hash)
                 if err != nil {
+                    fmt.Printf("Db.Exec returned error: %v\n", err)
                     return err
                 }
 
@@ -398,6 +416,7 @@ func checkPasswordHash(hashedPassword, plainPassword string) bool {
 func setSessionUserID(c echo.Context, userID int) error {
 	sess, err := session.Get("session", c)
 	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
     sess.Values["user_id"] = userID
@@ -408,6 +427,7 @@ func setSessionUserID(c echo.Context, userID int) error {
 func getSessionUserID(c echo.Context) (int, error) {
 	sess, err := session.Get("session", c)
 	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
 		return 0, err
 	}
     id, _ := sess.Values["user_id"].(int)
@@ -417,6 +437,7 @@ func getSessionUserID(c echo.Context) (int, error) {
 func clearSessionUserID(c echo.Context) error {
     sess, err := session.Get("session", c)
 	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
     delete(sess.Values, "user_id")
@@ -439,6 +460,7 @@ func getUserId(username string) (int, error) {
         return 0, nil // user not found
     } 
     if err != nil {
+        fmt.Printf("Db.QueryRow returned error: %v\n", err)
         return 0, err
     }
     return id, nil
@@ -455,6 +477,7 @@ func generatePasswordHash(password string) (string, error) {
 func addFlash(c echo.Context, message string) error {
 	sess, err := session.Get("session", c)
 	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
@@ -472,6 +495,7 @@ func addFlash(c echo.Context, message string) error {
 func getFlashes(c echo.Context) ([]string, error) {
 	sess, err := session.Get("session", c)
 	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
 		return []string{}, err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
@@ -497,6 +521,7 @@ func getCurrentUser(c echo.Context) (*user, error) {
 	var user user
 
 	if err != nil {
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return nil, err
 	}
 
@@ -505,6 +530,7 @@ func getCurrentUser(c echo.Context) (*user, error) {
 						id,
 					)
 	if err != nil {
+		fmt.Printf("queryDB returned error: %v\n", err)
 		return nil, err
 	}
 	
@@ -556,6 +582,7 @@ func main() {
 
 	db, err := initDB()
 	if err != nil {
+		fmt.Printf("initDB returned error: %v\n", err)
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
