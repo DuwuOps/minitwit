@@ -482,6 +482,40 @@ func getFlashes(c echo.Context) ([]string, error) {
     sess.Save(c.Request(), c.Response())
     return flashes, nil
 }
+
+type user struct {
+    UserID int
+	Username string
+	Email string
+	PwHash string
+}
+
+// Takes a context
+// Returns the current user
+func getCurrentUser(c echo.Context) (*user, error) {
+	id, err := getSessionUserID(c)
+	var user user
+
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := queryDB(Db, "select * from user where user_id = ?",
+						true,
+						id,
+					)
+	if err != nil {
+		return nil, err
+	}
+	
+	rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	fmt.Printf("Found user in database! %v\n", user)
+	fmt.Printf("user.UserID: %v\n", user.UserID)
+	fmt.Printf("user.Username: %v\n", user.Username)
+	fmt.Printf("user.Email: %v\n", user.Email)
+	fmt.Printf("user.PwHash: %v\n", user.PwHash)
+	return &user, nil
+}
 // End: Helpers
 // ==========================
 
