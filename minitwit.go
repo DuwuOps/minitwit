@@ -151,6 +151,8 @@ func setupRoutes(app *echo.Echo) {
     app.POST("/register", Register)
 
     app.GET("/logout", Logout)	
+
+	app.Static("/static", "static")
 }
 // End: Routes
 // ==========================
