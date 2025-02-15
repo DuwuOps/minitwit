@@ -72,6 +72,22 @@ func initDB() (*sql.DB, error) {
 	return db, nil
 }
 
+func populateDb(db *sql.DB, sqlFilePath string) error {
+	query, err := os.ReadFile(sqlFilePath)
+	if err != nil {
+		fmt.Printf("os.ReadFile returned error: %v\n", err)
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+	queryString := string(query)
+	_, err = db.Exec(queryString)
+	if err != nil {
+		fmt.Printf("sql.Open returned error: %v\n", err)
+		db.Close()
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
+	return nil
+}
+
 // Note: Method signature and return type have been modified
 func queryDbSingle(db *sql.DB, query string, args ...any)  *sql.Row {
 	row := db.QueryRow(query, args...)
@@ -600,6 +616,8 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
+	
+	populateDb(db, "./tmp/generate_data.sql")
 	Db = db
 
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
