@@ -168,7 +168,7 @@ func setupRoutes(app *echo.Echo) {
     app.GET("/register", Register)
     app.POST("/register", Register)
 
-    app.GET("/logout", Logout)	
+    app.GET("/logout", Logout)
 
 	app.Static("/static", "static")
 }
@@ -218,6 +218,7 @@ func Timeline(c echo.Context) error {
     data := map[string]interface{}{
 		"Messages": msgs,
 		"User": user,
+		"Endpoint": c.Path(),
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -244,6 +245,7 @@ func PublicTimeline(c echo.Context) error {
 
     data := map[string]interface{}{
 		"Messages": msgs,
+		"Endpoint": c.Path(),
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -302,6 +304,7 @@ func UserTimeline(c echo.Context) error {
 		"Followed":    followed,
 		"ProfileUser": followed,
 		"User": user,
+		"Endpoint": c.Path(),
 	}
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -371,7 +374,7 @@ func Login(c echo.Context) error {
 
 func Register(c echo.Context) error {
 	log.Println("User entered Register via route \"/register\"")
-    loggedIn, _ := isUserLoggedIn(c)
+	loggedIn, _ := isUserLoggedIn(c)
     if loggedIn {
         return c.Redirect(http.StatusFound, "/")
     }
@@ -619,7 +622,7 @@ func main() {
 	
 	populateDb(db, "./tmp/generate_data.sql")
 	Db = db
-
+	
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{

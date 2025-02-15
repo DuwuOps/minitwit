@@ -1,9 +1,9 @@
 {{ template "layout.html" . }}
 
 {{ define "title" }}
-  {{ if eq .Endpoint "public_timeline" }}
+  {{ if eq .Endpoint "/public" }}
     Public Timeline
-  {{ else if eq .Endpoint "user_timeline" }}
+  {{ else if eq .Endpoint "/:username" }}
     {{ .ProfileUser.Username }}'s Timeline
   {{ else }}
     My Timeline
@@ -14,7 +14,7 @@
   <h2>{{ template "title" . }}</h2>
 
   {{ if .User }}
-    {{ if eq .Endpoint "user_timeline" }}
+    {{ if eq .Endpoint "/:username" }}
       <div class="followstatus">
       {{ if eq .User.UserID .ProfileUser.UserID }}
         This is you!
@@ -26,7 +26,7 @@
         <a class="follow" href="/{{ .ProfileUser.Username }}/follow">Follow user</a>.
       {{ end }}
       </div>
-    {{ else if eq .Endpoint "timeline" }}
+    {{ else if eq .Endpoint "/" }}
       <div class="twitbox">
         <h3>What's on your mind, {{ .User.Username }}?</h3>
         <form action="/add_message" method="post">
