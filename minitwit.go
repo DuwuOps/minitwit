@@ -361,9 +361,40 @@ func FollowUser(c echo.Context) error {
 	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
 }
 
+// Removes the current user as follower of the given user.
 func UnfollowUser(c echo.Context) error {
-	log.Println("User entered UnfollowUser via route \"/:username/unfollow\"")
-	return errors.New("Not implemented yet") //TODO
+	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
+	loggedIn, _ := isUserLoggedIn(c)
+    if !loggedIn {
+        c.String(http.StatusUnauthorized, "Unauthorized")
+    }
+
+	row := Db.QueryRow(`SELECT * FROM user
+						WHERE username = ?`, 
+						username,
+					)
+	var user user
+	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	if err != nil {
+		fmt.Printf("row.Scan returned error: %v\n", err)
+		c.String(http.StatusNotFound, "Not found")
+	}
+
+	sessionUserId, err := getSessionUserID(c)
+	if err != nil {
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		return err
+	}
+	Db.Exec("delete from follower where who_id=? and whom_id=?", sessionUserId, user.UserID)
+
+	err = addFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
+	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
 }
 
 func AddMessage(c echo.Context) error {
