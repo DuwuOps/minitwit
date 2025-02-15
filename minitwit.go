@@ -142,7 +142,6 @@ func rowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
         }
         
         // Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...] 
-        fmt.Print(m)
         result = append(result, m)
     }
 
