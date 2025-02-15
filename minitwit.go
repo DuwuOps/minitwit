@@ -279,7 +279,7 @@ func UserTimeline(c echo.Context) error {
 		// The query should return a 1, if the user follows the user of the timeline.
 		var result int
 		err := follow_result.Scan(&result)
-		followed = err != nil
+		followed = err == nil
 	}
 
 	rows, err := queryDB(Db, `select message.*, user.* from message, user where
