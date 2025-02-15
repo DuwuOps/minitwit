@@ -106,10 +106,10 @@ func queryDB(db *sql.DB, query string, args ...any) (*sql.Rows, error) {
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
+		defer rows.Close()
 		fmt.Printf("db.Query returned error: %v\n", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-	defer rows.Close()
 
 	return rows, nil
 }
