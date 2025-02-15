@@ -304,19 +304,55 @@ func UserTimeline(c echo.Context) error {
 		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
 
+	flashes, err := getFlashes(c)
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
 	data := map[string]interface{}{
 		"Messages":    msgs,
 		"Followed":    followed,
 		"ProfileUser": requestedUser,
 		"User": user,
 		"Endpoint": c.Path(),
+		"Flashes": flashes,
 	}
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
+// Adds the current user as follower of the given user.
 func FollowUser(c echo.Context) error {
-	log.Println("User entered FollowUser via route \"/:username/follow\"")
-	return errors.New("Not implemented yet") //TODO
+	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
+	loggedIn, _ := isUserLoggedIn(c)
+    if !loggedIn {
+        c.String(http.StatusUnauthorized, "Unauthorized")
+    }
+
+	row := Db.QueryRow(`SELECT * FROM user
+						WHERE username = ?`, 
+						username,
+					)
+	var user user
+	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	if err != nil {
+		fmt.Printf("row.Scan returned error: %v\n", err)
+		c.String(http.StatusNotFound, "Not found")
+	}
+
+	sessionUserId, err := getSessionUserID(c)
+	if err != nil {
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		return err
+	}
+	Db.Exec("insert into follower (who_id, whom_id) values (?, ?)", sessionUserId, user.UserID)
+	err = addFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
+	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
 }
 
 func UnfollowUser(c echo.Context) error {
