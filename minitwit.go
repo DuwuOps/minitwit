@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gorilla/sessions"
 
@@ -397,9 +398,30 @@ func UnfollowUser(c echo.Context) error {
 	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
 }
 
+// Registers a new message for the user.
 func AddMessage(c echo.Context) error {
-	log.Println("User entered AddMessage via route \"/add_message\"")
-	return errors.New("Not implemented yet") //TODO
+	loggedIn, _ := isUserLoggedIn(c)
+    if !loggedIn {
+        c.String(http.StatusUnauthorized, "Unauthorized")
+    }
+	text := c.FormValue("text")
+	userId, err := getSessionUserID(c)
+	if err != nil {
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		return err
+	}
+	
+	Db.Exec(`insert into message (author_id, text, pub_date, flagged)
+			 values (?, ?, ?, 0)`,
+			 userId, text, time.Now().Unix(),
+	)
+
+	err = addFlash(c, "Your message was recorded")
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
+	return c.Redirect(http.StatusFound, "/")
 }
 
 // Logs the user in.
