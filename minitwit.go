@@ -73,7 +73,16 @@ func initDB() (*sql.DB, error) {
 }
 
 // Note: Method signature and return type have been modified
-func queryDB(db *sql.DB, query string, singleResult bool, args ...any) (*sql.Rows, error) {
+func queryDbSingle(db *sql.DB, query string, args ...any)  *sql.Row {
+	row := db.QueryRow(query, args...)
+	return row
+}
+
+func queryDB(db *sql.DB, query string, args ...any) (*sql.Rows, error) {
+	fmt.Printf("\nqueryDB called with following arguments:\n")
+	fmt.Printf(" - query: %v\n", query)
+	fmt.Printf(" - args: %v\n\n", args)
+
 	//Queries the database and returns a list of QueryResults.
 	if db == nil {
 		return nil, fmt.Errorf("database connection is nil")
@@ -85,13 +94,6 @@ func queryDB(db *sql.DB, query string, singleResult bool, args ...any) (*sql.Row
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
-
-	if singleResult {
-		if !rows.Next() {
-			rows.Close()
-			return nil, fmt.Errorf("no rows found")
-		}
-	}
 
 	return rows, nil
 }
@@ -178,7 +180,6 @@ func Timeline(c echo.Context) error {
                               user.user_id in (select whom_id from follower
                                                       where who_id = ?))
                           order by message.pub_date desc limit ?`, 
-                          false,
                           sessionUserId, sessionUserId, PER_PAGE,
                         )
     
@@ -211,7 +212,6 @@ func PublicTimeline(c echo.Context) error {
     rows, err := queryDB(Db, `select message.*, user.* from message, user
                             where message.flagged = 0 and message.author_id = user.user_id
                             order by message.pub_date desc limit ?`, 
-                            false,
                             PER_PAGE,
                         )
 	if err != nil {
@@ -237,37 +237,32 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
-	profileUser, err := queryDB(Db, "select user_id from user where username = ?", true, username)
+	row := queryDbSingle(Db, "select user_id from user where username = ?", username)
+	var requestedUserId int
+	err := row.Scan(&requestedUserId)
 	if err != nil {
-		fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
-		return err
-	}
-	if profileUser == nil {
+		fmt.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
-	var UserID int
-	profileUserId := profileUser.Scan(&UserID)
 
 	followed := false
 	loggedIn, _ := isUserLoggedIn(c)
 	if loggedIn {
 		sessionUserId, _ := getSessionUserID(c)
-		follow_result, err := queryDB(Db, `select 1 from follower where
+		follow_result := queryDbSingle(Db, `select 1 from follower where
              follower.who_id = ? and follower.whom_id = ?`,
-			true,
-			sessionUserId, profileUserId)
-		if err != nil {
-			fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
-			return err
-		}
-		followed = follow_result != nil
+			sessionUserId, requestedUserId)
+		
+		// The query should return a 1, if the user follows the user of the timeline.
+		var result int
+		err := follow_result.Scan(&result)
+		followed = err != nil
 	}
 
 	rows, err := queryDB(Db, `select message.*, user.* from message, user where
                             user.user_id = message.author_id and user.user_id = ?
                             order by message.pub_date desc limit ?`,
-		false,
-		profileUserId, PER_PAGE,
+							requestedUserId, PER_PAGE,
 	)
 
 	if err != nil {
@@ -545,16 +540,15 @@ func getCurrentUser(c echo.Context) (*user, error) {
 		return nil, err
 	}
 
-	rows, err := queryDB(Db, "select * from user where user_id = ?",
-						true,
+	rows := queryDbSingle(Db, "select * from user where user_id = ?",
 						id,
 					)
+	
+	err = rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
-		fmt.Printf("getCurrentUser: queryDB returned error: %v\n", err)
+		fmt.Printf("rows.Scan returned error: %v\n", err)
 		return nil, err
 	}
-	
-	rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	fmt.Printf("Found user in database! %v\n", user)
 	fmt.Printf("user.UserID: %v\n", user.UserID)
 	fmt.Printf("user.Username: %v\n", user.Username)
