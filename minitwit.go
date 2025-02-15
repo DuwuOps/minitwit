@@ -164,6 +164,7 @@ func setupRoutes(app *echo.Echo) {
 // redirect to the public timeline.  This timeline shows the user's
 // messages as well as all the messages of followed users.
 func Timeline(c echo.Context) error {
+	log.Println("User entered Timeline via route \"/\"")
     log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
     loggedIn, _ := isUserLoggedIn(c)
     if !loggedIn {
@@ -205,6 +206,8 @@ func Timeline(c echo.Context) error {
 }
 
 func PublicTimeline(c echo.Context) error {
+	log.Println("User entered PublicTimeline via route \"/public\"")
+	
     rows, err := queryDB(Db, `select message.*, user.* from message, user
                             where message.flagged = 0 and message.author_id = user.user_id
                             order by message.pub_date desc limit ?`, 
@@ -232,6 +235,8 @@ func PublicTimeline(c echo.Context) error {
 // Display's a users tweets.
 func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
 	profileUser, err := queryDB(Db, "select user_id from user where username = ?", true, username)
 	if err != nil {
 		fmt.Printf("queryDB returned error: %v\n", err)
@@ -291,19 +296,23 @@ func UserTimeline(c echo.Context) error {
 }
 
 func FollowUser(c echo.Context) error {
+	log.Println("User entered FollowUser via route \"/:username/follow\"")
 	return errors.New("Not implemented yet") //TODO
 }
 
 func UnfollowUser(c echo.Context) error {
+	log.Println("User entered UnfollowUser via route \"/:username/unfollow\"")
 	return errors.New("Not implemented yet") //TODO
 }
 
 func AddMessage(c echo.Context) error {
+	log.Println("User entered AddMessage via route \"/add_message\"")
 	return errors.New("Not implemented yet") //TODO
 }
 
 // Logs the user in.
 func Login(c echo.Context) error {
+	log.Println("User entered Login via route \"/login\"")
     loggedIn, _ := isUserLoggedIn(c)
     if loggedIn {
         return c.Redirect(http.StatusFound, "/")
@@ -350,6 +359,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
+	log.Println("User entered Register via route \"/register\"")
     loggedIn, _ := isUserLoggedIn(c)
     if loggedIn {
         return c.Redirect(http.StatusFound, "/")
@@ -406,6 +416,7 @@ func Register(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
+	log.Println("User entered Logout via route \"/logout\"")
     addFlash(c, "You were logged out")
     clearSessionUserID(c)
     return c.Redirect(http.StatusFound, "/public")
