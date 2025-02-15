@@ -243,9 +243,15 @@ func PublicTimeline(c echo.Context) error {
         return err
     }
 
+	user, err := getCurrentUser(c)
+	if err != nil {
+        fmt.Printf("getCurrentUser returned error: %v\n", err)
+    }
+
     data := map[string]interface{}{
 		"Messages": msgs,
 		"Endpoint": c.Path(),
+		"User": user,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -255,9 +261,9 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
-	row := queryDbSingle(Db, "select user_id from user where username = ?", username)
-	var requestedUserId int
-	err := row.Scan(&requestedUserId)
+	row := queryDbSingle(Db, "select * from user where username = ?", username)
+	var requestedUser user
+	err := row.Scan(&requestedUser.UserID, &requestedUser.Username, &requestedUser.Email, &requestedUser.PwHash)
 	if err != nil {
 		fmt.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -269,7 +275,7 @@ func UserTimeline(c echo.Context) error {
 		sessionUserId, _ := getSessionUserID(c)
 		follow_result := queryDbSingle(Db, `select 1 from follower where
              follower.who_id = ? and follower.whom_id = ?`,
-			sessionUserId, requestedUserId)
+			sessionUserId, requestedUser.UserID)
 		
 		// The query should return a 1, if the user follows the user of the timeline.
 		var result int
@@ -280,7 +286,7 @@ func UserTimeline(c echo.Context) error {
 	rows, err := queryDB(Db, `select message.*, user.* from message, user where
                             user.user_id = message.author_id and user.user_id = ?
                             order by message.pub_date desc limit ?`,
-							requestedUserId, PER_PAGE,
+							requestedUser.UserID, PER_PAGE,
 	)
 
 	if err != nil {
@@ -302,7 +308,7 @@ func UserTimeline(c echo.Context) error {
 	data := map[string]interface{}{
 		"Messages":    msgs,
 		"Followed":    followed,
-		"ProfileUser": followed,
+		"ProfileUser": requestedUser,
 		"User": user,
 		"Endpoint": c.Path(),
 	}
@@ -367,7 +373,6 @@ func Login(c echo.Context) error {
     data := map[string]interface{}{
 		"Error":   errorMessage,
 		"Flashes": flashes,
-		"User": dbUser,
     }
     return c.Render(http.StatusOK, "login.html", data)
 }
