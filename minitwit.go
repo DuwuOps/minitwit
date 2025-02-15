@@ -214,10 +214,16 @@ func Timeline(c echo.Context) error {
 		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
 
+	flashes, err := getFlashes(c)
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
     data := map[string]interface{}{
 		"Messages": msgs,
 		"User": user,
 		"Endpoint": c.Path(),
+		"Flashes": flashes,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
