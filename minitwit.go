@@ -183,7 +183,7 @@ func Timeline(c echo.Context) error {
                         )
     
     if err != nil {
-        fmt.Printf("queryDB returned error: %v\n", err)
+        fmt.Printf("Timeline: queryDB returned error: %v\n", err)
         return err
     }
 
@@ -215,7 +215,7 @@ func PublicTimeline(c echo.Context) error {
                             PER_PAGE,
                         )
 	if err != nil {
-		fmt.Printf("queryDB returned error: %v\n", err)
+		fmt.Printf("PublicTimeline: queryDB returned error: %v\n", err)
 		return err
 	}
 
@@ -239,7 +239,7 @@ func UserTimeline(c echo.Context) error {
 
 	profileUser, err := queryDB(Db, "select user_id from user where username = ?", true, username)
 	if err != nil {
-		fmt.Printf("queryDB returned error: %v\n", err)
+		fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
 		return err
 	}
 	if profileUser == nil {
@@ -257,7 +257,7 @@ func UserTimeline(c echo.Context) error {
 			true,
 			sessionUserId, profileUserId)
 		if err != nil {
-			fmt.Printf("queryDB returned error: %v\n", err)
+			fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
 			return err
 		}
 		followed = follow_result != nil
@@ -271,7 +271,7 @@ func UserTimeline(c echo.Context) error {
 	)
 
 	if err != nil {
-		fmt.Printf("queryDB returned error: %v\n", err)
+		fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
 		return err
 	}
 
@@ -550,7 +550,7 @@ func getCurrentUser(c echo.Context) (*user, error) {
 						id,
 					)
 	if err != nil {
-		fmt.Printf("queryDB returned error: %v\n", err)
+		fmt.Printf("getCurrentUser: queryDB returned error: %v\n", err)
 		return nil, err
 	}
 	
