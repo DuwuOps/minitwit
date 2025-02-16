@@ -1,0 +1,88 @@
+digraph "python3" {
+	rankdir=LR;
+	node [shape=box];
+	"python3" -> "python3-minimal" [color=purple,style=bold,label="(= 3.8.2-0ubuntu2)"];
+	"python3-minimal" -> "python3.8-minimal" [color=purple,style=bold,label="(>= 3.8.2-1~)"];
+	"python3.8-minimal" -> "libpython3.8-minimal" [color=blue,label="(= 3.8.10-0ubuntu1~20.04.14)"];
+	"libpython3.8-minimal" -> "libssl1.1" [color=blue,label="(>= 1.1.1)"];
+	"libssl1.1" -> "alt1":"debconf" [color=blue,label="(>= 0.5)"];
+	"alt1":"debconf-2.0" -> virt1 [dir=back,arrowtail=inv,color=green];
+	"libpython3.8-minimal" -> "libpython3.8-stdlib";
+	"libpython3.8-stdlib" -> "libpython3.8-minimal" [color=blue,label="(= 3.8.10-0ubuntu1~20.04.14)"];
+	"libpython3.8-stdlib" -> "mime-support" [color=blue];
+	"mime-support" -> "bzip2";
+	"bzip2" -> "libbz2-1.0" [color=blue,label="(= 1.0.8-2)"];
+	"mime-support" -> "file";
+	"file" -> "libmagic1" [color=blue,label="(= 1:5.38-4)"];
+	"libmagic1" -> "libbz2-1.0" [color=blue];
+	"libmagic1" -> "liblzma5" [color=blue,label="(>= 5.1.1alpha+20120614)"];
+	"libmagic1" -> "libmagic-mgc" [color=blue,label="(= 1:5.38-4)"];
+	"mime-support" -> "xz-utils";
+	"xz-utils" -> "liblzma5" [color=blue,label="(>= 5.2.2)"];
+	"xz-utils" -> "xz-lzma" [color=red];
+	"libpython3.8-stdlib" -> "libbz2-1.0" [color=blue];
+	"libpython3.8-stdlib" -> "libcrypt1" [color=blue,label="(>= 1:4.1.0)"];
+	"libpython3.8-stdlib" -> "libdb5.3" [color=blue];
+	"libpython3.8-stdlib" -> "libffi7" [color=blue,label="(>= 3.3~20180313)"];
+	"libpython3.8-stdlib" -> "liblzma5" [color=blue,label="(>= 5.1.1alpha+20120614)"];
+	"libpython3.8-stdlib" -> "libmpdec2" [color=blue];
+	"libpython3.8-stdlib" -> "libncursesw6" [color=blue,label="(>= 6)"];
+	"libncursesw6" -> "libtinfo6" [color=blue,label="(= 6.2-0ubuntu2.1)"];
+	"libncursesw6" -> "libgpm2";
+	"libpython3.8-stdlib" -> "libreadline8" [color=blue,label="(>= 7.0~beta)"];
+	"libreadline8" -> "readline-common" [color=blue];
+	"readline-common" -> "alt2":"dpkg" [color=blue,label="(>= 1.15.4)"];
+	"alt2":"install-info" -> "alt2":"dpkg" [color=purple,style=bold,label="(>= 1.16.1)"];
+	"readline-common" -> "libreadline-common" [color=red];
+	"libreadline8" -> "libtinfo6" [color=blue,label="(>= 6)"];
+	"libpython3.8-stdlib" -> "libsqlite3-0" [color=blue,label="(>= 3.7.15)"];
+	"libpython3.8-stdlib" -> "libtinfo6" [color=blue,label="(>= 6)"];
+	"libpython3.8-stdlib" -> "libuuid1" [color=blue,label="(>= 2.20.1)"];
+	"libuuid1" -> "uuid-runtime";
+	"uuid-runtime" -> "libuuid1" [color=purple,style=bold,label="(>= 2.25-5~)"];
+	"uuid-runtime" -> "adduser" [color=blue];
+	"adduser" -> "passwd" [color=blue];
+	"adduser" -> "alt1":"debconf" [color=blue,label="(>= 0.5)"];
+	"uuid-runtime" -> "libsmartcols1" [color=blue,label="(>= 2.27~rc1)"];
+	"uuid-runtime" -> "libsystemd0" [color=blue];
+	"libsystemd0" -> "libgcrypt20" [color=purple,style=bold,label="(>= 1.8.0)"];
+	"libgcrypt20" -> "libgpg-error0" [color=blue,label="(>= 1.25)"];
+	"libgpg-error0" -> "libgpg-error-l10n";
+	"libsystemd0" -> "liblz4-1" [color=purple,style=bold,label="(>= 0.0~r122)"];
+	"libsystemd0" -> "liblzma5" [color=purple,style=bold,label="(>= 5.1.1alpha+20120614)"];
+	"uuid-runtime" -> "libuuid1" [color=blue,label="(>= 2.31.1)"];
+	"python3.8-minimal" -> "libexpat1" [color=blue,label="(>= 2.1~beta3)"];
+	"python3.8-minimal" -> "python3.8";
+	"python3-minimal" -> "alt2":"dpkg" [color=blue,label="(>= 1.13.20)"];
+	"python3" -> "python3.8" [color=blue,label="(>= 3.8.2-1~)"];
+	"python3" -> "libpython3-stdlib" [color=blue,label="(= 3.8.2-0ubuntu2)"];
+	"libpython3-stdlib" -> "libpython3.8-stdlib" [color=blue,label="(>= 3.8.2-1~)"];
+	"python3" -> "python3:any" [arrowhead=inv,color=green];
+	"python3:any" [shape=octagon];
+	"python3" -> "python3-profiler" [arrowhead=inv,color=green];
+	"python3-profiler" [shape=octagon];
+	"python3" -> "python3-profiler:any" [arrowhead=inv,color=green];
+	"python3-profiler:any" [shape=octagon];
+	"python3" [style="setlinewidth(2)"]
+	"libreadline-common" [style=filled,fillcolor=oldlace];
+	"xz-lzma" [style=filled,fillcolor=oldlace];
+	alt1 [
+		shape = "record"
+		label = "<debconf> \{debconf\} | <debconf-2.0> debconf-2.0"
+	]
+	alt2 [
+		shape = "record"
+		label = "<dpkg> \{dpkg\} | <install-info> install-info"
+	]
+	virt1 [
+		shape = "record"
+		style = "rounded"
+		label = "<debconf> [debconf] | <cdebconf> \{cdebconf\}"
+	]
+	"passwd" [shape=diamond];
+	"python3.8" [shape=diamond];
+}
+// Excluded dependencies:
+// libc6 zlib1g
+// total size of all shown packages: 40121344
+// download size of all shown packages: 6929088
