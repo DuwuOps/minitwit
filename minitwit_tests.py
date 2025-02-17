@@ -133,7 +133,7 @@ class MiniTwitTestCase(unittest.TestCase):
 
         # now unfollow and check if that worked
         rv = self.app.get('/foo/unfollow', follow_redirects=True)
-        assert 'You are no longer following' in rv.get_data(as_text=True)
+        assert 'You are no longer following &#34;foo&#34;' in rv.get_data(as_text=True)
         rv = self.app.get('/')
         assert 'the message by foo' not in rv.get_data(as_text=True)
         assert 'the message by bar' in rv.get_data(as_text=True)
