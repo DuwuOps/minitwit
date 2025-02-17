@@ -512,6 +512,12 @@ func Register(c echo.Context) error {
                     fmt.Printf("Db.Exec returned error: %v\n", err)
                     return err
                 }
+				
+				log.Println("New user registered with the following forms:")
+				fmt.Printf("  - username: %v\n", username)
+				fmt.Printf("  - email: %v\n", email)
+				fmt.Printf("  - password: %v\n", password)
+				fmt.Printf("  - password2: %v\n", password2)
 
                 addFlash(c, "You were successfully registered and can login now")
                 return c.Redirect(http.StatusFound, "/login")
@@ -613,30 +619,28 @@ func addFlash(c echo.Context, message string) error {
 		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
-	flashes, ok := sess.Values["Flashes"].([]string)
-    if !ok {
-        flashes = []string{}
-    }
-    flashes = append(flashes, message)
-	sess.Values["Flashes"] = flashes
-    sess.Save(c.Request(), c.Response())
+	sess.AddFlash(message, "Flashes")
+
 	return nil
 }
 
 // Takes a context
 // Returns empties the flashes in the given context and returns the flashes in a list of strings
 func getFlashes(c echo.Context) ([]string, error) {
+	log.Print("Getting flashses!")
 	sess, err := session.Get("session", c)
 	if err != nil {
 		fmt.Printf("session.Get returned error: %v\n", err)
 		return []string{}, err
 	}
-	flashes, ok := sess.Values["Flashes"].([]string)
-    if !ok {
-        return []string{}, nil
-    }
-	sess.Values["Flashes"] = []string{}
-    sess.Save(c.Request(), c.Response())
+	rs := sess.Flashes("Flashes")
+	var flashes []string
+	for _, r := range rs {
+		flashes = append(flashes, r.(string))
+	}
+
+	fmt.Printf("Returning flashes: %v\n", flashes)
+
     return flashes, nil
 }
 
