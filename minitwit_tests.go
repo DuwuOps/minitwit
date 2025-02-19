@@ -12,18 +12,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-func register(username string, password string, password2 string, email string){
-	if password2 != ""{
+func register(username string, password string, password2 string, email string) {
+	if password2 != "" {
 		password2 = password
 	}
-	if email != ""{
+	if email != "" {
 		email = username + "@example.com"
 	}
 }
 
+//curl -v -d "username=user1&email=user1@mail.com&password=123&password2=123" http://localhost:8000/register -L
 
-func TestRegister(t *testing.T){
+func TestRegister(t *testing.T) {
 	// Setup
 	e := echo.New()
 
@@ -35,7 +35,7 @@ func TestRegister(t *testing.T){
 	c := e.NewContext(req, rec)
 
 	c.SetPath("/register")
-	
+
 	c.SetParamNames("email")
 	c.SetParamValues("jon@labstack.com")
 
