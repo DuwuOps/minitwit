@@ -552,9 +552,8 @@ func checkPasswordHash(hashedPassword, plainPassword string) bool {
 }
 
 func setSessionUserID(c echo.Context, userID int) error {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
     sess.Values["user_id"] = userID
@@ -563,9 +562,8 @@ func setSessionUserID(c echo.Context, userID int) error {
 }
 
 func getSessionUserID(c echo.Context) (int, error) {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return 0, err
 	}
     id, _ := sess.Values["user_id"].(int)
@@ -573,9 +571,8 @@ func getSessionUserID(c echo.Context) (int, error) {
 }
 
 func clearSessionUserID(c echo.Context) error {
-    sess, err := session.Get("session", c)
+    sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
     delete(sess.Values, "user_id")
@@ -585,7 +582,7 @@ func clearSessionUserID(c echo.Context) error {
 
 // Take a context and returns whether the current user is logged in
 func isUserLoggedIn(c echo.Context) (bool, error) {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
     _, ok := sess.Values["user_id"].(int)
     return ok, err
 }
@@ -613,9 +610,8 @@ func generatePasswordHash(password string) (string, error) {
 // Takes a message to be flashed and a context
 // Flashes a message to the next request
 func addFlash(c echo.Context, message string) error {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
@@ -631,9 +627,8 @@ func addFlash(c echo.Context, message string) error {
 // Takes a context
 // Returns empties the flashes in the given context and returns the flashes in a list of strings
 func getFlashes(c echo.Context) ([]string, error) {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return []string{}, err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
@@ -736,4 +731,18 @@ func main() {
 	setupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
+}
+
+func getSession(c echo.Context) (*sessions.Session, error) {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
+		return nil, err
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	return sess, nil
 }
