@@ -3,7 +3,17 @@
 This repository contains group c / "DuwuOps"'s official DevOps project.
 
 # Run via Docker
-## Not using docker compose
+## Using docker compose
+Build image and start container: 
+```
+docker compose up
+```
+Stop and destroy container:
+```
+docker compose down
+```
+
+## Manual start and stop
 start:
 ```
 docker build --tag minitwit_image .
@@ -16,23 +26,21 @@ stop:
 docker stop minitwit_app
 ```
 
-## Using docker compose
-TODO
-
 # Cleanup
 
-remove image: 
-
-It is not always necessary to use -f it is only when you want to force deletion.
+Remove image. It is not always necessary to use -f it is only when you want to force deletion:
 ```
 docker image rm minitwit_image -f
 ```
-remove container:
+Remove container:
 ```
 docker container rm minitwit_app
 ```
-
-## Get an overview
+Clean local images during ``docker compose down``:
+```
+docker compose down -v --rmi local
+```
+# Additional information
 See your images:
 ```
 docker images
@@ -40,4 +48,8 @@ docker images
 See containers:
 ```
 docker ps --all
+```
+Run docker compose in detached mode:
+```
+docker compose up -d
 ```
