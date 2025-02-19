@@ -242,7 +242,6 @@ func PublicTimeline(c echo.Context) error {
 		return err
 	}
 
-    
 	msgs, err := rowsToMapList(rows)
     if err != nil {
         fmt.Printf("rowsToMapList returned error: %v\n", err)
@@ -254,10 +253,16 @@ func PublicTimeline(c echo.Context) error {
         fmt.Printf("getCurrentUser returned error: %v\n", err)
     }
 
+	flashes, err := getFlashes(c)
+    if err != nil {
+      fmt.Printf("getFlashes returned error: %v\n", err)
+    }
+
     data := map[string]interface{}{
 		"Messages": msgs,
 		"Endpoint": c.Path(),
 		"User": user,
+		"Flashes": flashes,
     }
     return c.Render(http.StatusOK, "timeline.html", data)
 }
