@@ -4,12 +4,6 @@
 # Ignore all .db files
 *.db
 
-# Ignore Visual Studio related files
-.vs/
-
-# Ignore all .db files
-*.db
-
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
