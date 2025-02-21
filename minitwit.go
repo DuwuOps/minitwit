@@ -25,7 +25,7 @@ import (
 // configuration
 var DATABASE = "./tmp/minitwit.db"
 var SECRET_KEY = []byte("development key") // to parallel the Python "SECRET_KEY"
-var PER_PAGE  = 30
+var PER_PAGE = 30
 var Db *sql.DB
 
 func connectDB() (*sql.DB, error) {
@@ -90,7 +90,7 @@ func populateDb(db *sql.DB, sqlFilePath string) error {
 }
 
 // Note: Method signature and return type have been modified
-func queryDbSingle(db *sql.DB, query string, args ...any)  *sql.Row {
+func queryDbSingle(db *sql.DB, query string, args ...any) *sql.Row {
 	row := db.QueryRow(query, args...)
 	return row
 }
@@ -116,37 +116,37 @@ func queryDB(db *sql.DB, query string, args ...any) (*sql.Rows, error) {
 }
 
 func rowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
-    var result []map[string]interface{}
-    cols, _ := rows.Columns()
+	var result []map[string]interface{}
+	cols, _ := rows.Columns()
 
-    for rows.Next() {
-        // Create a slice of interface{}'s to represent each column,
-        // and a second slice to contain pointers to each item in the columns slice.
-        columns := make([]interface{}, len(cols))
-        columnPointers := make([]interface{}, len(cols))
-        for i, _ := range columns {
-            columnPointers[i] = &columns[i]
-        }
-        
-        // Scan the result into the column pointers...
-        if err := rows.Scan(columnPointers...); err != nil {
-            fmt.Printf("rows.Scan returned error: %v\n", err)
-            return nil, err
-        }
+	for rows.Next() {
+		// Create a slice of interface{}'s to represent each column,
+		// and a second slice to contain pointers to each item in the columns slice.
+		columns := make([]interface{}, len(cols))
+		columnPointers := make([]interface{}, len(cols))
+		for i, _ := range columns {
+			columnPointers[i] = &columns[i]
+		}
 
-        // Create our map, and retrieve the value for each column from the pointers slice,
-        // storing it in the map with the name of the column as the key.
-        m := make(map[string]interface{})
-        for i, colName := range cols {
-            val := columnPointers[i].(*interface{})
-            m[colName] = *val
-        }
-        
-        // Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...] 
-        result = append(result, m)
-    }
+		// Scan the result into the column pointers...
+		if err := rows.Scan(columnPointers...); err != nil {
+			fmt.Printf("rows.Scan returned error: %v\n", err)
+			return nil, err
+		}
 
-    return result, nil
+		// Create our map, and retrieve the value for each column from the pointers slice,
+		// storing it in the map with the name of the column as the key.
+		m := make(map[string]interface{})
+		for i, colName := range cols {
+			val := columnPointers[i].(*interface{})
+			m[colName] = *val
+		}
+
+		// Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...]
+		result = append(result, m)
+	}
+
+	return result, nil
 }
 
 // ==========================
@@ -154,24 +154,25 @@ func rowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
 func setupRoutes(app *echo.Echo) {
 	app.GET("/", Timeline)
 
-    app.GET("/public", PublicTimeline)
+	app.GET("/public", PublicTimeline)
 	app.GET("/:username", UserTimeline)
 
 	app.GET("/:username/follow", FollowUser)
-    app.GET("/:username/unfollow", UnfollowUser)
+	app.GET("/:username/unfollow", UnfollowUser)
 
 	app.POST("/add_message", AddMessage)
 
-    app.GET("/login", Login)
-    app.POST("/login", Login)
+	app.GET("/login", Login)
+	app.POST("/login", Login)
 
-    app.GET("/register", Register)
-    app.POST("/register", Register)
+	app.GET("/register", Register)
+	app.POST("/register", Register)
 
-    app.GET("/logout", Logout)
+	app.GET("/logout", Logout)
 
 	app.Static("/static", "static")
 }
+
 // End: Routes
 // ==========================
 
@@ -183,29 +184,29 @@ func setupRoutes(app *echo.Echo) {
 // messages as well as all the messages of followed users.
 func Timeline(c echo.Context) error {
 	log.Println("User entered Timeline via route \"/\"")
-    log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
-    loggedIn, _ := isUserLoggedIn(c)
-    if !loggedIn {
-        return c.Redirect(http.StatusFound, "/public")
-    }
+	log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
+	loggedIn, _ := isUserLoggedIn(c)
+	if !loggedIn {
+		return c.Redirect(http.StatusFound, "/public")
+	}
 
-    sessionUserId, _ := getSessionUserID(c)
-    rows, err := queryDB(Db, `select message.*, user.* from message, user
+	sessionUserId, _ := getSessionUserID(c)
+	rows, err := queryDB(Db, `select message.*, user.* from message, user
                           where message.flagged = 0 and message.author_id = user.user_id and (
                               user.user_id = ? or
                               user.user_id in (select whom_id from follower
                                                       where who_id = ?))
-                          order by message.pub_date desc limit ?`, 
-                          sessionUserId, sessionUserId, PER_PAGE,
-                        )
-    
-    if err != nil {
-        fmt.Printf("Timeline: queryDB returned error: %v\n", err)
-        return err
-    }
+                          order by message.pub_date desc limit ?`,
+		sessionUserId, sessionUserId, PER_PAGE,
+	)
 
-    msgs, err := rowsToMapList(rows)
-    if err != nil {
+	if err != nil {
+		fmt.Printf("Timeline: queryDB returned error: %v\n", err)
+		return err
+	}
+
+	msgs, err := rowsToMapList(rows)
+	if err != nil {
 		fmt.Printf("rowsToMapList returned error: %v\n", err)
 		return err
 	}
@@ -220,46 +221,51 @@ func Timeline(c echo.Context) error {
 		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-    data := map[string]interface{}{
+	data := map[string]interface{}{
 		"Messages": msgs,
-		"User": user,
+		"User":     user,
 		"Endpoint": c.Path(),
-		"Flashes": flashes,
-    }
-    return c.Render(http.StatusOK, "timeline.html", data)
+		"Flashes":  flashes,
+	}
+	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
 func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
-	
-    rows, err := queryDB(Db, `select message.*, user.* from message, user
+
+	rows, err := queryDB(Db, `select message.*, user.* from message, user
                             where message.flagged = 0 and message.author_id = user.user_id
-                            order by message.pub_date desc limit ?`, 
-                            PER_PAGE,
-                        )
+                            order by message.pub_date desc limit ?`,
+		PER_PAGE,
+	)
 	if err != nil {
 		fmt.Printf("PublicTimeline: queryDB returned error: %v\n", err)
 		return err
 	}
 
-    
 	msgs, err := rowsToMapList(rows)
-    if err != nil {
-        fmt.Printf("rowsToMapList returned error: %v\n", err)
-        return err
-    }
+	if err != nil {
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
+		return err
+	}
 
 	user, err := getCurrentUser(c)
 	if err != nil {
-        fmt.Printf("getCurrentUser returned error: %v\n", err)
-    }
+		fmt.Printf("getCurrentUser returned error: %v\n", err)
+	}
 
-    data := map[string]interface{}{
+	flashes, err := getFlashes(c)
+	if err != nil {
+		fmt.Printf("getFlashes returned error: %v\n", err)
+	}
+
+	data := map[string]interface{}{
 		"Messages": msgs,
 		"Endpoint": c.Path(),
-		"User": user,
-    }
-    return c.Render(http.StatusOK, "timeline.html", data)
+		"User":     user,
+		"Flashes":  flashes,
+	}
+	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
 // Display's a users tweets.
@@ -282,7 +288,7 @@ func UserTimeline(c echo.Context) error {
 		follow_result := queryDbSingle(Db, `select 1 from follower where
              follower.who_id = ? and follower.whom_id = ?`,
 			sessionUserId, requestedUser.UserID)
-		
+
 		// The query should return a 1, if the user follows the user of the timeline.
 		var result int
 		err := follow_result.Scan(&result)
@@ -292,7 +298,7 @@ func UserTimeline(c echo.Context) error {
 	rows, err := queryDB(Db, `select message.*, user.* from message, user where
                             user.user_id = message.author_id and user.user_id = ?
                             order by message.pub_date desc limit ?`,
-							requestedUser.UserID, PER_PAGE,
+		requestedUser.UserID, PER_PAGE,
 	)
 
 	if err != nil {
@@ -301,7 +307,7 @@ func UserTimeline(c echo.Context) error {
 	}
 
 	msgs, err := rowsToMapList(rows)
-    if err != nil {
+	if err != nil {
 		fmt.Printf("rowsToMapList returned error: %v\n", err)
 		return err
 	}
@@ -320,9 +326,9 @@ func UserTimeline(c echo.Context) error {
 		"Messages":    msgs,
 		"Followed":    followed,
 		"ProfileUser": requestedUser,
-		"User": user,
-		"Endpoint": c.Path(),
-		"Flashes": flashes,
+		"User":        user,
+		"Endpoint":    c.Path(),
+		"Flashes":     flashes,
 	}
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
@@ -333,14 +339,14 @@ func FollowUser(c echo.Context) error {
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
 	loggedIn, _ := isUserLoggedIn(c)
-    if !loggedIn {
-        c.String(http.StatusUnauthorized, "Unauthorized")
-    }
+	if !loggedIn {
+		c.String(http.StatusUnauthorized, "Unauthorized")
+	}
 
 	row := Db.QueryRow(`SELECT * FROM user
-						WHERE username = ?`, 
-						username,
-					)
+						WHERE username = ?`,
+		username,
+	)
 	var user user
 	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
@@ -359,7 +365,7 @@ func FollowUser(c echo.Context) error {
 		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
+	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
 // Removes the current user as follower of the given user.
@@ -368,14 +374,14 @@ func UnfollowUser(c echo.Context) error {
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
 	loggedIn, _ := isUserLoggedIn(c)
-    if !loggedIn {
-        c.String(http.StatusUnauthorized, "Unauthorized")
-    }
+	if !loggedIn {
+		c.String(http.StatusUnauthorized, "Unauthorized")
+	}
 
 	row := Db.QueryRow(`SELECT * FROM user
-						WHERE username = ?`, 
-						username,
-					)
+						WHERE username = ?`,
+		username,
+	)
 	var user user
 	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
@@ -395,25 +401,25 @@ func UnfollowUser(c echo.Context) error {
 		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-	return c.Redirect(http.StatusFound ,fmt.Sprintf("/%s", username))
+	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
 // Registers a new message for the user.
 func AddMessage(c echo.Context) error {
 	loggedIn, _ := isUserLoggedIn(c)
-    if !loggedIn {
-        c.String(http.StatusUnauthorized, "Unauthorized")
-    }
+	if !loggedIn {
+		c.String(http.StatusUnauthorized, "Unauthorized")
+	}
 	text := c.FormValue("text")
 	userId, err := getSessionUserID(c)
 	if err != nil {
 		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-	
+
 	Db.Exec(`insert into message (author_id, text, pub_date, flagged)
 			 values (?, ?, ?, 0)`,
-			 userId, text, time.Now().Unix(),
+		userId, text, time.Now().Unix(),
 	)
 
 	err = addFlash(c, "Your message was recorded")
@@ -427,224 +433,219 @@ func AddMessage(c echo.Context) error {
 // Logs the user in.
 func Login(c echo.Context) error {
 	log.Println("User entered Login via route \"/login\"")
-    loggedIn, _ := isUserLoggedIn(c)
-    if loggedIn {
-        return c.Redirect(http.StatusFound, "/")
-    }
+	loggedIn, _ := isUserLoggedIn(c)
+	if loggedIn {
+		return c.Redirect(http.StatusFound, "/")
+	}
 
 	var dbUser user
 
-    var errorMessage string
-    if c.Request().Method == http.MethodPost {
-        username := c.FormValue("username")
-        password := c.FormValue("password")
+	var errorMessage string
+	if c.Request().Method == http.MethodPost {
+		username := c.FormValue("username")
+		password := c.FormValue("password")
 
 		dbUser.Username = username
 
-        err := Db.QueryRow(`
+		err := Db.QueryRow(`
             SELECT user_id, pw_hash FROM user
             WHERE username = ?
         `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
 
-        if errors.Is(err, sql.ErrNoRows) {
-            errorMessage = "Invalid username"
-        } else if err != nil {
-            fmt.Printf("Db.QueryRow returned error: %v\n", err)
-            return err
-        } else {
-            if !checkPasswordHash(dbUser.PwHash, password) {
-                errorMessage = "Invalid password"
-            } else {
-                addFlash(c, "You were logged in")
-                setSessionUserID(c, dbUser.UserID)
-                return c.Redirect(http.StatusFound, "/")
-            }
-        }
-    }
+		if errors.Is(err, sql.ErrNoRows) {
+			errorMessage = "Invalid username"
+		} else if err != nil {
+			fmt.Printf("Db.QueryRow returned error: %v\n", err)
+			return err
+		} else {
+			if !checkPasswordHash(dbUser.PwHash, password) {
+				errorMessage = "Invalid password"
+			} else {
+				addFlash(c, "You were logged in")
+				setSessionUserID(c, dbUser.UserID)
+				return c.Redirect(http.StatusFound, "/")
+			}
+		}
+	}
 
 	flashes, _ := getFlashes(c)
 
-    data := map[string]interface{}{
+	data := map[string]interface{}{
 		"Error":   errorMessage,
 		"Flashes": flashes,
-    }
-    return c.Render(http.StatusOK, "login.html", data)
+	}
+	return c.Render(http.StatusOK, "login.html", data)
 }
 
 func Register(c echo.Context) error {
 	log.Println("User entered Register via route \"/register\"")
 	loggedIn, _ := isUserLoggedIn(c)
-    if loggedIn {
-        return c.Redirect(http.StatusFound, "/")
-    }
+	if loggedIn {
+		return c.Redirect(http.StatusFound, "/")
+	}
 
-    var errorMessage string
-    if c.Request().Method == http.MethodPost {
-        username := c.FormValue("username")
-        email := c.FormValue("email")
-        password := c.FormValue("password")
-        password2 := c.FormValue("password2")
+	var errorMessage string
+	if c.Request().Method == http.MethodPost {
+		username := c.FormValue("username")
+		email := c.FormValue("email")
+		password := c.FormValue("password")
+		password2 := c.FormValue("password2")
 
-        switch {
-        case username == "":
-            errorMessage = "You have to enter a username"
-        case email == "" || !strings.Contains(email, "@"):
-            errorMessage = "You have to enter a valid email address"
-        case password == "":
-            errorMessage = "You have to enter a password"
-        case password != password2:
-            errorMessage = "The two passwords do not match"
-        default:
-            existingID, _ := getUserId(username)
-            if existingID != 0 {
-                errorMessage = "The username is already taken"
-            } else {
-                hash, err := generatePasswordHash(password)
-                if err != nil {
-                    fmt.Printf("generatePasswordHash returned error: %v\n", err)
-                    return err
-                }
-                _, err = Db.Exec(`
+		switch {
+		case username == "":
+			errorMessage = "You have to enter a username"
+		case email == "" || !strings.Contains(email, "@"):
+			errorMessage = "You have to enter a valid email address"
+		case password == "":
+			errorMessage = "You have to enter a password"
+		case password != password2:
+			errorMessage = "The two passwords do not match"
+		default:
+			existingID, _ := getUserId(username)
+			if existingID != 0 {
+				errorMessage = "The username is already taken"
+			} else {
+				hash, err := generatePasswordHash(password)
+				if err != nil {
+					fmt.Printf("generatePasswordHash returned error: %v\n", err)
+					return err
+				}
+				_, err = Db.Exec(`
                     INSERT INTO user (username, email, pw_hash)
                     VALUES (?, ?, ?)
                 `, username, email, hash)
-                if err != nil {
-                    fmt.Printf("Db.Exec returned error: %v\n", err)
-                    return err
-                }
+				if err != nil {
+					fmt.Printf("Db.Exec returned error: %v\n", err)
+					return err
+				}
 
-                addFlash(c, "You were successfully registered and can login now")
-                return c.Redirect(http.StatusFound, "/login")
-            }
-        }
-    }
+				addFlash(c, "You were successfully registered and can login now")
+				return c.Redirect(http.StatusFound, "/login")
+			}
+		}
+	}
 
 	flashes, _ := getFlashes(c)
 
-    data := map[string]interface{}{
+	data := map[string]interface{}{
 		"Error":   errorMessage,
 		"Flashes": flashes,
-    }
-    return c.Render(http.StatusOK, "register.html", data)
+	}
+	return c.Render(http.StatusOK, "register.html", data)
 }
 
 func Logout(c echo.Context) error {
 	log.Println("User entered Logout via route \"/logout\"")
-    addFlash(c, "You were logged out")
-    clearSessionUserID(c)
-    return c.Redirect(http.StatusFound, "/public")
+	addFlash(c, "You were logged out")
+	clearSessionUserID(c)
+	return c.Redirect(http.StatusFound, "/public")
 }
+
 // End: Route-Handlers
 // ==========================
-
 
 // ==========================
 // Start: Helpers
 // Securely check that the given stored password hash matches the given password.
 func checkPasswordHash(hashedPassword, plainPassword string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+	return err == nil
 }
 
 func setSessionUserID(c echo.Context, userID int) error {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
-    sess.Values["user_id"] = userID
-    sess.Save(c.Request(), c.Response())
+	sess.Values["user_id"] = userID
+	sess.Save(c.Request(), c.Response())
 	return nil
 }
 
 func getSessionUserID(c echo.Context) (int, error) {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return 0, err
 	}
-    id, _ := sess.Values["user_id"].(int)
+	id, _ := sess.Values["user_id"].(int)
 	return id, nil
 }
 
 func clearSessionUserID(c echo.Context) error {
-    sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
-    delete(sess.Values, "user_id")
-    sess.Save(c.Request(), c.Response())
+	delete(sess.Values, "user_id")
+	sess.Save(c.Request(), c.Response())
 	return nil
 }
 
 // Take a context and returns whether the current user is logged in
 func isUserLoggedIn(c echo.Context) (bool, error) {
-	sess, err := session.Get("session", c)
-    _, ok := sess.Values["user_id"].(int)
-    return ok, err
+	sess, err := getSession(c)
+	_, ok := sess.Values["user_id"].(int)
+	return ok, err
 }
 
 // Takes a username and return the user's id
 func getUserId(username string) (int, error) {
 	var id int
-    err := Db.QueryRow(`SELECT user_id FROM user WHERE username = ?`, username).Scan(&id)
-    if errors.Is(err, sql.ErrNoRows) {
-        return 0, nil // user not found
-    } 
-    if err != nil {
-        fmt.Printf("Db.QueryRow returned error: %v\n", err)
-        return 0, err
-    }
-    return id, nil
+	err := Db.QueryRow(`SELECT user_id FROM user WHERE username = ?`, username).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil // user not found
+	}
+	if err != nil {
+		fmt.Printf("Db.QueryRow returned error: %v\n", err)
+		return 0, err
+	}
+	return id, nil
 }
 
 // Takes a password-string and returns a hashed version of the password-string
 func generatePasswordHash(password string) (string, error) {
-    hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    return string(hashBytes), err
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hashBytes), err
 }
 
 // Takes a message to be flashed and a context
 // Flashes a message to the next request
 func addFlash(c echo.Context, message string) error {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
-    if !ok {
-        flashes = []string{}
-    }
-    flashes = append(flashes, message)
+	if !ok {
+		flashes = []string{}
+	}
+	flashes = append(flashes, message)
 	sess.Values["Flashes"] = flashes
-    sess.Save(c.Request(), c.Response())
+	sess.Save(c.Request(), c.Response())
 	return nil
 }
 
 // Takes a context
 // Returns empties the flashes in the given context and returns the flashes in a list of strings
 func getFlashes(c echo.Context) ([]string, error) {
-	sess, err := session.Get("session", c)
+	sess, err := getSession(c)
 	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
 		return []string{}, err
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
-    if !ok {
-        return []string{}, nil
-    }
+	if !ok {
+		return []string{}, nil
+	}
 	sess.Values["Flashes"] = []string{}
-    sess.Save(c.Request(), c.Response())
-    return flashes, nil
+	sess.Save(c.Request(), c.Response())
+	return flashes, nil
 }
 
 type user struct {
-    UserID int
+	UserID   int
 	Username string
-	Email string
-	PwHash string
+	Email    string
+	PwHash   string
 }
 
 // Takes a context
@@ -659,9 +660,9 @@ func getCurrentUser(c echo.Context) (*user, error) {
 	}
 
 	rows := queryDbSingle(Db, "select * from user where user_id = ?",
-						id,
-					)
-	
+		id,
+	)
+
 	err = rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
 		fmt.Printf("rows.Scan returned error: %v\n", err)
@@ -674,35 +675,34 @@ func getCurrentUser(c echo.Context) (*user, error) {
 	fmt.Printf("user.PwHash: %v\n", user.PwHash)
 	return &user, nil
 }
+
 // End: Helpers
 // ==========================
-
 
 // ==========================
 // Begin: Template Rendering
 
 // Implementation of echo.Renderer interface
 type TemplateRenderer struct {
-    templates *template.Template
+	templates *template.Template
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-    tmpl := template.Must(t.templates.Clone())
-    tmpl = template.Must(tmpl.ParseFiles(filepath.Join("templates", name)))
-    return tmpl.ExecuteTemplate(w, name, data)
+	tmpl := template.Must(t.templates.Clone())
+	tmpl = template.Must(tmpl.ParseFiles(filepath.Join("templates", name)))
+	return tmpl.ExecuteTemplate(w, name, data)
 }
 
 // Create and return a new instance of a TemplateRenderer
 func NewTemplateRenderer() *TemplateRenderer {
 	tmpl := template.Must(template.ParseGlob(filepath.Join("templates", "*.html")))
-    return &TemplateRenderer{
-        templates: tmpl,
-    }
+	return &TemplateRenderer{
+		templates: tmpl,
+	}
 }
 
 // End: Template Rendering
 // ==========================
-
 
 // Main method
 func main() {
@@ -718,17 +718,31 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-	
+
 	populateDb(db, "./tmp/generate_data.sql")
 	Db = db
-	
+
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
-        Root: "static", // static folder
-    }))
+		Root: "static", // static folder
+	}))
 
 	setupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
+}
+
+func getSession(c echo.Context) (*sessions.Session, error) {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
+		return nil, err
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	return sess, nil
 }
