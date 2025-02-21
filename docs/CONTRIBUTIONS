@@ -2,7 +2,7 @@
 
 This document describes the agreed upon contribution guidelines by group "*DuwuOps*"' regarding their MiniTwit DevOps project.
 
-## Tasks
+## Tasks & Cooperation
 1. A task must be completed through *cooperation*.
 2. A task must be assigned to *at least* 2 contributors, who share the responsibility of it's completion.   
 3. The process of completing a task should, unless specified otherwise, be completed through [*pair-programming*](https://qentelli.com/thought-leadership/insights/introduction-pair-programming#:~:text=Pair%20programming%20is%20a%20concept,the%20accuracy%20of%20the%20code). 
@@ -42,6 +42,8 @@ These are:
 * **test**: Adding missing tests or correcting existing tests
 
 #### Co-authoring
+
+If the changes in a commit has been performed by multiple contributors, then [standards for co-authoring](https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors) must be included in the commit.
 
 #### Example
 
