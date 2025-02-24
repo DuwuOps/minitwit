@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -167,6 +168,8 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/register", Register)
 	app.POST("/register", Register)
+
+	app.GET("/latest", GetLatest)
 
 	app.GET("/logout", Logout)
 
@@ -541,6 +544,26 @@ func Logout(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/public")
 }
 
+func GetLatest(c echo.Context) error {
+	id, err := os.ReadFile("./latest_processed_sim_action_id.txt")
+	if err != nil {
+		fmt.Printf("could not read from ./latest_processed_sim_action_id.txt: %v\n", err)
+		return err
+	}
+
+	latestProcessedCommandId, err := strconv.Atoi(string(id))
+	if err != nil {
+		fmt.Printf("latestProcessedCommandId is not an int: %v\n", err)
+		return err
+	}
+
+	data := map[string]interface{}{
+		"latest": latestProcessedCommandId,
+	}
+
+	return c.JSON(http.StatusOK, data)
+}
+
 // End: Route-Handlers
 // ==========================
 
@@ -674,6 +697,13 @@ func getCurrentUser(c echo.Context) (*user, error) {
 	fmt.Printf("user.Email: %v\n", user.Email)
 	fmt.Printf("user.PwHash: %v\n", user.PwHash)
 	return &user, nil
+}
+
+func updateLatest(c echo.Context) {
+	parsedCommandId := c.Param("latest")
+	if parsedCommandId != "" {
+		os.WriteFile("./latest_processed_sim_action_id.txt", []byte(parsedCommandId), 0644)
+	}
 }
 
 // End: Helpers
