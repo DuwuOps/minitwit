@@ -530,12 +530,22 @@ func Register(c echo.Context) error {
 					return err
 				}
 
+				if pwd == "" {
 				addFlash(c, "You were successfully registered and can login now")
 				return c.Redirect(http.StatusFound, "/login")
 			}
 		}
 	}
+		if pwd != "" {
+			if errorMessage != "" {
+				data := map[string]interface{}{
+					"error_msg": errorMessage,
+				}
+				return c.JSON(http.StatusBadRequest, data)
+			}
+			return c.String(http.StatusNoContent, "")
 
+		} else {
 	flashes, _ := getFlashes(c)
 
 	data := map[string]interface{}{
@@ -543,6 +553,9 @@ func Register(c echo.Context) error {
 		"Flashes": flashes,
 	}
 	return c.Render(http.StatusOK, "register.html", data)
+}
+	}
+	return c.String(http.StatusBadRequest, "")
 }
 
 func Logout(c echo.Context) error {
