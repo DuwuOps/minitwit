@@ -497,12 +497,17 @@ func Register(c echo.Context) error {
 		password := c.FormValue("password")
 		password2 := c.FormValue("password2")
 
+		if password == ""{
+			password = pwd
+			password2 = pwd
+		}
+
 		switch {
 		case username == "":
 			errorMessage = "You have to enter a username"
 		case email == "" || !strings.Contains(email, "@"):
 			errorMessage = "You have to enter a valid email address"
-		case password == "" && pwd == "":
+		case password == "":
 			errorMessage = "You have to enter a password"
 		case password != password2:
 			errorMessage = "The two passwords do not match"
