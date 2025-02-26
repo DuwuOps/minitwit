@@ -493,6 +493,7 @@ func Register(c echo.Context) error {
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
 		email := c.FormValue("email")
+		pwd := c.FormValue("pwd")
 		password := c.FormValue("password")
 		password2 := c.FormValue("password2")
 
@@ -501,7 +502,7 @@ func Register(c echo.Context) error {
 			errorMessage = "You have to enter a username"
 		case email == "" || !strings.Contains(email, "@"):
 			errorMessage = "You have to enter a valid email address"
-		case password == "":
+		case password == "" && pwd == "":
 			errorMessage = "You have to enter a password"
 		case password != password2:
 			errorMessage = "The two passwords do not match"
