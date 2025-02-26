@@ -531,11 +531,11 @@ func Register(c echo.Context) error {
 				}
 
 				if pwd == "" {
-				addFlash(c, "You were successfully registered and can login now")
-				return c.Redirect(http.StatusFound, "/login")
+					addFlash(c, "You were successfully registered and can login now")
+					return c.Redirect(http.StatusFound, "/login")
+				}
 			}
 		}
-	}
 		if pwd != "" {
 			if errorMessage != "" {
 				data := map[string]interface{}{
@@ -546,14 +546,14 @@ func Register(c echo.Context) error {
 			return c.String(http.StatusNoContent, "")
 
 		} else {
-	flashes, _ := getFlashes(c)
+			flashes, _ := getFlashes(c)
 
-	data := map[string]interface{}{
-		"Error":   errorMessage,
-		"Flashes": flashes,
-	}
-	return c.Render(http.StatusOK, "register.html", data)
-}
+			data := map[string]interface{}{
+				"Error":   errorMessage,
+				"Flashes": flashes,
+			}
+			return c.Render(http.StatusOK, "register.html", data)
+		}
 	}
 	return c.String(http.StatusBadRequest, "")
 }
@@ -721,7 +721,9 @@ func getCurrentUser(c echo.Context) (*user, error) {
 }
 
 func updateLatest(c echo.Context) {
-	parsedCommandId := c.Param("latest")
+
+	parsedCommandId:= c.FormValue("latest")
+
 	if parsedCommandId != "" {
 		os.WriteFile("./latest_processed_sim_action_id.txt", []byte(parsedCommandId), 0644)
 	}
