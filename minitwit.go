@@ -499,7 +499,7 @@ func Register(c echo.Context) error {
 		password := c.FormValue("password")
 		password2 := c.FormValue("password2")
 
-		if password == ""{
+		if password == "" {
 			password = pwd
 			password2 = pwd
 		}
@@ -730,7 +730,7 @@ func updateLatest(c echo.Context) {
 			return
 		}
 	}
-	parsedCommandId:= c.FormValue("latest")
+	parsedCommandId := c.FormValue("latest")
 
 	if parsedCommandId != "" {
 		os.WriteFile("./latest_processed_sim_action_id.txt", []byte(parsedCommandId), 0644)
