@@ -737,6 +737,20 @@ func updateLatest(c echo.Context) {
 	}
 }
 
+func getSession(c echo.Context) (*sessions.Session, error) {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
+		return nil, err
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	return sess, nil
+}
+
 // End: Helpers
 // ==========================
 
@@ -792,18 +806,4 @@ func main() {
 	setupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
-}
-
-func getSession(c echo.Context) (*sessions.Session, error) {
-	sess, err := session.Get("session", c)
-	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
-		return nil, err
-	}
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
-	}
-	return sess, nil
 }
