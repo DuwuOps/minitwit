@@ -721,7 +721,13 @@ func getCurrentUser(c echo.Context) (*user, error) {
 }
 
 func updateLatest(c echo.Context) {
-
+	if _, err := os.Stat("./latest_processed_sim_action_id.txt"); errors.Is(err, os.ErrNotExist) {
+		_, err := os.Create("./latest_processed_sim_action_id.txt")
+		if err != nil {
+			fmt.Printf("Could not create file. %v\n", err)
+			return
+		}
+	}
 	parsedCommandId:= c.FormValue("latest")
 
 	if parsedCommandId != "" {
