@@ -487,6 +487,8 @@ func Register(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
+	updateLatest(c)
+
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
