@@ -749,6 +749,17 @@ func getSession(c echo.Context) (*sessions.Session, error) {
 	return sess, nil
 }
 
+func notReqFromSimulator(c echo.Context) error {
+	fromSimulator := c.Request().Header.Get("Authorization")
+	if fromSimulator != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh" {
+		data := map[string]interface{}{
+			"error_msg": "You are not authorized to use this resource!",
+		}
+		return c.JSON(http.StatusForbidden, data)
+	}
+	return nil
+}
+
 // End: Helpers
 // ==========================
 
