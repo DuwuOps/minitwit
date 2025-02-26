@@ -163,6 +163,8 @@ func setupRoutes(app *echo.Echo) {
 
 	app.POST("/add_message", AddMessage)
 
+	app.GET("/msgs", Messages)
+
 	app.GET("/login", Login)
 	app.POST("/login", Login)
 
