@@ -435,6 +435,57 @@ func AddMessage(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
+func Messages(c echo.Context) error {
+	fmt.Printf("User entered Messages via route \"/:msgs\"")
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
+
+	if c.Request().Method == http.MethodGet {
+		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND message.author_id = user.user_id
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]interface{}{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]interface{}{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
 // Logs the user in.
 func Login(c echo.Context) error {
 	log.Println("User entered Login via route \"/login\"")
@@ -549,13 +600,13 @@ func Register(c echo.Context) error {
 		}
 	}
 
-			flashes, _ := getFlashes(c)
+	flashes, _ := getFlashes(c)
 
-			data := map[string]interface{}{
-				"Error":   errorMessage,
-				"Flashes": flashes,
-			}
-			return c.Render(http.StatusOK, "register.html", data)
+	data := map[string]interface{}{
+		"Error":   errorMessage,
+		"Flashes": flashes,
+	}
+	return c.Render(http.StatusOK, "register.html", data)
 }
 
 func Logout(c echo.Context) error {
