@@ -483,7 +483,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	log.Println("User entered Register via route \"/register\"")
+	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
 	loggedIn, _ := isUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -546,8 +546,9 @@ func Register(c echo.Context) error {
 				return c.JSON(http.StatusBadRequest, data)
 			}
 			return c.String(http.StatusNoContent, "")
+		}
+	}
 
-		} else {
 			flashes, _ := getFlashes(c)
 
 			data := map[string]interface{}{
@@ -555,9 +556,6 @@ func Register(c echo.Context) error {
 				"Flashes": flashes,
 			}
 			return c.Render(http.StatusOK, "register.html", data)
-		}
-	}
-	return c.String(http.StatusBadRequest, "")
 }
 
 func Logout(c echo.Context) error {
