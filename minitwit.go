@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -431,14 +432,22 @@ func Follow(c echo.Context) error {
 		return err
 	}
 
-	vals, err := c.FormParams()
-	if err != nil {
-		fmt.Printf("FormParams returned error: %v\n", err)
-		return err
+	err, payload := extractJson(c)
+
+	var followsUsername string
+	var unfollowsUsername string
+
+	if err == nil {
+		followsUsername = getStringValue(payload, "follow")
+		unfollowsUsername = getStringValue(payload, "unfollow")
+	} else {
+		followsUsername = c.FormValue("follow")
+		unfollowsUsername = c.FormValue("unfollow")
 	}
 
-	if c.Request().Method == http.MethodPost && vals.Has("follow") {
-		followsUsername := c.FormValue("follow")
+	if c.Request().Method == http.MethodPost && followsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
+
 		followsUserId, err := getUserId(followsUsername)
 		if err != nil {
 			fmt.Printf("getUserId returned error: %v\n", err)
@@ -452,8 +461,9 @@ func Follow(c echo.Context) error {
 
 		return c.JSON(http.StatusNoContent, nil)
 		
-	} else if c.Request().Method == http.MethodPost && vals.Has("unfollow") {
-		unfollowsUsername := c.FormValue("unfollow")
+	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
+
 		unfollowsUserId, err := getUserId(unfollowsUsername)
 		if err != nil {
 			fmt.Printf("getUserId returned error: %v\n", err)
@@ -468,6 +478,8 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodGet {
+		fmt.Printf("\"/fllws/:username\" running as a Get-Method\n")
+
 		noFollowersStr := c.QueryParam("no")
 		noFollowers := 100
 		if noFollowersStr != "" {
@@ -489,23 +501,27 @@ func Follow(c echo.Context) error {
 			return err
 		}
 
-		msgs, err := rowsToMapList(rows)
+		follows, err := rowsToMapList(rows)
 		if err != nil {
 			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
 			return err
 		}
 
-		filteredFollows := []map[string]interface{}{}
-		for _, msg := range msgs {
-			curFollow := map[string]interface{}{
-				"follows":  msg["username"],
-			}
-			filteredFollows = append(filteredFollows, curFollow)
+		var followList []interface{}
+
+		for _, follow := range follows {
+			followList = append(followList, follow["username"])
 		}
 
-		return c.JSON(http.StatusOK, filteredFollows)
+		data := map[string]interface{}{
+			"follows": followList,
+			}
+		fmt.Printf("data: %v\n", data)
+
+		return c.JSON(http.StatusOK, data)
 	}
 
+	fmt.Printf("ERROR: \"/fllws/:username\" was entered wrongly!\n")
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
@@ -715,11 +731,27 @@ func Register(c echo.Context) error {
 
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
-		username := c.FormValue("username")
-		email := c.FormValue("email")
-		pwd := c.FormValue("pwd")
-		password := c.FormValue("password")
-		password2 := c.FormValue("password2")
+		err, payload := extractJson(c)
+
+		var username string
+		var email string
+		var pwd string
+		var password string
+		var password2 string
+
+		if err == nil {
+			username = getStringValue(payload, "username")
+			email = getStringValue(payload, "email")
+			pwd = getStringValue(payload, "pwd")
+			password = getStringValue(payload, "password")
+			password2 = getStringValue(payload, "password2")
+		} else {
+			username = c.FormValue("username")
+			email = c.FormValue("email")
+			pwd = c.FormValue("pwd")
+			password = c.FormValue("password")
+			password2 = c.FormValue("password2")
+		}
 
 		if password == "" {
 			password = pwd
@@ -980,6 +1012,28 @@ func notReqFromSimulator(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, data)
 	}
 	return nil
+}
+
+func extractJson(c echo.Context) (error, map[string]interface{}) {
+
+	jsonBody := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
+	if err != nil {
+		fmt.Printf("json.NewDecoder returned error: %v\n", err)
+		return err, nil
+	}
+
+	return nil, jsonBody
+}
+
+func getStringValue(jsonBody map[string]interface{}, key string) string {
+	result := jsonBody[key]
+	if result == nil {
+		fmt.Printf("result of %v: nil\n", key)
+		return ""
+	}
+	fmt.Printf("result.(string) of %v: %v\n", key, result.(string))
+	return result.(string)
 }
 
 // End: Helpers
