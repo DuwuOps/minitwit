@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"encoding/json"
 	"github.com/gorilla/sessions"
 
 	"github.com/labstack/echo-contrib/session"
@@ -164,6 +164,9 @@ func setupRoutes(app *echo.Echo) {
 	app.POST("/add_message", AddMessage)
 
 	app.GET("/msgs", Messages)
+
+	app.GET("/msgs/:username", MessagesPerUser)
+	app.POST("/msgs/:username", MessagesPerUser)
 
 	app.GET("/login", Login)
 	app.POST("/login", Login)
@@ -433,6 +436,87 @@ func AddMessage(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusFound, "/")
+}
+
+func MessagesPerUser(c echo.Context) error {
+	username := c.Param("username")
+	updateLatest(c)
+
+	if notFromSim := notReqFromSimulator(c); notFromSim != nil {
+		return notFromSim
+	}
+
+	noMsgs, err := strconv.Atoi(c.QueryParam("no"))
+	if err != nil {
+		noMsgs = 100
+	}
+
+	switch c.Request().Method {
+	case http.MethodGet:
+		return getMessagesByUser(c, username, noMsgs)
+	case http.MethodPost:
+		return postMessageAsUser(c, username)
+	default:
+		return c.JSON(http.StatusMethodNotAllowed, map[string]string{"error": "Method not allowed"})
+	}
+}
+
+func getMessagesByUser(c echo.Context, username string, noMsgs int) error {
+	userID, err := getUserId(username)
+	if err != nil || userID == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	query := `SELECT message.text, message.pub_date, user.username
+			  FROM message 
+			  JOIN user ON user.user_id = message.author_id
+			  WHERE message.flagged = 0 AND user.user_id = ?
+			  ORDER BY message.pub_date DESC 
+			  LIMIT ?`
+	rows, err := Db.Query(query, userID, noMsgs)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
+	}
+	defer rows.Close()
+	messages := []map[string]interface{}{}
+	for rows.Next() {
+		var msgContent string
+		var pubDate int64
+		var user string
+		if err := rows.Scan(&msgContent, &pubDate, &user); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to process result"})
+		}
+
+		messages = append(messages, map[string]interface{}{
+			"content":  msgContent,
+			"pub_date": pubDate,
+			"user":     user,
+		})
+	}
+	return c.JSON(http.StatusOK, messages)
+}
+
+func postMessageAsUser(c echo.Context, username string) error {
+	var requestData struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(c.Request().Body).Decode(&requestData); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid JSON"})
+	}
+
+	userID, err := getUserId(username)
+	if err != nil || userID == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+
+	query := `INSERT INTO message (author_id, text, pub_date, flagged)
+			  VALUES (?, ?, ?, 0)`
+	_, err = Db.Exec(query, userID, requestData.Content, time.Now().Unix())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to post message"})
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
 
 func Messages(c echo.Context) error {
