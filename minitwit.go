@@ -165,6 +165,7 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/msgs", Messages)
 	app.GET("/msgs/:username", MessagesPerUser)
+	app.POST("/msgs/:username", MessagesPerUser)
 
 	app.GET("/login", Login)
 	app.POST("/login", Login)
