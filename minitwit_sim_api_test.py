@@ -7,7 +7,7 @@ from pathlib import Path
 from contextlib import closing
 
 
-BASE_URL = 'http://127.0.0.1:5001'
+BASE_URL = 'http://127.0.0.1:8000'
 DATABASE = "/tmp/minitwit.db"
 USERNAME = 'simulator'
 PWD = 'super_safe!'
@@ -21,14 +21,14 @@ HEADERS = {'Connection': 'close',
 def init_db():
     """Creates the database tables."""
     with closing(sqlite3.connect(DATABASE)) as db:
-        with open("schema.sql") as fp:
+        with open("queries/schema.sql") as fp:
             db.cursor().executescript(fp.read())
         db.commit()
 
 
 # Empty the database and initialize the schema again
-Path(DATABASE).unlink()
-init_db()
+#Path(DATABASE).unlink()
+#init_db()
 
 
 def test_latest():

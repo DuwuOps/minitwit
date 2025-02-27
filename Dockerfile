@@ -8,12 +8,9 @@ COPY go.mod go.sum ./
 COPY *.go ./
 COPY ./templates /app/templates
 COPY ./static /app/static
-COPY ./schema.sql ./
+COPY ./queries /app/queries
 
 RUN go mod download
-
-RUN mkdir -p /app/tmp
-COPY ./tmp/generate_data.sql /app/tmp
 
 RUN go build -o minitwit ./minitwit.go
 
