@@ -164,6 +164,7 @@ func setupRoutes(app *echo.Echo) {
 	app.POST("/add_message", AddMessage)
 
 	app.GET("/msgs", Messages)
+	app.GET("/msgs/:username", MessagesPerUser)
 
 	app.GET("/login", Login)
 	app.POST("/login", Login)
@@ -482,6 +483,76 @@ func Messages(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, filteredMsgs)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+func MessagesPerUser(c echo.Context) error {
+	username := c.Param("username")
+	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
+	
+	userId, err := getUserId(username)
+	if err != nil {
+		return err
+	}
+
+	if c.Request().Method == http.MethodGet {
+	
+		
+		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND
+					user.user_id = message.author_id AND user.user_id = ?
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			userId, noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]interface{}{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]interface{}{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	} else if c.Request().Method == http.MethodPost {
+		requestData := c.Request().Header.Get("content")
+		query := `INSERT INTO message (author_id, text, pub_date, flagged)
+                   VALUES (?, ?, ?, 0)`
+
+		Db.Exec(query,
+			userId, requestData, noMsgs, time.Now().Unix(),
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
 	}
 	return c.JSON(http.StatusBadRequest, nil)
 }
