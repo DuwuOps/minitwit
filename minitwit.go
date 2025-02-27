@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -56,7 +58,7 @@ func initDB() (*sql.DB, error) {
 	}
 
 	// Creates the database tables (and file if it does not exist yet).
-	sqlFile, err := os.ReadFile("./schema.sql")
+	sqlFile, err := os.ReadFile("./queries/schema.sql")
 	if err != nil {
 		fmt.Printf("os.ReadFile returned error: %v\n", err)
 		db.Close()
@@ -159,14 +161,22 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/:username/follow", FollowUser)
 	app.GET("/:username/unfollow", UnfollowUser)
+	app.GET("/fllws/:username", Follow)
+	app.POST("/fllws/:username", Follow)
 
 	app.POST("/add_message", AddMessage)
+
+	app.GET("/msgs", Messages)
+	app.GET("/msgs/:username", MessagesPerUser)
+	app.POST("/msgs/:username", MessagesPerUser)
 
 	app.GET("/login", Login)
 	app.POST("/login", Login)
 
 	app.GET("/register", Register)
 	app.POST("/register", Register)
+
+	app.GET("/latest", GetLatest)
 
 	app.GET("/logout", Logout)
 
@@ -404,6 +414,118 @@ func UnfollowUser(c echo.Context) error {
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
+func Follow(c echo.Context) error {
+	username := c.Param("username")
+	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
+		return err
+	}
+
+	userId, err := getUserId(username)
+	if err != nil {
+		fmt.Printf("getUserId returned error: %v\n", err)
+		return err
+	}
+
+	err, payload := extractJson(c)
+
+	var followsUsername string
+	var unfollowsUsername string
+
+	if err == nil {
+		followsUsername = getStringValue(payload, "follow")
+		unfollowsUsername = getStringValue(payload, "unfollow")
+	} else {
+		followsUsername = c.FormValue("follow")
+		unfollowsUsername = c.FormValue("unfollow")
+	}
+
+	if c.Request().Method == http.MethodPost && followsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
+
+		followsUserId, err := getUserId(followsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
+		Db.Exec(query,
+			userId, followsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
+
+		unfollowsUserId, err := getUserId(unfollowsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
+		Db.Exec(query,
+			userId, unfollowsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodGet {
+		fmt.Printf("\"/fllws/:username\" running as a Get-Method\n")
+
+		noFollowersStr := c.QueryParam("no")
+		noFollowers := 100
+		if noFollowersStr != "" {
+			val, err := strconv.Atoi(noFollowersStr)
+			if err == nil {
+				noFollowers = val
+			}
+		}
+		query := `SELECT user.username FROM user
+                  INNER JOIN follower ON follower.whom_id=user.user_id
+                  WHERE follower.who_id=?
+                  LIMIT ?`
+
+		rows, err := queryDB(Db, query,
+			userId, noFollowers,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		follows, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		var followList []interface{}
+
+		for _, follow := range follows {
+			followList = append(followList, follow["username"])
+		}
+
+		data := map[string]interface{}{
+			"follows": followList,
+		}
+		fmt.Printf("data: %v\n", data)
+
+		return c.JSON(http.StatusOK, data)
+	}
+
+	fmt.Printf("ERROR: \"/fllws/:username\" was entered wrongly!\n")
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+
 // Registers a new message for the user.
 func AddMessage(c echo.Context) error {
 	loggedIn, _ := isUserLoggedIn(c)
@@ -428,6 +550,137 @@ func AddMessage(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusFound, "/")
+}
+
+func Messages(c echo.Context) error {
+	fmt.Printf("User entered Messages via route \"/:msgs\"")
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
+
+	if c.Request().Method == http.MethodGet {
+		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND message.author_id = user.user_id
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]interface{}{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]interface{}{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+func MessagesPerUser(c echo.Context) error {
+	username := c.Param("username")
+	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
+
+	userId, err := getUserId(username)
+	if err != nil {
+		return err
+	}
+
+	if c.Request().Method == http.MethodGet {
+
+		
+		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND
+					user.user_id = message.author_id AND user.user_id = ?
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			userId, noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]interface{}{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]interface{}{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	} else if c.Request().Method == http.MethodPost {
+		err, payload := extractJson(c)
+
+		var requestData string
+
+		if err == nil {
+			requestData = getStringValue(payload, "content")
+		} else {
+			requestData = c.FormValue("content")
+		}
+		
+		fmt.Printf("requestData: %v\n", requestData)
+		query := `INSERT INTO message (author_id, text, pub_date, flagged)
+                   VALUES (?, ?, ?, 0)`
+
+		Db.Exec(query,
+			userId, requestData, noMsgs, time.Now().Unix(),
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
 }
 
 // Logs the user in.
@@ -478,18 +731,42 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	log.Println("User entered Register via route \"/register\"")
+	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
 	loggedIn, _ := isUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
+	updateLatest(c)
+
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
-		username := c.FormValue("username")
-		email := c.FormValue("email")
-		password := c.FormValue("password")
-		password2 := c.FormValue("password2")
+		err, payload := extractJson(c)
+
+		var username string
+		var email string
+		var pwd string
+		var password string
+		var password2 string
+
+		if err == nil {
+			username = getStringValue(payload, "username")
+			email = getStringValue(payload, "email")
+			pwd = getStringValue(payload, "pwd")
+			password = getStringValue(payload, "password")
+			password2 = getStringValue(payload, "password2")
+		} else {
+			username = c.FormValue("username")
+			email = c.FormValue("email")
+			pwd = c.FormValue("pwd")
+			password = c.FormValue("password")
+			password2 = c.FormValue("password2")
+		}
+
+		if password == "" {
+			password = pwd
+			password2 = pwd
+		}
 
 		switch {
 		case username == "":
@@ -519,9 +796,20 @@ func Register(c echo.Context) error {
 					return err
 				}
 
-				addFlash(c, "You were successfully registered and can login now")
-				return c.Redirect(http.StatusFound, "/login")
+				if pwd == "" {
+					addFlash(c, "You were successfully registered and can login now")
+					return c.Redirect(http.StatusFound, "/login")
+				}
 			}
+		}
+		if pwd != "" {
+			if errorMessage != "" {
+				data := map[string]interface{}{
+					"error_msg": errorMessage,
+				}
+				return c.JSON(http.StatusBadRequest, data)
+			}
+			return c.String(http.StatusNoContent, "")
 		}
 	}
 
@@ -539,6 +827,26 @@ func Logout(c echo.Context) error {
 	addFlash(c, "You were logged out")
 	clearSessionUserID(c)
 	return c.Redirect(http.StatusFound, "/public")
+}
+
+func GetLatest(c echo.Context) error {
+	id, err := os.ReadFile("./latest_processed_sim_action_id.txt")
+	if err != nil {
+		fmt.Printf("could not read from ./latest_processed_sim_action_id.txt: %v\n", err)
+		return err
+	}
+
+	latestProcessedCommandId, err := strconv.Atoi(string(id))
+	if err != nil {
+		fmt.Printf("latestProcessedCommandId is not an int: %v\n", err)
+		return err
+	}
+
+	data := map[string]interface{}{
+		"latest": latestProcessedCommandId,
+	}
+
+	return c.JSON(http.StatusOK, data)
 }
 
 // End: Route-Handlers
@@ -676,6 +984,68 @@ func getCurrentUser(c echo.Context) (*user, error) {
 	return &user, nil
 }
 
+func updateLatest(c echo.Context) {
+	if _, err := os.Stat("./latest_processed_sim_action_id.txt"); errors.Is(err, os.ErrNotExist) {
+		_, err := os.Create("./latest_processed_sim_action_id.txt")
+		if err != nil {
+			fmt.Printf("Could not create file. %v\n", err)
+			return
+		}
+	}
+	parsedCommandId := c.FormValue("latest")
+
+	if parsedCommandId != "" {
+		os.WriteFile("./latest_processed_sim_action_id.txt", []byte(parsedCommandId), 0644)
+	}
+}
+
+func getSession(c echo.Context) (*sessions.Session, error) {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		fmt.Printf("session.Get returned error: %v\n", err)
+		return nil, err
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	return sess, nil
+}
+
+func notReqFromSimulator(c echo.Context) error {
+	fromSimulator := c.Request().Header.Get("Authorization")
+	if fromSimulator != "Basic c2ltdWxhdG9yOnN1cGVyX3NhZmUh" {
+		data := map[string]interface{}{
+			"error_msg": "You are not authorized to use this resource!",
+		}
+		return c.JSON(http.StatusForbidden, data)
+	}
+	return nil
+}
+
+func extractJson(c echo.Context) (error, map[string]interface{}) {
+
+	jsonBody := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
+	if err != nil {
+		fmt.Printf("json.NewDecoder returned error: %v\n", err)
+		return err, nil
+	}
+
+	return nil, jsonBody
+}
+
+func getStringValue(jsonBody map[string]interface{}, key string) string {
+	result := jsonBody[key]
+	if result == nil {
+		fmt.Printf("result of %v: nil\n", key)
+		return ""
+	}
+	fmt.Printf("result.(string) of %v: %v\n", key, result.(string))
+	return result.(string)
+}
+
 // End: Helpers
 // ==========================
 
@@ -719,7 +1089,7 @@ func main() {
 	}
 	defer db.Close()
 
-	populateDb(db, "./tmp/generate_data.sql")
+	populateDb(db, "./queries/generate_data.sql")
 	Db = db
 
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
@@ -731,18 +1101,4 @@ func main() {
 	setupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
-}
-
-func getSession(c echo.Context) (*sessions.Session, error) {
-	sess, err := session.Get("session", c)
-	if err != nil {
-		fmt.Printf("session.Get returned error: %v\n", err)
-		return nil, err
-	}
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
-	}
-	return sess, nil
 }
