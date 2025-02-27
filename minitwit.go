@@ -456,11 +456,11 @@ func Follow(c echo.Context) error {
 
 		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
 		Db.Exec(query,
-				userId, followsUserId,
+			userId, followsUserId,
 		)
 
 		return c.JSON(http.StatusNoContent, nil)
-		
+
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
 		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
 
@@ -472,7 +472,7 @@ func Follow(c echo.Context) error {
 
 		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
 		Db.Exec(query,
-				userId, unfollowsUserId,
+			userId, unfollowsUserId,
 		)
 
 		return c.JSON(http.StatusNoContent, nil)
@@ -492,9 +492,9 @@ func Follow(c echo.Context) error {
                   INNER JOIN follower ON follower.whom_id=user.user_id
                   WHERE follower.who_id=?
                   LIMIT ?`
-		
+
 		rows, err := queryDB(Db, query,
-		  					 userId, noFollowers,
+			userId, noFollowers,
 		)
 		if err != nil {
 			fmt.Printf("messages: queryDB returned error: %v\n", err)
@@ -515,7 +515,7 @@ func Follow(c echo.Context) error {
 
 		data := map[string]interface{}{
 			"follows": followList,
-			}
+		}
 		fmt.Printf("data: %v\n", data)
 
 		return c.JSON(http.StatusOK, data)
@@ -622,14 +622,14 @@ func MessagesPerUser(c echo.Context) error {
 			noMsgs = val
 		}
 	}
-	
+
 	userId, err := getUserId(username)
 	if err != nil {
 		return err
 	}
 
 	if c.Request().Method == http.MethodGet {
-	
+
 		
 		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
 					WHERE message.flagged = 0 AND
@@ -660,7 +660,17 @@ func MessagesPerUser(c echo.Context) error {
 
 		return c.JSON(http.StatusOK, filteredMsgs)
 	} else if c.Request().Method == http.MethodPost {
-		requestData := c.Request().Header.Get("content")
+		err, payload := extractJson(c)
+
+		var requestData string
+
+		if err == nil {
+			requestData = getStringValue(payload, "content")
+		} else {
+			requestData = c.FormValue("content")
+		}
+		
+		fmt.Printf("requestData: %v\n", requestData)
 		query := `INSERT INTO message (author_id, text, pub_date, flagged)
                    VALUES (?, ?, ?, 0)`
 
