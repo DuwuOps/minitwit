@@ -57,7 +57,7 @@ func initDB() (*sql.DB, error) {
 	}
 
 	// Creates the database tables (and file if it does not exist yet).
-	sqlFile, err := os.ReadFile("./schema.sql")
+	sqlFile, err := os.ReadFile("./queries/schema.sql")
 	if err != nil {
 		fmt.Printf("os.ReadFile returned error: %v\n", err)
 		db.Close()
@@ -160,10 +160,14 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/:username/follow", FollowUser)
 	app.GET("/:username/unfollow", UnfollowUser)
+	app.GET("/fllws/:username", Follow)
+	app.POST("/fllws/:username", Follow)
 
 	app.POST("/add_message", AddMessage)
 
 	app.GET("/msgs", Messages)
+	app.GET("/msgs/:username", MessagesPerUser)
+	app.POST("/msgs/:username", MessagesPerUser)
 
 	app.GET("/msgs/:username", MessagesPerUser)
 	app.POST("/msgs/:username", MessagesPerUser)
@@ -412,6 +416,103 @@ func UnfollowUser(c echo.Context) error {
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
+func Follow(c echo.Context) error {
+	username := c.Param("username")
+	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
+		return err
+	}
+
+	userId, err := getUserId(username)
+	if err != nil {
+		fmt.Printf("getUserId returned error: %v\n", err)
+		return err
+	}
+
+	vals, err := c.FormParams()
+	if err != nil {
+		fmt.Printf("FormParams returned error: %v\n", err)
+		return err
+	}
+
+	if c.Request().Method == http.MethodPost && vals.Has("follow") {
+		followsUsername := c.FormValue("follow")
+		followsUserId, err := getUserId(followsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
+		Db.Exec(query,
+				userId, followsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+		
+	} else if c.Request().Method == http.MethodPost && vals.Has("unfollow") {
+		unfollowsUsername := c.FormValue("unfollow")
+		unfollowsUserId, err := getUserId(unfollowsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
+		Db.Exec(query,
+				userId, unfollowsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodGet {
+		noFollowersStr := c.QueryParam("no")
+		noFollowers := 100
+		if noFollowersStr != "" {
+			val, err := strconv.Atoi(noFollowersStr)
+			if err == nil {
+				noFollowers = val
+			}
+		}
+		query := `SELECT user.username FROM user
+                  INNER JOIN follower ON follower.whom_id=user.user_id
+                  WHERE follower.who_id=?
+                  LIMIT ?`
+		
+		rows, err := queryDB(Db, query,
+		  					 userId, noFollowers,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredFollows := []map[string]interface{}{}
+		for _, msg := range msgs {
+			curFollow := map[string]interface{}{
+				"follows":  msg["username"],
+			}
+			filteredFollows = append(filteredFollows, curFollow)
+		}
+
+		return c.JSON(http.StatusOK, filteredFollows)
+	}
+
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+
 // Registers a new message for the user.
 func AddMessage(c echo.Context) error {
 	loggedIn, _ := isUserLoggedIn(c)
@@ -566,6 +667,76 @@ func Messages(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, filteredMsgs)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+func MessagesPerUser(c echo.Context) error {
+	username := c.Param("username")
+	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
+	
+	userId, err := getUserId(username)
+	if err != nil {
+		return err
+	}
+
+	if c.Request().Method == http.MethodGet {
+	
+		
+		rows, err := queryDB(Db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND
+					user.user_id = message.author_id AND user.user_id = ?
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			userId, noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]interface{}{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]interface{}{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	} else if c.Request().Method == http.MethodPost {
+		requestData := c.Request().Header.Get("content")
+		query := `INSERT INTO message (author_id, text, pub_date, flagged)
+                   VALUES (?, ?, ?, 0)`
+
+		Db.Exec(query,
+			userId, requestData, noMsgs, time.Now().Unix(),
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
 	}
 	return c.JSON(http.StatusBadRequest, nil)
 }
@@ -938,7 +1109,7 @@ func main() {
 	}
 	defer db.Close()
 
-	populateDb(db, "./tmp/generate_data.sql")
+	populateDb(db, "./queries/generate_data.sql")
 	Db = db
 
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
