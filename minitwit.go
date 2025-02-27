@@ -160,8 +160,8 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/:username/follow", FollowUser)
 	app.GET("/:username/unfollow", UnfollowUser)
-	app.GET("/fllws/:username", FollowUser)
-	app.POST("/fllws/:username", FollowUser)
+	app.GET("/fllws/:username", Follow)
+	app.POST("/fllws/:username", Follow)
 
 	app.POST("/add_message", AddMessage)
 
