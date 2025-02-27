@@ -57,7 +57,7 @@ func initDB() (*sql.DB, error) {
 	}
 
 	// Creates the database tables (and file if it does not exist yet).
-	sqlFile, err := os.ReadFile("./schema.sql")
+	sqlFile, err := os.ReadFile("./queries/schema.sql")
 	if err != nil {
 		fmt.Printf("os.ReadFile returned error: %v\n", err)
 		db.Close()
@@ -854,7 +854,7 @@ func main() {
 	}
 	defer db.Close()
 
-	populateDb(db, "./tmp/generate_data.sql")
+	populateDb(db, "./queries/generate_data.sql")
 	Db = db
 
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
