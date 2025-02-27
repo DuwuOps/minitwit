@@ -160,6 +160,8 @@ func setupRoutes(app *echo.Echo) {
 
 	app.GET("/:username/follow", FollowUser)
 	app.GET("/:username/unfollow", UnfollowUser)
+	app.GET("/fllws/:username", FollowUser)
+	app.POST("/fllws/:username", FollowUser)
 
 	app.POST("/add_message", AddMessage)
 
@@ -410,6 +412,11 @@ func UnfollowUser(c echo.Context) error {
 
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
+
+func Follow(c echo.Context) error {
+	return errors.New("Not implemented yet") //TODO
+}
+
 
 // Registers a new message for the user.
 func AddMessage(c echo.Context) error {
