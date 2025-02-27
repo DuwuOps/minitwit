@@ -414,7 +414,99 @@ func UnfollowUser(c echo.Context) error {
 }
 
 func Follow(c echo.Context) error {
-	return errors.New("Not implemented yet") //TODO
+	username := c.Param("username")
+	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
+
+	updateLatest(c)
+
+	err := notReqFromSimulator(c)
+	if err != nil {
+		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
+		return err
+	}
+
+	userId, err := getUserId(username)
+	if err != nil {
+		fmt.Printf("getUserId returned error: %v\n", err)
+		return err
+	}
+
+	vals, err := c.FormParams()
+	if err != nil {
+		fmt.Printf("FormParams returned error: %v\n", err)
+		return err
+	}
+
+	if c.Request().Method == http.MethodPost && vals.Has("follow") {
+		followsUsername := c.FormValue("follow")
+		followsUserId, err := getUserId(followsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
+		Db.Exec(query,
+				userId, followsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+		
+	} else if c.Request().Method == http.MethodPost && vals.Has("unfollow") {
+		unfollowsUsername := c.FormValue("unfollow")
+		unfollowsUserId, err := getUserId(unfollowsUsername)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
+		Db.Exec(query,
+				userId, unfollowsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodGet {
+		noFollowersStr := c.QueryParam("no")
+		noFollowers := 100
+		if noFollowersStr != "" {
+			val, err := strconv.Atoi(noFollowersStr)
+			if err == nil {
+				noFollowers = val
+			}
+		}
+		query := `SELECT user.username FROM user
+                  INNER JOIN follower ON follower.whom_id=user.user_id
+                  WHERE follower.who_id=?
+                  LIMIT ?`
+		
+		rows, err := queryDB(Db, query,
+		  					 userId, noFollowers,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := rowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredFollows := []map[string]interface{}{}
+		for _, msg := range msgs {
+			curFollow := map[string]interface{}{
+				"follows":  msg["username"],
+			}
+			filteredFollows = append(filteredFollows, curFollow)
+		}
+
+		return c.JSON(http.StatusOK, filteredFollows)
+	}
+
+	return c.JSON(http.StatusBadRequest, nil)
 }
 
 
