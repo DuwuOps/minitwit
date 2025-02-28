@@ -67,14 +67,20 @@ func GetLatest(c echo.Context, db *sql.DB) error {
 	return c.JSON(http.StatusOK, data)
 }
 
-func UpdateLatest(c echo.Context) {
+func CreateLatestFile() {
 	if _, err := os.Stat(LATEST_PROCESSED); errors.Is(err, os.ErrNotExist) {
 		_, err := os.Create(LATEST_PROCESSED)
 		if err != nil {
 			fmt.Printf("Could not create file. %v\n", err)
 			return
 		}
+		os.WriteFile(LATEST_PROCESSED, []byte("0"), 0644) // If latest_processed_sim_action_id.txt does not exist, create it with an initial value.
 	}
+}
+
+func UpdateLatest(c echo.Context) {
+	CreateLatestFile()
+
 	parsedCommandId := c.FormValue("latest")
 
 	if parsedCommandId != "" {

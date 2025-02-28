@@ -12,6 +12,7 @@ import (
 	"minitwit/src/datalayer"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
+	"minitwit/src/handlers/helpers"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -35,6 +36,8 @@ func main() {
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root: "static", // static folder
 	}))
+
+	helpers.CreateLatestFile()
 
 	routes.SetupRoutes(app, db)
 
