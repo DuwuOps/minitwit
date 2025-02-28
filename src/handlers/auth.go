@@ -72,7 +72,7 @@ func Register(c echo.Context, db *sql.DB) error {
 
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
-		err, payload := helpers.ExtractJson(c)
+		payload, err := helpers.ExtractJson(c)
 
 		var username string
 		var email string

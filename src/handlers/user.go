@@ -57,7 +57,7 @@ func Follow(c echo.Context, db *sql.DB) error {
 		return err
 	}
 
-	err, payload := helpers.ExtractJson(c)
+	payload, err := helpers.ExtractJson(c)
 
 	var followsUsername string
 	var unfollowsUsername string

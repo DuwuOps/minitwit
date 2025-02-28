@@ -7,16 +7,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func ExtractJson(c echo.Context) (error, map[string]any) {
+func ExtractJson(c echo.Context) (map[string]any, error) {
 
 	jsonBody := make(map[string]any)
 	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
 	if err != nil {
 		fmt.Printf("json.NewDecoder returned error: %v\n", err)
-		return err, nil
+		return nil, err
 	}
 
-	return nil, jsonBody
+	return jsonBody, nil
 }
 
 func GetStringValue(jsonBody map[string]any, key string) string {

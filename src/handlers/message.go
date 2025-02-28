@@ -149,7 +149,7 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 
 		return c.JSON(http.StatusOK, filteredMsgs)
 	} else if c.Request().Method == http.MethodPost {
-		err, payload := helpers.ExtractJson(c)
+		payload, err := helpers.ExtractJson(c)
 
 		var requestData string
 
