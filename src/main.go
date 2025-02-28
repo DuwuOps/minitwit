@@ -30,8 +30,6 @@ func main() {
 	}
 	defer db.Close()
 
-	datalayer.PopulateDb(db, "queries/generate_data.sql")
-
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{

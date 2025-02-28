@@ -58,22 +58,6 @@ func InitDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func PopulateDb(db *sql.DB, sqlFilePath string) error {
-	query, err := os.ReadFile(sqlFilePath)
-	if err != nil {
-		fmt.Printf("os.ReadFile returned error: %v\n", err)
-		return fmt.Errorf("failed to read file: %w", err)
-	}
-	queryString := string(query)
-	_, err = db.Exec(queryString)
-	if err != nil {
-		fmt.Printf("sql.Open returned error: %v\n", err)
-		db.Close()
-		return fmt.Errorf("failed to execute query: %w", err)
-	}
-	return nil
-}
-
 func QueryDbSingle(db *sql.DB, query string, args ...any) *sql.Row {
 	row := db.QueryRow(query, args...)
 	return row
