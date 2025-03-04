@@ -11,7 +11,7 @@ import (
 
 	"minitwit/datalayer"
 	"minitwit/routes"
-	"minitwit/template"
+	"minitwit/template_rendering"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -21,7 +21,7 @@ func main() {
 	app := echo.New()
 
 	// Add template-renderer to app
-	app.Renderer = template.NewTemplateRenderer()
+	app.Renderer = template_rendering.NewTemplateRenderer()
 
 	db, err := datalayer.InitDB()
 	if err != nil {

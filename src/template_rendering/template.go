@@ -1,4 +1,4 @@
-package template
+package template_rendering
 
 import (
 	"html/template"
