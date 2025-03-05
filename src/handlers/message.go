@@ -3,14 +3,14 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
-	"time"
-	"strconv"
 	"log"
+	"net/http"
+	"strconv"
+	"time"
 
-	"minitwit/datalayer"
-	"minitwit/handlers/helpers"
-	"minitwit/models"
+	"minitwit/src/datalayer"
+	"minitwit/src/handlers/helpers"
+	"minitwit/src/models"
 
 	"github.com/labstack/echo/v4"
 )
@@ -120,7 +120,6 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 
 	if c.Request().Method == http.MethodGet {
 
-		
 		rows, err := datalayer.QueryDB(db, `SELECT message.*, user.* FROM message, user
 					WHERE message.flagged = 0 AND
 					user.user_id = message.author_id AND user.user_id = ?
@@ -159,7 +158,7 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 		} else {
 			requestData = c.FormValue("content")
 		}
-		
+
 		fmt.Printf("requestData: %v\n", requestData)
 		query := `INSERT INTO message (author_id, text, pub_date, flagged)
                    VALUES (?, ?, ?, 0)`

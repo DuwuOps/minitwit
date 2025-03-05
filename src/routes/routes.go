@@ -2,9 +2,10 @@ package routes
 
 import (
 	"database/sql"
+	"minitwit/src/handlers"
+	"minitwit/src/handlers/helpers"
+
 	"github.com/labstack/echo/v4"
-	"minitwit/handlers"
-	"minitwit/handlers/helpers"
 )
 
 func SetupRoutes(app *echo.Echo, db *sql.DB) {

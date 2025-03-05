@@ -2,13 +2,13 @@ package datalayer
 
 import (
 	"database/sql"
-	"fmt"
-	"path/filepath"
-	"os"
-	"log"
 	"errors"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3" 
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DATABASE = "./tmp/minitwit.db"

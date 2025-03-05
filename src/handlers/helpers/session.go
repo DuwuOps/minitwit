@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 func SetSessionUserID(c echo.Context, userID int) error {
 	sess, err := GetSession(c)
 	if err != nil {

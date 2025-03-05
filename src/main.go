@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
-	"minitwit/datalayer"
-	"minitwit/routes"
-	"minitwit/template_rendering"
+	"minitwit/src/datalayer"
+	"minitwit/src/routes"
+	"minitwit/src/template_rendering"
 )
 
 var SECRET_KEY = []byte("development key")
