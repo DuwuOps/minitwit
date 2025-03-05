@@ -11,6 +11,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var LATEST_PROCESSED string = "../../../latest_processed_sim_action_id.txt"
+
 func RowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
 	var result []map[string]interface{}
 	cols, _ := rows.Columns()
@@ -46,9 +48,9 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
 }
 
 func GetLatest(c echo.Context, db *sql.DB) error {
-	id, err := os.ReadFile("./latest_processed_sim_action_id.txt")
+	id, err := os.ReadFile(LATEST_PROCESSED)
 	if err != nil {
-		fmt.Printf("could not read from ./latest_processed_sim_action_id.txt: %v\n", err)
+		fmt.Printf("could not read from latest_processed_sim_action_id.txt: %v\n", err)
 		return err
 	}
 
@@ -66,8 +68,8 @@ func GetLatest(c echo.Context, db *sql.DB) error {
 }
 
 func UpdateLatest(c echo.Context) {
-	if _, err := os.Stat("./latest_processed_sim_action_id.txt"); errors.Is(err, os.ErrNotExist) {
-		_, err := os.Create("./latest_processed_sim_action_id.txt")
+	if _, err := os.Stat(LATEST_PROCESSED); errors.Is(err, os.ErrNotExist) {
+		_, err := os.Create(LATEST_PROCESSED)
 		if err != nil {
 			fmt.Printf("Could not create file. %v\n", err)
 			return
@@ -76,6 +78,6 @@ func UpdateLatest(c echo.Context) {
 	parsedCommandId := c.FormValue("latest")
 
 	if parsedCommandId != "" {
-		os.WriteFile("./latest_processed_sim_action_id.txt", []byte(parsedCommandId), 0644)
+		os.WriteFile(LATEST_PROCESSED, []byte(parsedCommandId), 0644)
 	}
 }

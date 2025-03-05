@@ -11,7 +11,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DATABASE = "./tmp/minitwit.db"
+var DATABASE = "tmp/minitwit.db"
 
 func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
@@ -41,7 +41,7 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	// Creates the database tables (and file if it does not exist yet).
-	sqlFile, err := os.ReadFile("./queries/schema.sql")
+	sqlFile, err := os.ReadFile("queries/schema.sql")
 	if err != nil {
 		fmt.Printf("os.ReadFile returned error: %v\n", err)
 		db.Close()
