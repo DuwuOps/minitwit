@@ -78,9 +78,9 @@ func Messages(c echo.Context, db *sql.DB) error {
 			return err
 		}
 
-		filteredMsgs := []map[string]interface{}{}
+		filteredMsgs := []map[string]any{}
 		for _, msg := range msgs {
-			filteredMsg := map[string]interface{}{
+			filteredMsg := map[string]any{
 				"content":  msg["text"],
 				"pub_date": msg["pub_date"],
 				"user":     msg["username"],
@@ -137,9 +137,9 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 			return err
 		}
 
-		filteredMsgs := []map[string]interface{}{}
+		filteredMsgs := []map[string]any{}
 		for _, msg := range msgs {
-			filteredMsg := map[string]interface{}{
+			filteredMsg := map[string]any{
 				"content":  msg["text"],
 				"pub_date": msg["pub_date"],
 				"user":     msg["username"],
@@ -225,7 +225,7 @@ func UserTimeline(c echo.Context, db *sql.DB) error {
 		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Messages":    msgs,
 		"Followed":    followed,
 		"ProfileUser": requestedUser,
@@ -265,7 +265,7 @@ func PublicTimeline(c echo.Context, db *sql.DB) error {
 		fmt.Printf("getFlashes returned error: %v\n", err)
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Messages": msgs,
 		"Endpoint": c.Path(),
 		"User":     user,
@@ -313,7 +313,7 @@ func Timeline(c echo.Context, db *sql.DB) error {
 		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Messages": msgs,
 		"User":     user,
 		"Endpoint": c.Path(),

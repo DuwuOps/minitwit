@@ -7,9 +7,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func ExtractJson(c echo.Context) (error, map[string]interface{}) {
+func ExtractJson(c echo.Context) (error, map[string]any) {
 
-	jsonBody := make(map[string]interface{})
+	jsonBody := make(map[string]any)
 	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
 	if err != nil {
 		fmt.Printf("json.NewDecoder returned error: %v\n", err)
@@ -19,7 +19,7 @@ func ExtractJson(c echo.Context) (error, map[string]interface{}) {
 	return nil, jsonBody
 }
 
-func GetStringValue(jsonBody map[string]interface{}, key string) string {
+func GetStringValue(jsonBody map[string]any, key string) string {
 	result := jsonBody[key]
 	if result == nil {
 		fmt.Printf("result of %v: nil\n", key)

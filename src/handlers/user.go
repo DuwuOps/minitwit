@@ -132,13 +132,13 @@ func Follow(c echo.Context, db *sql.DB) error {
 			return err
 		}
 
-		var followList []interface{}
+		var followList []any
 
 		for _, follow := range follows {
 			followList = append(followList, follow["username"])
 		}
 
-		data := map[string]interface{}{
+		data := map[string]any{
 			"follows": followList,
 		}
 		fmt.Printf("data: %v\n", data)

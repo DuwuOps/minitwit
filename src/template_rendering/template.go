@@ -12,7 +12,7 @@ type TemplateRenderer struct {
 	templates *template.Template
 }
 
-func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *TemplateRenderer) Render(w io.Writer, name string, data any, c echo.Context) error {
 	tmpl := template.Must(t.templates.Clone())
 	tmpl = template.Must(tmpl.ParseFiles(filepath.Join("templates", name)))
 	return tmpl.ExecuteTemplate(w, name, data)

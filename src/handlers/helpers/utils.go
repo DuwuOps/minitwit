@@ -13,15 +13,15 @@ import (
 
 var LATEST_PROCESSED string = "../../../latest_processed_sim_action_id.txt"
 
-func RowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
-	var result []map[string]interface{}
+func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
+	var result []map[string]any
 	cols, _ := rows.Columns()
 
 	for rows.Next() {
-		// Create a slice of interface{}'s to represent each column,
+		// Create a slice of interface{}'s (any's) to represent each column,
 		// and a second slice to contain pointers to each item in the columns slice.
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
 		for i, _ := range columns {
 			columnPointers[i] = &columns[i]
 		}
@@ -34,9 +34,9 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]interface{}, error) {
 
 		// Create our map, and retrieve the value for each column from the pointers slice,
 		// storing it in the map with the name of the column as the key.
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val := columnPointers[i].(*any)
 			m[colName] = *val
 		}
 
@@ -60,7 +60,7 @@ func GetLatest(c echo.Context, db *sql.DB) error {
 		return err
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"latest": latestProcessedCommandId,
 	}
 

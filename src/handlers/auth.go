@@ -54,7 +54,7 @@ func Login(c echo.Context, db *sql.DB) error {
 
 	flashes, _ := helpers.GetFlashes(c)
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Error":   errorMessage,
 		"Flashes": flashes,
 	}
@@ -135,7 +135,7 @@ func Register(c echo.Context, db *sql.DB) error {
 		}
 		if pwd != "" {
 			if errorMessage != "" {
-				data := map[string]interface{}{
+				data := map[string]any{
 					"error_msg": errorMessage,
 				}
 				return c.JSON(http.StatusBadRequest, data)
@@ -146,7 +146,7 @@ func Register(c echo.Context, db *sql.DB) error {
 
 	flashes, _ := helpers.GetFlashes(c)
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"Error":   errorMessage,
 		"Flashes": flashes,
 	}
