@@ -45,12 +45,9 @@ jobs:
         env:
           TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
 
-      - name: Deploy to server
-        # Configure the ~./bash_profile and deploy.sh file on the Vagrantfile
-        run: >
-          ssh $SSH_USER@$TEST_ENV_SSH_HOST
-          -i ~/.ssh/id_do_test_env_rsa -o StrictHostKeyChecking=no
-          '/minitwit/deploy.sh'
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          TEST_ENV_SSH_HOST: ${{ secrets.TEST_ENV_SSH_HOST }}
+      - name: Deploy the app
+        id: deploy
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          deploy_pr_preview: "true"
+          token: ${{ secrets.DIGITALOCEAN_TEST_ENV_ACCESS_TOKEN }}
