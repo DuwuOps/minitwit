@@ -31,7 +31,7 @@ func AddMessage(c echo.Context, db *sql.DB) error {
 
 	db.Exec(`insert into message (author_id, text, pub_date, flagged)
 			 values (?, ?, ?, 0)`,
-		userId, text, time.Now().Unix(),
+		userId, (text + "okay let's go"), time.Now().Unix(),
 	)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
