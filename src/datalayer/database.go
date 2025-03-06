@@ -12,6 +12,7 @@ import (
 )
 
 var DATABASE = "tmp/minitwit.db"
+var DATABASE_NAME = "minitwit.db"
 
 func connectDB() (*sql.DB, error) {
 	//Returns a new connection to the database.
@@ -28,7 +29,7 @@ func InitDB() (*sql.DB, error) {
 	// Create tmp directory
 	dir := filepath.Dir(DATABASE)
 
-	if _, err := os.Stat(dir); err != nil {
+	if _, err := os.Stat(dir + "/" + DATABASE_NAME); err != nil {
 		if os.IsNotExist(err) {
 			//Create Database if not exists!
 			fmt.Printf("Creating new Minitwit Database!")
