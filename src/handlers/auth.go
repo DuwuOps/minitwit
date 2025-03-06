@@ -155,6 +155,7 @@ func Register(c echo.Context, db *sql.DB) error {
 
 func Logout(c echo.Context) error {
 	helpers.ClearSessionUserID(c)
+	helpers.AddFlash(c, "You were logged out")
 	return c.Redirect(http.StatusFound, "/public")
 }
 
