@@ -1,11 +1,11 @@
-FROM golang:1.23.6-alpine
+#################### BUILD BINARY ####################
 
-# Install build dependencies for virtual machine
-# Claude AI helped us with this line.
-RUN apk add --no-cache git sqlite gcc musl-dev 
+FROM golang:1.23.6-alpine AS builder
 
-# Create the proper module structure
-WORKDIR /minitwit
+# Install build-dependencies for virtual machine
+RUN apk add --no-cache git sqlite gcc musl-dev
+
+WORKDIR /build
 
 # Download module dependencies
 COPY ./go.mod ./go.sum ./
@@ -21,16 +21,24 @@ COPY ./src/template_rendering ./src/template_rendering
 
 RUN go build -o minitwit ./src/main.go
 
-# Delete source code from container
-RUN rm -rf ./src/
-RUN rm go.mod
-RUN rm go.sum
 
-# Copy non-source-code files 
+
+####################  RUN BINARY  ####################
+
+FROM alpine:3.18
+
+# Install run-dependencies for virtual machine
+RUN apk add --no-cache sqlite
+
+WORKDIR /minitwit
+
+# Copy binary from build-phase
+COPY --from=builder /build/minitwit .
+
+# Copy non-source-code files
 COPY ./src/templates ./templates
 COPY ./src/static ./static
 COPY ./src/queries ./queries
-
 
 # Expose port and run binary-file
 EXPOSE 8000
