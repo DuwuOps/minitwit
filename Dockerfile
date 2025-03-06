@@ -1,5 +1,6 @@
 FROM golang:1.23.6-alpine
 
+# Install build dependencies for virtual machine
 # Claude AI helped us with this line.
 RUN apk add --no-cache git sqlite gcc musl-dev 
 
