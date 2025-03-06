@@ -21,7 +21,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Docker Buildx
@@ -33,9 +33,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/minitwit:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/minitwit:webbuildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
+          tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
+          cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
 
       - name: Configure SSH
         run: |
@@ -45,17 +45,18 @@ jobs:
           chmod 600 ~/.ssh/id_do_test_env_rsa
         env:
           TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-          TEST_ENV_SSH_HOST: ${{ secrets.TEST_ENV_SSH_HOST }}
+          TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
 
       - name: Deploy to server
         # Configure the ~./bash_profile and deploy.sh file on the Vagrantfile
         run: |
           ssh $SSH_USER@$TEST_ENV_SSH_HOST -i ~/.ssh/id_do_test_env_rsa -o StrictHostKeyChecking=no
+          echo $DOCKER_USERNAME
           docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_USERNAME/minitwit:latest --format="{{.ID}}"))
           docker image pull $DOCKER_USERNAME/minitwit:latest
           sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp $DOCKER_USERNAME/minitwit:latest
         env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          TEST_ENV_SSH_HOST: ${{ secrets.TEST_ENV_SSH_HOST }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          SSH_USER: ${{ vars.SSH_USER }}
+          TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
+          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           
