@@ -47,16 +47,15 @@ jobs:
           TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
           TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
 
-      - name: Deploy to server
-        # Configure the ~./bash_profile and deploy.sh file on the Vagrantfile
-        run: |
-          ssh $SSH_USER@$TEST_ENV_SSH_HOST -i ~/.ssh/id_do_test_env_rsa -o StrictHostKeyChecking=no
-          echo $DOCKER_USERNAME
-          docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_USERNAME/minitwit:latest --format="{{.ID}}"))
-          docker image pull $DOCKER_USERNAME/minitwit:latest
-          sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp $DOCKER_USERNAME/minitwit:latest
-        env:
-          SSH_USER: ${{ vars.SSH_USER }}
-          TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
-          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
-          
+      - name: Deploy to Digital Ocean droplet via SSH action
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.TEST_ENV_SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
+          envs:
+            DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          script: |
+            docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
+            docker image pull $DOCKER_IMAGE
+            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp $DOCKER_IMAGE
