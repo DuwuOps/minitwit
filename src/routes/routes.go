@@ -31,7 +31,7 @@ func SetupRoutes(app *echo.Echo, db *sql.DB) {
 	app.POST("/login", func(c echo.Context) error { return handlers.Login(c, db) })
 	app.GET("/register", func(c echo.Context) error { return handlers.Register(c, db) })
 	app.POST("/register", func(c echo.Context) error { return handlers.Register(c, db) })
-	app.GET("/logout", handlers.Logout)
+	app.GET("/logout", func(c echo.Context) error { return handlers.Logout(c) })
 
 	app.GET("/latest", func(c echo.Context) error { return helpers.GetLatest(c, db) })
 	app.Static("/static", "static")
