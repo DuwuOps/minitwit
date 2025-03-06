@@ -66,21 +66,19 @@ jobs:
     steps:
       - name: Configure SSH
         run: |
-          echo $TEST_ENV_SSH_HOST
           mkdir -p ~/.ssh/
           echo "$TEST_ENV_SSH_SECRET_KEY" > ~/.ssh/id_do_test_env_rsa
           chmod 600 ~/.ssh/id_do_test_env_rsa
         env:
           TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-          TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
 
       - name: Deploy to Digital Ocean droplet via SSH action
         env:
           DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.TEST_ENV_SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ vars.TEST_ENV_SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
           envs: DOCKER_IMAGE
           script: |
