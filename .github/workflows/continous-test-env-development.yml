@@ -59,4 +59,4 @@ jobs:
           script: |
             docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
             docker image pull $DOCKER_IMAGE
-            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp $DOCKER_IMAGE
+            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v sqliteDB:/minitwit/tmp $DOCKER_IMAGE
