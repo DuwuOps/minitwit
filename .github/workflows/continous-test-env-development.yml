@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: Build Docker image and Push it to DockerHub
+    name: Build & Push
     runs-on: ubuntu-latest
 
     steps:
@@ -39,7 +39,7 @@ jobs:
           cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
 
   tests:
-    name: Test program
+    name: Tests
     runs-on: ubuntu-latest
     needs: build
 
@@ -59,7 +59,7 @@ jobs:
           echo "IF I HAD ONE!"
 
   deploy:
-    name: Connect to droplet on DigitalOcean and Update Docker image
+    name: Deploy to DigitalOcean
     runs-on: ubuntu-latest
     needs: tests
 
