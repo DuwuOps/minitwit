@@ -48,13 +48,14 @@ jobs:
           TEST_ENV_SSH_HOST: ${{ vars.TEST_ENV_SSH_HOST }}
 
       - name: Deploy to Digital Ocean droplet via SSH action
+        env:
+          DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TEST_ENV_SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-          envs:
-            DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          envs: DOCKER_IMAGE
           script: |
             docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
             docker image pull $DOCKER_IMAGE
