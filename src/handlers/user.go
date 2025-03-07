@@ -43,9 +43,13 @@ func Follow(c echo.Context, db *sql.DB) error {
 	username := c.Param("username")
 	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
 
-	helpers.UpdateLatest(c)
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		return err
+	}
 
-	err := helpers.NotReqFromSimulator(c)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
 		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
 		return err
@@ -57,7 +61,7 @@ func Follow(c echo.Context, db *sql.DB) error {
 		return err
 	}
 
-	err, payload := helpers.ExtractJson(c)
+	payload, err := helpers.ExtractJson(c)
 
 	var followsUsername string
 	var unfollowsUsername string
