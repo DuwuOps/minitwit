@@ -44,9 +44,36 @@ jobs:
     needs: build
 
     steps:
-      - name: This is where I would put my test
-        run: |
-          echo "IF I HAD ONE!"
+    - name: Checkout
+      uses: actions/checkout@v4
+
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+        cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test with pytest
+      run: |
+        pip install pytest pytest-cov
+        pytest sim_api_test.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
 
   release:
     name: Release
