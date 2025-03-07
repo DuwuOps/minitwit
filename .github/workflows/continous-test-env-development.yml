@@ -11,37 +11,9 @@ on:
     manual: true
 
 jobs:
-  build:
-    name: Build & Push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
-          cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
-          cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
-
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
     - name: Checkout
@@ -74,6 +46,34 @@ jobs:
       run: |
         pytest sim_api_test.py
 
+  push:
+    name: Build & Push
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
+          cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
+
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -87,7 +87,7 @@ jobs:
   deploy:
     name: Deploy to DigitalOcean
     runs-on: ubuntu-latest
-    needs: tests
+    needs: push
 
     steps:
       - name: Configure SSH
