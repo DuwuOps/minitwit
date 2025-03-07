@@ -43,6 +43,7 @@
       <p>
         <strong><a href="/{{ .username }}">{{ .username }}</a></strong>
         {{ .text }}
+        <small>&mdash; {{ datetimeformat .pub_date }}</small>
       </p>
     </li>
   {{ else }}
