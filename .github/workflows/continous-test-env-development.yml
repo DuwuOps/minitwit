@@ -68,11 +68,11 @@ jobs:
 
     - name: Test with refactored_minitwit_tests.py
       run: |
-        pytest refactored_minitwit_tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest refactored_minitwit_tests.py
 
     - name: Test with sim_api_test.py
       run: |
-        pytest sim_api_test.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest sim_api_test.py
 
   release:
     name: Release
