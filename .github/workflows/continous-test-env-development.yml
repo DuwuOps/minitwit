@@ -51,14 +51,9 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: ./Dockerfile
-        push: false
-        tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
-        cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
+    - name: Build Docker Container
+      run: |
+        docker compose up -d
 
     - name: Set up Python
       uses: actions/setup-python@v5
