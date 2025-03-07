@@ -21,7 +21,7 @@ body:
     attributes:
       label: Acceptance criteria
       description: What is needed for this issue to be complete?
-      placeholder: |
+      value: |
         - [ ] ...
         - [ ] ...
     validations:
