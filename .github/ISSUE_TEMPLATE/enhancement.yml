@@ -1,6 +1,5 @@
 name: Enhancement-template
 description: "This issue is an enhancement to the program"
-title: ""
 labels: ["enhancement"]
 projects: ["DuwuOps/1"]
 body:
