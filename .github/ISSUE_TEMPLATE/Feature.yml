@@ -1,0 +1,29 @@
+name: Enhancement-template
+description: "This issue is an enhancement to the program"
+title: ""
+labels: ["enhancement"]
+projects: ["DuwuOps/1"]
+body:
+  - type: markdown
+    attributes:
+      value: "## Problem description"
+  - type: textarea
+    attributes:
+      label: Problem description
+      description: What problem is this issue about?
+      placeholder: |        
+        The program does abc
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: "## Acceptance Criteria"
+  - type: textarea
+    attributes:
+      label: Acceptance criteria
+      description: What is needed for this issue to be complete?
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
