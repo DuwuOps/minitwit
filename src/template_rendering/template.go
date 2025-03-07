@@ -25,6 +25,9 @@ func NewTemplateRenderer() *TemplateRenderer {
 		"gravatar": func(email string, size int) string {
 			return gravatarUrl(email, size)
 		},
+		"datetimeformat": func(timestamp int64) string {
+			return formatDatetime(timestamp)
+		},
 	}
 
 	tmpl := template.Must(template.New("").Funcs(funcMap).ParseGlob(filepath.Join("templates", "*.html")))
