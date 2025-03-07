@@ -78,12 +78,16 @@ func CreateLatestFile() {
 	}
 }
 
-func UpdateLatest(c echo.Context) {
-	CreateLatestFile()
+func UpdateLatest(c echo.Context) error {
+	if _, err := os.Stat(LATEST_PROCESSED); errors.Is(err, os.ErrNotExist) {
+		return err
+	}
 
 	parsedCommandId := c.FormValue("latest")
 
 	if parsedCommandId != "" {
-		os.WriteFile(LATEST_PROCESSED, []byte(parsedCommandId), 0644)
+		return os.WriteFile(LATEST_PROCESSED, []byte(parsedCommandId), 0644)
+	} else {
+		return nil
 	}
 }

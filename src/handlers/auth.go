@@ -68,7 +68,12 @@ func Register(c echo.Context, db *sql.DB) error {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	helpers.UpdateLatest(c)
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		return err
+	}
+
 
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {

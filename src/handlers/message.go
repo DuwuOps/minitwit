@@ -45,9 +45,13 @@ func AddMessage(c echo.Context, db *sql.DB) error {
 func Messages(c echo.Context, db *sql.DB) error {
 	fmt.Printf("User entered Messages via route \"/:msgs\"")
 
-	helpers.UpdateLatest(c)
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		return err
+	}
 
-	err := helpers.NotReqFromSimulator(c)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
 		return err
 	}
@@ -97,9 +101,13 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 	username := c.Param("username")
 	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
 
-	helpers.UpdateLatest(c)
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		return err
+	}
 
-	err := helpers.NotReqFromSimulator(c)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
 		return err
 	}
