@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -40,11 +41,8 @@ func main() {
 		Root: "static", // static folder
 	}))
 
-	if err := metrics.Initialize(); err != nil {
-		log.Fatal(err)
-	}
-
-	app.Use(metrics.PrometheusMiddleware()) // For metrics
+	// Setup middleware for Prometheus
+	app.Use(echoprometheus.NewMiddleware("minitwit"))
 
 	helpers.CreateLatestFile()
 
