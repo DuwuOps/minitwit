@@ -5,6 +5,7 @@ import (
 	"minitwit/src/handlers"
 	"minitwit/src/handlers/helpers"
 
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,4 +36,7 @@ func SetupRoutes(app *echo.Echo, db *sql.DB) {
 
 	app.GET("/latest", func(c echo.Context) error { return helpers.GetLatest(c, db) })
 	app.Static("/static", "static")
+
+	//Prometheus metrics route
+	app.GET("/metrics", echoprometheus.NewHandler())
 }
