@@ -3,5 +3,9 @@ services:
     build: 
       dockerfile: ./Dockerfile
     image: minitwit_image
+    volumes:
+      - sqliteDB:/minitwit/tmp
     ports:
       - 8000:8000
+volumes:
+  sqliteDB:

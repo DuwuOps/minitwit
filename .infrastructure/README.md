@@ -6,7 +6,7 @@ To deploy
 
 `docker container ls`
 
-`docker commit CONTAINERID tingariussorensen/minitwit:latest`
+`docker commit ${CONTAINER_ID} tingariussorensen/minitwit:latest`
 
 `docker push tingariussorensen/minitwit:latest`
 
@@ -14,10 +14,19 @@ To deploy
 
 `docker container ls`
 
-`docker stop CONTAINERID`
+`docker stop ${CONTAINER_ID}`
 
-`docker rm CONTAINERID`
+`docker rm ${CONTAINER_ID}`
 
 `docker image pull tingariussorensen/minitwit:latest`
 
-`sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp tingariussorensen/minitwit:latest`
+`sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v sqliteDB:/minitwit/tmp tingariussorensen/minitwit:latest`
+
+`export DATABASE_FILE_PATH="/tmp/minitwit.go`
+
+`export LATESTPROCESSED_PATH="/tmp/latest_processed_sim_action_id.txt`
+
+`docker cp ${DATABASE_FILE_PATH} ${CONTAINER_ID}:/minitwit/tmp/`
+
+`docker cp ${LATESTPROCESSED_PATH} ${CONTAINER_ID}:/minitwit/`
+
