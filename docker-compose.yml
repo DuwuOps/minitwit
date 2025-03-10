@@ -1,3 +1,7 @@
+networks:
+  main:
+    name: minitwit-network-group-c
+
 services:
   app:
     build: 
@@ -5,3 +9,27 @@ services:
     image: minitwit_image
     ports:
       - 8000:8000
+    networks:
+      - main
+    depends_on:
+      - grafana
+      - prometheus
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - main
+
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"  
+    networks:
+      - main
