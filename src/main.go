@@ -5,14 +5,15 @@ import (
 	"log"
 
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
 	"minitwit/src/datalayer"
+	"minitwit/src/handlers/helpers"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
-	"minitwit/src/handlers/helpers"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -36,6 +37,9 @@ func main() {
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root: "static", // static folder
 	}))
+
+	// Setup middleware for Prometheus 
+	app.Use(echoprometheus.NewMiddleware("minitwit"))
 
 	helpers.CreateLatestFile()
 
