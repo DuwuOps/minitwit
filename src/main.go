@@ -13,6 +13,8 @@ import (
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/handlers"
+	"minitwit/src/models"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -30,7 +32,8 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-
+	userRepo := datalayer.NewRepository[models.User](db, "user")
+	handlers.SetUserRepo(userRepo)
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{

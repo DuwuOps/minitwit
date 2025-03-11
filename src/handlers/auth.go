@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -10,43 +9,45 @@ import (
 	"minitwit/src/models"
 	"net/http"
 	"strings"
+	"context"
+	"io"
+	"bytes"
+	"encoding/json"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(c echo.Context, db *sql.DB) error {
+var userRepo *datalayer.Repository[models.User]
+
+func SetUserRepo(repo *datalayer.Repository[models.User]) {
+	userRepo = repo
+}
+
+func Login(c echo.Context) error {
 	log.Println("User entered Login via route \"/login\"")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	var dbUser models.User
-
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		dbUser.Username = username
-
-		err := db.QueryRow(`
-            SELECT user_id, pw_hash FROM user
-            WHERE username = ?
-        `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
-
-		if errors.Is(err, sql.ErrNoRows) {
+		user, err := userRepo.GetByField(context.Background(), "username", username)
+		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
-			fmt.Printf("Db.QueryRow returned error: %v\n", err)
+			fmt.Printf("GetByField returned error: %v\n", err)
 			return err
 		} else {
-			if !checkPasswordHash(dbUser.PwHash, password) {
+			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
 			} else {
 				helpers.AddFlash(c, "You were logged in")
-				helpers.SetSessionUserID(c, dbUser.UserID)
+				helpers.SetSessionUserID(c, user.UserID)
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
@@ -61,101 +62,134 @@ func Login(c echo.Context, db *sql.DB) error {
 	return c.Render(http.StatusOK, "login.html", data)
 }
 
-func Register(c echo.Context, db *sql.DB) error {
+func Register(c echo.Context) error {
 	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
-	loggedIn, _ := helpers.IsUserLoggedIn(c)
-	if loggedIn {
+
+	if loggedIn, _ := helpers.IsUserLoggedIn(c); loggedIn {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	err := helpers.UpdateLatest(c)
-	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+	if err := helpers.UpdateLatest(c); err != nil {
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
-
-	var errorMessage string
 	if c.Request().Method == http.MethodPost {
-		payload, err := helpers.ExtractJson(c)
-
-		var username string
-		var email string
-		var pwd string
-		var password string
-		var password2 string
-
-		if err == nil {
-			username = helpers.GetStringValue(payload, "username")
-			email = helpers.GetStringValue(payload, "email")
-			pwd = helpers.GetStringValue(payload, "pwd")
-			password = helpers.GetStringValue(payload, "password")
-			password2 = helpers.GetStringValue(payload, "password2")
-		} else {
-			username = c.FormValue("username")
-			email = c.FormValue("email")
-			pwd = c.FormValue("pwd")
-			password = c.FormValue("password")
-			password2 = c.FormValue("password2")
+		username, email, password, password2, pwd, err := extractRegisterInput(c)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error_msg": "Invalid request payload"})
 		}
 
-		if password == "" {
-			password = pwd
-			password2 = pwd
+		if errorMessage := validateRegisterInput(username, email, password, password2); errorMessage != "" {
+			return renderRegisterError(c, errorMessage)
 		}
 
-		switch {
-		case username == "":
-			errorMessage = "You have to enter a username"
-		case email == "" || !strings.Contains(email, "@"):
-			errorMessage = "You have to enter a valid email address"
-		case password == "":
-			errorMessage = "You have to enter a password"
-		case password != password2:
-			errorMessage = "The two passwords do not match"
-		default:
-			existingID, _ := datalayer.GetUserId(username, db)
-			if existingID != 0 {
-				errorMessage = "The username is already taken"
-			} else {
-				hash, err := generatePasswordHash(password)
-				if err != nil {
-					fmt.Printf("generatePasswordHash returned error: %v\n", err)
-					return err
-				}
-				_, err = db.Exec(`
-                    INSERT INTO user (username, email, pw_hash)
-                    VALUES (?, ?, ?)
-                `, username, email, hash)
-				if err != nil {
-					fmt.Printf("Db.Exec returned error: %v\n", err)
-					return err
-				}
-
-				if pwd == "" {
-					helpers.AddFlash(c, "You were successfully registered and can login now")
-					return c.Redirect(http.StatusFound, "/login")
-				}
-			}
+		if existingUser, _ := userRepo.GetByField(context.Background(), "username", username); existingUser != nil {
+			return renderRegisterError(c, "The username is already taken")
 		}
+
+		if err := createUser(username, email, password); err != nil {
+			log.Printf("CreateUser returned error: %v\n", err)
+			return err
+		}
+
 		if pwd != "" {
-			if errorMessage != "" {
-				data := map[string]any{
-					"error_msg": errorMessage,
-				}
-				return c.JSON(http.StatusBadRequest, data)
-			}
 			return c.String(http.StatusNoContent, "")
 		}
+
+		helpers.AddFlash(c, "You were successfully registered and can login now")
+		return c.Redirect(http.StatusFound, "/login")
 	}
 
-	flashes, _ := helpers.GetFlashes(c)
+	return renderRegisterPage(c, "")
+}
 
+
+func renderRegisterError(c echo.Context, errorMessage string) error {
+	flashes, _ := helpers.GetFlashes(c)
 	data := map[string]any{
 		"Error":   errorMessage,
 		"Flashes": flashes,
 	}
 	return c.Render(http.StatusOK, "register.html", data)
+}
+
+func renderRegisterPage(c echo.Context, errorMessage string) error {
+	flashes, _ := helpers.GetFlashes(c)
+	data := map[string]any{
+		"Error":   errorMessage,
+		"Flashes": flashes,
+	}
+	return c.Render(http.StatusOK, "register.html", data)
+}
+
+func extractRegisterInput(c echo.Context) (string, string, string, string, string, error) {
+	bodyBytes, _ := io.ReadAll(c.Request().Body)
+	log.Println("📩 Raw Request Body:", string(bodyBytes))
+
+	c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	contentType := c.Request().Header.Get("Content-Type")
+
+	if contentType == "application/json" {
+		payload := make(map[string]string)
+		if err := json.Unmarshal(bodyBytes, &payload); err == nil {
+
+			payloadAny := make(map[string]any)
+			for key, value := range payload {
+				payloadAny[key] = value
+			}
+
+			return helpers.GetStringValue(payloadAny, "username"),
+				helpers.GetStringValue(payloadAny, "email"),
+				helpers.GetStringValue(payloadAny, "password"),
+				helpers.GetStringValue(payloadAny, "password2"),
+				helpers.GetStringValue(payloadAny, "pwd"),
+				nil
+		} else {
+			log.Printf("❌ JSON Decoding Error: %v\n", err)
+		}
+	}
+
+	log.Println("✅ Extracted Form Payload (Fallback)")
+	username := c.FormValue("username")
+	email := c.FormValue("email")
+	password := c.FormValue("password")
+	password2 := c.FormValue("password2")
+	pwd := c.FormValue("pwd")
+
+	return username, email, password, password2, pwd, nil
+}
+
+
+func validateRegisterInput(username, email, password, password2 string) string {
+	switch {
+	case username == "":
+		return "You have to enter a username"
+	case email == "" || !strings.Contains(email, "@"):
+		return "You have to enter a valid email address"
+	case password == "":
+		return "You have to enter a password"
+	case password != password2:
+		return "The two passwords do not match"
+	default:
+		return ""
+	}
+}
+
+func createUser(username, email, password string) error {
+	hash, err := generatePasswordHash(password)
+	if err != nil {
+		return fmt.Errorf("error hashing password: %v", err)
+	}
+
+	newUser := &models.User{
+		Username: username,
+		Email:    email,
+		PwHash:   hash,
+	}
+
+	return userRepo.Create(context.Background(), newUser)
 }
 
 func Logout(c echo.Context) error {
