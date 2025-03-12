@@ -6,6 +6,8 @@ on:
     # Run workflow every time a PR that targets main is edited.
     types:
       - edited
+      - opened
+      - synchronize
     branches:
       - Task/73
 
