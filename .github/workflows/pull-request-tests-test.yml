@@ -1,5 +1,5 @@
 ---
-name: Continuous Deployment
+name: Pull-request testing (Testing Environment)
 
 on:
   pull_request:

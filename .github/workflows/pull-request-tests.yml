@@ -1,5 +1,5 @@
 ---
-name: Continuous Deployment
+name: Pull-request testing
 
 on:
   pull_request:
