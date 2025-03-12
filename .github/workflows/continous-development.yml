@@ -79,13 +79,57 @@ jobs:
 
   release:
     name: Release
+    permissions: 
+      contents: write
     runs-on: ubuntu-latest
     needs: tests
 
     steps:
-      - name: This is where I would put my release 
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Get all tags and history 
+
+      - name: Build binary
         run: |
-          echo "IF I HAD ONE!"
+          go build -v .
+
+      - name: Determine next version
+        id: next-version
+        run : | 
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          MAJOR=$(echo $LATEST_TAG | sed 's/v\([0-9]*\)\..*/\1/')
+          MINOR=$(echo $LATEST_TAG | sed 's/v[0-9]*\.\([0-9]*\)\..*/\1/')
+          PATCH=$(echo $LATEST_TAG | sed 's/v[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/')
+          
+          NEW_MAJOR=$((MAJOR + 1))
+          NEW_TAG="v${NEW_MAJOR}.0.0"
+          
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag ${tag}
+          git push origin ${tag}
+
+      - name: Create release with binary files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find the executable name
+          BINARY_NAME=$(basename $(go list -m))
+
+          gh release create "${tag}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="minitwit ${tag}" \
+              --generate-notes
+
+          gh release upload "${tag}" \
+            ${BINARY_NAME} \
+            --repo="$GITHUB_REPOSITORY"
 
   deploy:
     name: Deploy to DigitalOcean
