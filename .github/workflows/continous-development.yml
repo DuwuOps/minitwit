@@ -89,10 +89,6 @@ jobs:
         with:
           fetch-depth: 0 # Get all tags and history 
 
-      - name: Build binary
-        run: |
-          go build -v .
-
       - name: Determine next version
         id: next-version
         run : | 
@@ -121,6 +117,11 @@ jobs:
           git config --local user.name "GitHub Action"
           git tag ${TAG}
           git push origin ${TAG}
+
+      - name: Download dependencies and build binary
+        run: |
+          go mod download
+          go build -o minitwit ./src/main.go
 
       - name: Create release with binary files
         env:
