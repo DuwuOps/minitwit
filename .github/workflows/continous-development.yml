@@ -110,28 +110,34 @@ jobs:
           NEW_TAG="v${MAJOR}.${NEW_MINOR}.0"
           echo "NEW_TAG : $NEW_TAG"
           
-          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
 
       - name: Create and push tag
+        env:
+          TAG: ${{ steps.next-version.outputs.NEW_TAG }}
         run: |
+          echo "Creating tag : $TAG"
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag ${tag}
-          git push origin ${tag}
+          git tag ${TAG}
+          git push origin ${TAG}
 
       - name: Create release with binary files
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.next-version.outputs.NEW_TAG }}
         run: |
+          echo "Creating tag : $TAG"
+
           # Find the executable name
           BINARY_NAME=$(basename $(go list -m))
 
-          gh release create "${tag}" \
+          gh release create "${TAG}" \
               --repo="$GITHUB_REPOSITORY" \
-              --title="minitwit ${tag}" \
+              --title="minitwit ${TAG}" \
               --generate-notes
 
-          gh release upload "${tag}" \
+          gh release upload "${TAG}" \
             ${BINARY_NAME} \
             --repo="$GITHUB_REPOSITORY"
 
