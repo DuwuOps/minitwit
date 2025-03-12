@@ -99,12 +99,16 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "Latest tag: $LATEST_TAG"
           
-          MAJOR=$(echo $LATEST_TAG | sed 's/v\([0-9]*\)\..*/\1/')
-          MINOR=$(echo $LATEST_TAG | sed 's/v[0-9]*\.\([0-9]*\)\..*/\1/')
-          PATCH=$(echo $LATEST_TAG | sed 's/v[0-9]*\.[0-9]*\.\([0-9]*\).*/\1/')
+          MAJOR=$(echo $LATEST_TAG | grep -Po '\d+(?=\.\d+\.\d+$)')
+          echo "MAJOR: $MAJOR"
+          MINOR=$(echo $LATEST_TAG | grep -Po '(?<=\.)\d+(?=\.\d+$)')
+          echo "MINOR $MINOR"
+          PATCH=$(echo $LATEST_TAG | grep -Po '(?<=\.)\d+(?=$)')
+          echo "PATCH : $PATCH"
           
-          NEW_MAJOR=$((MAJOR + 1))
-          NEW_TAG="v${NEW_MAJOR}.0.0"
+          NEW_MINOR=$((MINOR + 1))
+          NEW_TAG="v${MAJOR}.${NEW_MINOR}.0"
+          echo "NEW_TAG : $NEW_TAG"
           
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
