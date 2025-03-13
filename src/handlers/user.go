@@ -103,8 +103,8 @@ func handleUserFollowAction(c echo.Context, follow bool) error {
 		return err
 	}
 
-	message := fmt.Sprintf("You are now %s \"%s\"", 
-		map[bool]string{true: "following", false: "no longer following"}[follow], username)
+	message := fmt.Sprintf("You are %s \"%s\"", 
+		map[bool]string{true: "now following", false: "no longer following"}[follow], username)
 	helpers.AddFlash(c, message)
 
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
@@ -164,27 +164,31 @@ func processFollowAction(ctx context.Context, userID int, targetUsername string,
 
 
 func handleGetFollowers(c echo.Context, userID int) error {
-	noFollowers := parseQueryParam(c, "no", 100)
+    noFollowers := parseQueryParam(c, "no", 100)
 
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), map[string]any{
-		"who_id": userID,
-	}, noFollowers, "") 
+    followers, err := followerRepo.GetFiltered(c.Request().Context(), map[string]any{
+        "who_id": userID,
+    }, noFollowers, "")
 
-	if err != nil {
-		log.Printf("Error retrieving followers for userID=%d: %v", userID, err)
-		return err
-	}
+    if err != nil {
+        log.Printf("Error retrieving followers for userID=%d: %v", userID, err)
+        return err
+    }
 
-	var followerUsernames []string
-	for _, follower := range followers {
-		targetUser, err := getUserByID(c.Request().Context(), follower.WhomID)
-		if err == nil {
-			followerUsernames = append(followerUsernames, targetUser.Username)
-		}
-	}
+    var followerUsernames []string
+    for _, follower := range followers {
+        targetUser, err := getUserByID(c.Request().Context(), follower.WhomID)
+        if err == nil {
+            followerUsernames = append(followerUsernames, targetUser.Username)
+        }
+    }
 
-	return c.JSON(http.StatusOK, map[string]any{"follows": followerUsernames})
+    log.Printf("Raw followers retrieved for user %d: %+v", userID, followers)
+    log.Printf("Processed follower usernames: %+v", followerUsernames)
+
+    return c.JSON(http.StatusOK, map[string]any{"follows": followerUsernames})
 }
+
 
 
 func extractFollowRequest(c echo.Context) (string, string) {

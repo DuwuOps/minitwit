@@ -25,29 +25,40 @@ func NewRepository[T any](db *sql.DB, tableName string) *Repository[T] {
 }
 
 func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
-	val := reflect.ValueOf(entity).Elem()
-	typeOfEntity := val.Type()
+    val := reflect.ValueOf(entity).Elem()
+    typeOfEntity := val.Type()
 
-	var columns []string
-	var placeholders []string
-	var values []interface{}
+    var columns []string
+    var placeholders []string
+    var values []interface{}
 
-	for i := 0; i < val.NumField(); i++ {
-		fieldName := typeOfEntity.Field(i).Tag.Get("db") 
-		if fieldName == "" {
-			fieldName = typeOfEntity.Field(i).Name
-		}
+    for i := 0; i < val.NumField(); i++ {
+        fieldName := typeOfEntity.Field(i).Tag.Get("db") 
+        if fieldName == "" {
+            fieldName = typeOfEntity.Field(i).Name
+        }
 
-		if fieldName != "user_id" { 
-			columns = append(columns, fieldName)
-			placeholders = append(placeholders, "?")
-			values = append(values, val.Field(i).Interface())
-		}
-	}
+        if fieldName != "message_id" && fieldName != "user_id" {  // Skip autoincrement field
+            columns = append(columns, fieldName)
+            placeholders = append(placeholders, "?")
+            values = append(values, val.Field(i).Interface())
+        }
+    }
 
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", r.tableName, strings.Join(columns, ","), strings.Join(placeholders, ","))
-	_, err := r.db.ExecContext(ctx, query, values...)
-	return err
+    query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", r.tableName, strings.Join(columns, ","), strings.Join(placeholders, ","))
+    
+    log.Printf("Executing INSERT Query: %s | Values: %v", query, values) // 🔍 Debug
+
+    result, err := r.db.ExecContext(ctx, query, values...)
+    if err != nil {
+        log.Printf("Error inserting message: %v", err)  // 🔍 Log SQL errors
+        return err
+    }
+
+    rowsAffected, _ := result.RowsAffected()
+    log.Printf("Inserted %d row(s) into %s", rowsAffected, r.tableName) // 🔍 Confirm rows inserted
+
+    return nil
 }
 
 
@@ -141,111 +152,86 @@ func (r *Repository[T]) GetAll(ctx context.Context) ([]T, error) {
 }
 
 func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int, orderBy string) ([]T, error) {
-	var whereClauses []string
-	var values []any
+    var whereClauses []string
+    var values []any
 
-	for key, value := range conditions {
-		if reflect.TypeOf(value).Kind() == reflect.Slice {
-			sliceVal := reflect.ValueOf(value)
-			placeholders := make([]string, sliceVal.Len())
+    for key, value := range conditions {
+        if slice, ok := value.([]int); ok {  // ✅ Handle slice of ints
+            if len(slice) > 0 {
+                placeholders := make([]string, len(slice))
+                for i, v := range slice {
+                    placeholders[i] = "?"
+                    values = append(values, v)
+                }
+                whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", key, strings.Join(placeholders, ",")))
+            }
+        } else {
+            whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
+            values = append(values, value)
+        }
+    }
 
-			for i := 0; i < sliceVal.Len(); i++ {
-				placeholders[i] = "?"
-				values = append(values, sliceVal.Index(i).Interface())
-			}
+    query := fmt.Sprintf("SELECT DISTINCT * FROM %s", r.tableName)
+    if len(whereClauses) > 0 {
+        query += " WHERE " + strings.Join(whereClauses, " AND ")
+    }
+    if orderBy != "" {
+        query += " ORDER BY " + orderBy
+    }
+    if limit > 0 {
+        query += " LIMIT ?"
+        values = append(values, limit)
+    }
 
-			whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", key, strings.Join(placeholders, ",")))
-		} else {
-			whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
-			values = append(values, value)
-		}
-	}
+    log.Printf("Executing Query: %s | Values: %v", query, values)
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
-	if orderBy != "" {
-		query += " ORDER BY " + orderBy
-	}
-	if limit > 0 {
-		query += " LIMIT ?"
-		values = append(values, limit)
-	}
+    rows, err := r.db.QueryContext(ctx, query, values...)
+    if err != nil {
+        log.Printf("Query failed: %v", err)
+        return nil, err
+    }
+    defer rows.Close()
 
-	log.Printf("Executing Query: %s | Values: %v", query, values)
+    var results []T
+    for rows.Next() {
+        var entity T
+        val := reflect.ValueOf(&entity).Elem()
 
-	rows, err := r.db.QueryContext(ctx, query, values...)
-	if err != nil {
-		log.Printf("Query failed: %v", err)
-		return nil, err
-	}
-	defer rows.Close()
+        fields := make([]any, val.NumField())
+        for i := 0; i < val.NumField(); i++ {
+            fields[i] = val.Field(i).Addr().Interface()
+        }
 
-	var results []T
-	for rows.Next() {
-		var entity T
-		val := reflect.ValueOf(&entity).Elem()
+        if err := rows.Scan(fields...); err != nil {
+            log.Printf("Error scanning row: %v", err)
+            continue
+        }
 
-		fields := make([]any, val.NumField())
-		for i := 0; i < val.NumField(); i++ {
-			fields[i] = val.Field(i).Addr().Interface()
-		}
+        results = append(results, entity)
+    }
 
-		if err := rows.Scan(fields...); err != nil {
-			log.Printf("Error scanning row: %v", err)
-			continue
-		}
-
-		results = append(results, entity)
-	}
-
-	return results, nil
+    return results, nil
 }
 
-
-
-func (r *Repository[T]) Update(ctx context.Context, entity *T) error {
-	val := reflect.ValueOf(entity).Elem()
-	typeOfEntity := val.Type()
-
-	var setClauses []string
-	var values []interface{}
-	var idValue interface{}
-
-	for i := 0; i < val.NumField(); i++ {
-		fieldName := typeOfEntity.Field(i).Name
-		fieldValue := val.Field(i).Interface()
-
-		if fieldName == "ID" { 
-			idValue = fieldValue
-		} else {
-			setClauses = append(setClauses, fmt.Sprintf("%s = ?", fieldName))
-			values = append(values, fieldValue)
-		}
-	}
-
-	if idValue == nil {
-		return fmt.Errorf("entity must have an ID field")
-	}
-
-	values = append(values, idValue) 
-
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE ID = ?", r.tableName, strings.Join(setClauses, ","))
-	_, err := r.db.ExecContext(ctx, query, values...)
-	return err
-}
 
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
-	var whereClauses []string
-	var values []any
+    var whereClauses []string
+    var values []any
 
-	for field, value := range conditions {
-		whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", field))
-		values = append(values, value)
-	}
+    for field, value := range conditions {
+        whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", field))
+        values = append(values, value)
+    }
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
+    query := fmt.Sprintf("DELETE FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
+    result, err := r.db.ExecContext(ctx, query, values...)
+    if err != nil {
+        return err
+    }
 
-	_, err := r.db.ExecContext(ctx, query, values...)
-	return err
+    rowsAffected, _ := result.RowsAffected()
+    log.Printf("Deleted %d rows from %s where %v", rowsAffected, r.tableName, conditions)
+    return nil
 }
 
 
