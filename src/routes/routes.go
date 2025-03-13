@@ -10,9 +10,9 @@ import (
 
 func SetupRoutes(app *echo.Echo, db *sql.DB) {
 	// Timeline Routes
-	app.GET("/", func(c echo.Context) error { return handlers.Timeline(c, db) })
-	app.GET("/public", func(c echo.Context) error { return handlers.PublicTimeline(c, db) })
-	app.GET("/:username", func(c echo.Context) error { return handlers.UserTimeline(c, db) })
+	app.GET("/", func(c echo.Context) error { return handlers.Timeline(c) })
+	app.GET("/public", func(c echo.Context) error { return handlers.PublicTimeline(c) })
+	app.GET("/:username", func(c echo.Context) error { return handlers.UserTimeline(c) })
 
 	// User Follow Routes
 	app.GET("/:username/follow", func(c echo.Context) error { return handlers.FollowUser(c, db) })
@@ -21,10 +21,10 @@ func SetupRoutes(app *echo.Echo, db *sql.DB) {
 	app.POST("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c, db) })
 
 	// Message Routes
-	app.POST("/add_message", func(c echo.Context) error { return handlers.AddMessage(c, db) })
-	app.GET("/msgs", func(c echo.Context) error { return handlers.Messages(c, db) })
-	app.GET("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c, db) })
-	app.POST("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c, db) })
+	app.POST("/add_message", func(c echo.Context) error { return handlers.AddMessage(c) })
+	app.GET("/msgs", func(c echo.Context) error { return handlers.Messages(c) })
+	app.GET("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c) })
+	app.POST("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c) })
 
 	// Authentication Routes
 	app.GET("/login", handlers.Login)

@@ -33,7 +33,11 @@ func main() {
 	}
 	defer db.Close()
 	userRepo := datalayer.NewRepository[models.User](db, "user")
+	messageRepo := datalayer.NewRepository[models.Message](db, "message")
+	followerRepo := datalayer.NewRepository[models.Follower](db, "follower")
 	handlers.SetUserRepo(userRepo)
+	handlers.SetMessageRepo(messageRepo)
+	handlers.SetFollowerRepo(followerRepo)
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
