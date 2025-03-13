@@ -74,23 +74,43 @@ func (r *Repository[T]) GetByField(ctx context.Context, field string, value any)
 }
 
 func (r *Repository[T]) GetByID(ctx context.Context, id int) (*T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id = ?", r.tableName)
+	// Detect the correct primary key dynamically
+	primaryKey := detectPrimaryKey(r.tableName)
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = ?", r.tableName, primaryKey)
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	var entity T
 	val := reflect.ValueOf(&entity).Elem()
 
-	fields := make([]any, val.NumField()) 
+	fields := make([]any, val.NumField())
 	for i := 0; i < val.NumField(); i++ {
 		fields[i] = val.Field(i).Addr().Interface()
 	}
 
 	err := row.Scan(fields...)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
 		return nil, err
 	}
 	return &entity, nil
 }
+
+func detectPrimaryKey(tableName string) string {
+	switch tableName {
+	case "user":
+		return "user_id"
+	case "message":
+		return "message_id"
+	case "follower":
+		return "who_id" // Follower table has `who_id` and `whom_id`, adjust logic as needed.
+	default:
+		return "id" // Default to `id`, but this should never happen.
+	}
+}
+
 
 func (r *Repository[T]) GetAll(ctx context.Context) ([]T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s", r.tableName)
@@ -117,6 +137,46 @@ func (r *Repository[T]) GetAll(ctx context.Context) ([]T, error) {
 
 		results = append(results, entity)
 	}
+	return results, nil
+}
+
+func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int) ([]T, error) {
+	var whereClauses []string
+	var values []any
+
+	for key, value := range conditions {
+		whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
+		values = append(values, value)
+	}
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s ORDER BY pub_date DESC LIMIT ?", r.tableName, strings.Join(whereClauses, " AND "))
+	values = append(values, limit)
+
+	rows, err := r.db.QueryContext(ctx, query, values...)
+	if err != nil {
+		log.Printf("Query failed: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []T
+	for rows.Next() {
+		var entity T
+		val := reflect.ValueOf(&entity).Elem()
+
+		fields := make([]any, val.NumField())
+		for i := 0; i < val.NumField(); i++ {
+			fields[i] = val.Field(i).Addr().Interface()
+		}
+
+		if err := rows.Scan(fields...); err != nil {
+			log.Printf("Error scanning row: %v", err)
+			continue
+		}
+
+		results = append(results, entity)
+	}
+
 	return results, nil
 }
 

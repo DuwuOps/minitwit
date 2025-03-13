@@ -47,6 +47,17 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
 	return result, nil
 }
 
+func ValidateRequest(c echo.Context) error {
+	if err := helpers.UpdateLatest(c); err != nil {
+		log.Printf("Error updating latest: %v", err)
+		return err
+	}
+	if err := helpers.NotReqFromSimulator(c); err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetLatest(c echo.Context, db *sql.DB) error {
 	id, err := os.ReadFile(LATEST_PROCESSED)
 	if err != nil {
