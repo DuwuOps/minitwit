@@ -32,7 +32,7 @@ var PER_PAGE = 30
 func AddMessage(c echo.Context) error {
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		return c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
@@ -54,18 +54,20 @@ func AddMessage(c echo.Context) error {
 }
 
 func Messages(c echo.Context) error {
-	log.Println("User entered Messages via route \"/:msgs\"")
+    log.Println("User entered Messages via route \"/:msgs\"")
 
-	if err := helpers.NotReqFromSimulator(c); err != nil {
-		return err
-	}
+    if err := helpers.ValidateRequest(c); err != nil {
+        log.Printf("Request blocked by NotReqFromSimulator: %v", err)
+        return c.JSON(http.StatusForbidden, map[string]string{"error": "Forbidden"})
+    }
 
-	messages, err := handleGetMessages(c, nil)
-	if err != nil {
-		return err
-	}
+    messages, err := handleGetMessages(c, nil)
+    if err != nil {
+        log.Printf("Error fetching messages: %v", err)
+        return err
+    }
 
-	return c.JSON(http.StatusOK, messages)
+    return c.JSON(http.StatusOK, messages)
 }
 
 func MessagesPerUser(c echo.Context) error {
@@ -109,6 +111,8 @@ func UserTimeline(c echo.Context) error {
 		return err
 	}
 
+	log.Printf("📝 Messages for user %s: %v", user.Username, messages)
+
 	loggedInUser, err := GetCurrentUser(c)
 	if err != nil {
 		log.Printf("No user found. GetCurrentUser returned error: %v\n", err)
@@ -127,8 +131,12 @@ func UserTimeline(c echo.Context) error {
 		"Endpoint":    c.Path(),
 		"Flashes":     flashes,
 	}
+
+	log.Printf("📤 Data passed to template: %v", data)
+
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
+
 
 func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
@@ -138,33 +146,38 @@ func PublicTimeline(c echo.Context) error {
 }
 
 func Timeline(c echo.Context) error {
-	log.Println("User entered Timeline via route \"/\"")
-	log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
+    log.Println("User entered Timeline via route \"/\"")
+    log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
 
-	if loggedIn, _ := helpers.IsUserLoggedIn(c); !loggedIn {
-		return c.Redirect(http.StatusFound, "/public")
-	}
+    if loggedIn, _ := helpers.IsUserLoggedIn(c); !loggedIn {
+        return c.Redirect(http.StatusFound, "/public")
+    }
 
-	sessionUserId, err := helpers.GetSessionUserID(c)
-	if err != nil {
-		log.Printf("Failed to get session user ID: %v\n", err)
-		return err
-	}
+    sessionUserId, err := helpers.GetSessionUserID(c)
+    if err != nil {
+        log.Printf("Failed to get session user ID: %v\n", err)
+        return err
+    }
 
-	conditions := map[string]any{"who_id": sessionUserId}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
-	if err != nil {
-		log.Printf("Error fetching followers: %v\n", err)
-		return err
-	}
+    conditions := map[string]any{"who_id": sessionUserId}
+    followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+    if err != nil {
+        log.Printf("Error fetching followers: %v\n", err)
+        return err
+    }
 
-	followedUserIDs := []int{sessionUserId}
-	for _, f := range followers {
-		followedUserIDs = append(followedUserIDs, f.WhomID)
-	}
+    followedUserIDs := []int{sessionUserId}
+    for _, f := range followers {
+        followedUserIDs = append(followedUserIDs, f.WhomID)
+    }
 
-	return handleRenderTimeline(c, map[string]any{"flagged": 0, "author_id": followedUserIDs}, nil)
+    // ✅ Fix: Ensure `author_id` is filtered correctly
+    return handleRenderTimeline(c, map[string]any{
+        "flagged": 0,
+        "author_id": followedUserIDs,  // ✅ Only fetch followed users
+    }, nil)
 }
+
 
 func handleRenderTimeline(c echo.Context, conditions map[string]any, user *models.User) error {
 	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
@@ -250,12 +263,15 @@ func handleGetMessages(c echo.Context, user *models.User) ([]map[string]any, err
 	conditions := map[string]any{
 		"flagged": 0,
 	}
+
 	if user != nil {
 		conditions["author_id"] = user.UserID
 	}
 
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+	log.Printf("🔍 Fetching messages for user: %v (ID: %d)", user.Username, user.UserID)
+	log.Printf("Using conditions: %v", conditions)
 
+	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 	if err != nil {
 		log.Printf("Error retrieving messages: %v", err)
 		return nil, err
@@ -263,15 +279,31 @@ func handleGetMessages(c echo.Context, user *models.User) ([]map[string]any, err
 
 	var filteredMsgs []map[string]any
 	for _, msg := range messages {
+		username := "Unknown"
+
+		user, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+		if user != nil {
+			username = user.Username
+		}
+
 		filteredMsgs = append(filteredMsgs, map[string]any{
+			"username": username, // ✅ Fix: was "user"
+			"text":     msg.Text, // ✅ Fix: was "content"
+			"pub_date": msg.PubDate,
+		})
+		/* filteredMsgs = append(filteredMsgs, map[string]any{
 			"content":  msg.Text,
 			"pub_date": msg.PubDate,
-			"user":     user.Username,
-		})
+			"user":     username,
+		}) */
 	}
+
+	// 🔥 Debug: Print messages
+	log.Printf("📥 Filtered Messages: %v", filteredMsgs)
 
 	return filteredMsgs, nil
 }
+
 
 func getFlashes(c echo.Context) ([]string, error) {
 	flashes, err := helpers.GetFlashes(c)
