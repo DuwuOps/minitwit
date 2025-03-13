@@ -1,12 +1,13 @@
 networks:
   main:
-    name: minitwit-network-group-c
+    name: minitwit-network
 
 services:
   app:
     build: 
       dockerfile: ./Dockerfile
     image: minitwit_image
+    container_name: app
     volumes:
       - sqliteDB:/minitwit/tmp
     ports:
@@ -31,10 +32,15 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "3000:3000"  
     networks:
       - main
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 
 volumes:
   sqliteDB:
+  grafana-storage: {}
