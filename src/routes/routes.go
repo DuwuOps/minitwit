@@ -15,10 +15,10 @@ func SetupRoutes(app *echo.Echo, db *sql.DB) {
 	app.GET("/:username", func(c echo.Context) error { return handlers.UserTimeline(c) })
 
 	// User Follow Routes
-	app.GET("/:username/follow", func(c echo.Context) error { return handlers.FollowUser(c, db) })
-	app.GET("/:username/unfollow", func(c echo.Context) error { return handlers.UnfollowUser(c, db) })
-	app.GET("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c, db) })
-	app.POST("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c, db) })
+	app.GET("/:username/follow", func(c echo.Context) error { return handlers.FollowUser(c) })
+	app.GET("/:username/unfollow", func(c echo.Context) error { return handlers.UnfollowUser(c) })
+	app.GET("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c) })
+	app.POST("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c) })
 
 	// Message Routes
 	app.POST("/add_message", func(c echo.Context) error { return handlers.AddMessage(c) })

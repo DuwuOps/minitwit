@@ -72,7 +72,7 @@ func MessagesPerUser(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
 
-	if err := utils.ValidateRequest(c); err != nil {
+	if err := helpers.ValidateRequest(c); err != nil {
 		return err
 	}
 
@@ -152,7 +152,7 @@ func Timeline(c echo.Context) error {
 	}
 
 	conditions := map[string]any{"who_id": sessionUserId}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1)
+	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
 	if err != nil {
 		log.Printf("Error fetching followers: %v\n", err)
 		return err
@@ -167,7 +167,7 @@ func Timeline(c echo.Context) error {
 }
 
 func handleRenderTimeline(c echo.Context, conditions map[string]any, user *models.User) error {
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE)
+	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
 		log.Printf("Error retrieving messages: %v", err)
 		return err
@@ -211,11 +211,10 @@ func isFollowingUser(c echo.Context, profileUserID int) bool {
 		"who_id":  sessionUserID,
 		"whom_id": profileUserID,
 	}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1)
+	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
 
 	return err == nil && len(followers) > 0
 }
-
 
 func newMessage(authorID int, text string) *models.Message {
 	return &models.Message{
@@ -255,7 +254,8 @@ func handleGetMessages(c echo.Context, user *models.User) ([]map[string]any, err
 		conditions["author_id"] = user.UserID
 	}
 
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs)
+	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+
 	if err != nil {
 		log.Printf("Error retrieving messages: %v", err)
 		return nil, err

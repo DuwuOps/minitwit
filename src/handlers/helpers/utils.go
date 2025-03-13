@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"log"
 
 	"github.com/labstack/echo/v4"
 )
@@ -48,11 +49,11 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
 }
 
 func ValidateRequest(c echo.Context) error {
-	if err := helpers.UpdateLatest(c); err != nil {
+	if err := UpdateLatest(c); err != nil {
 		log.Printf("Error updating latest: %v", err)
 		return err
 	}
-	if err := helpers.NotReqFromSimulator(c); err != nil {
+	if err := NotReqFromSimulator(c); err != nil {
 		return err
 	}
 	return nil
@@ -102,3 +103,4 @@ func UpdateLatest(c echo.Context) error {
 		return nil
 	}
 }
+
