@@ -140,17 +140,37 @@ func (r *Repository[T]) GetAll(ctx context.Context) ([]T, error) {
 	return results, nil
 }
 
-func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int) ([]T, error) {
+func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int, orderBy string) ([]T, error) {
 	var whereClauses []string
 	var values []any
 
 	for key, value := range conditions {
-		whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
-		values = append(values, value)
+		if reflect.TypeOf(value).Kind() == reflect.Slice {
+			sliceVal := reflect.ValueOf(value)
+			placeholders := make([]string, sliceVal.Len())
+
+			for i := 0; i < sliceVal.Len(); i++ {
+				placeholders[i] = "?"
+				values = append(values, sliceVal.Index(i).Interface())
+			}
+
+			whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", key, strings.Join(placeholders, ",")))
+		} else {
+			whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
+			values = append(values, value)
+		}
 	}
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s ORDER BY pub_date DESC LIMIT ?", r.tableName, strings.Join(whereClauses, " AND "))
-	values = append(values, limit)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
+	if orderBy != "" {
+		query += " ORDER BY " + orderBy
+	}
+	if limit > 0 {
+		query += " LIMIT ?"
+		values = append(values, limit)
+	}
+
+	log.Printf("Executing Query: %s | Values: %v", query, values)
 
 	rows, err := r.db.QueryContext(ctx, query, values...)
 	if err != nil {
@@ -179,6 +199,8 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 
 	return results, nil
 }
+
+
 
 func (r *Repository[T]) Update(ctx context.Context, entity *T) error {
 	val := reflect.ValueOf(entity).Elem()
@@ -210,6 +232,22 @@ func (r *Repository[T]) Update(ctx context.Context, entity *T) error {
 	_, err := r.db.ExecContext(ctx, query, values...)
 	return err
 }
+
+func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
+	var whereClauses []string
+	var values []any
+
+	for field, value := range conditions {
+		whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", field))
+		values = append(values, value)
+	}
+
+	query := fmt.Sprintf("DELETE FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
+
+	_, err := r.db.ExecContext(ctx, query, values...)
+	return err
+}
+
 
 func (r *Repository[T]) Remove(ctx context.Context, id int) error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", r.tableName)
