@@ -25,41 +25,68 @@ func NewRepository[T any](db *sql.DB, tableName string) *Repository[T] {
 }
 
 func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
-    val := reflect.ValueOf(entity).Elem()
-    typeOfEntity := val.Type()
+    if entity == nil {
+        return errors.New("entity is nil")
+    }
 
+    val := reflect.ValueOf(entity)
+    if val.Kind() == reflect.Ptr {
+        val = val.Elem()
+    }
+    if !val.IsValid() {
+        return errors.New("invalid entity value")
+    }
+
+    typeOfEntity := val.Type()
     var columns []string
     var placeholders []string
     var values []interface{}
 
     for i := 0; i < val.NumField(); i++ {
-        fieldName := typeOfEntity.Field(i).Tag.Get("db") 
+        field := typeOfEntity.Field(i)
+        fieldName := field.Tag.Get("db")
         if fieldName == "" {
-            fieldName = typeOfEntity.Field(i).Name
+            fieldName = field.Name
         }
 
-        if fieldName != "message_id" && fieldName != "user_id" {  // Skip autoincrement field
-            columns = append(columns, fieldName)
-            placeholders = append(placeholders, "?")
-            values = append(values, val.Field(i).Interface())
+        // Ensure that only exportable fields are included
+        if !val.Field(i).CanInterface() {
+            continue
         }
+
+        // Special handling for `author_id`, `who_id`, `whom_id`
+        if fieldName == "id" || strings.Contains(fieldName, "_id") {
+            if val.Field(i).IsZero() {
+                log.Printf("⚠️ Skipping %s (auto-generated or missing)", fieldName)
+                continue
+            }
+        }
+
+        columns = append(columns, fieldName)
+        placeholders = append(placeholders, "?")
+        values = append(values, val.Field(i).Interface())
+    }
+
+    if len(columns) == 0 {
+        return errors.New("no valid fields to insert")
     }
 
     query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", r.tableName, strings.Join(columns, ","), strings.Join(placeholders, ","))
     
-    log.Printf("Executing INSERT Query: %s | Values: %v", query, values) // 🔍 Debug
+    log.Printf("📝 Executing INSERT Query: %s | Values: %v", query, values)
 
     result, err := r.db.ExecContext(ctx, query, values...)
     if err != nil {
-        log.Printf("Error inserting message: %v", err)  // 🔍 Log SQL errors
+        log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
         return err
     }
 
     rowsAffected, _ := result.RowsAffected()
-    log.Printf("Inserted %d row(s) into %s", rowsAffected, r.tableName) // 🔍 Confirm rows inserted
+    log.Printf("✅ Inserted %d row(s) into %s", rowsAffected, r.tableName)
 
     return nil
 }
+
 
 
 func (r *Repository[T]) GetByField(ctx context.Context, field string, value any) (*T, error) {
@@ -156,7 +183,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
     var values []any
 
     for key, value := range conditions {
-        if slice, ok := value.([]int); ok {  // ✅ Handle slice of ints
+        if slice, ok := value.([]int); ok {  
             if len(slice) > 0 {
                 placeholders := make([]string, len(slice))
                 for i, v := range slice {
