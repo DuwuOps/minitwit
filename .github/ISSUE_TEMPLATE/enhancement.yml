@@ -5,17 +5,6 @@ projects: ["DuwuOps/1"]
 body:
   - type: markdown
     attributes:
-      value: "## Problem description"
-  - type: textarea
-    attributes:
-      label: Problem description
-      description: What problem is this issue about?
-      placeholder: |        
-        The program does abc
-    validations:
-      required: false
-  - type: markdown
-    attributes:
       value: "## Acceptance Criteria"
   - type: textarea
     attributes:
@@ -26,3 +15,15 @@ body:
         - [ ] ...
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: "## Problem Description"
+  - type: textarea
+    attributes:
+      label: Problem description
+      description: What problem is this issue about?
+      placeholder: |        
+        > The program does abc
+        > 
+    validations:
+      required: false
