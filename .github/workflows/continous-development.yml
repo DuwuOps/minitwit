@@ -79,13 +79,68 @@ jobs:
 
   release:
     name: Release
+    permissions: 
+      contents: write
     runs-on: ubuntu-latest
     needs: tests
 
     steps:
-      - name: This is where I would put my release 
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Get all tags and history 
+
+      - name: Determine next version
+        id: next-version
+        run : | 
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          MAJOR=$(echo $LATEST_TAG | grep -Po '\d+(?=\.\d+\.\d+$)')
+          echo "MAJOR: $MAJOR"
+          MINOR=$(echo $LATEST_TAG | grep -Po '(?<=\.)\d+(?=\.\d+$)')
+          echo "MINOR $MINOR"
+          PATCH=$(echo $LATEST_TAG | grep -Po '(?<=\.)\d+(?=$)')
+          echo "PATCH : $PATCH"
+          
+          NEW_MINOR=$((MINOR + 1))
+          NEW_TAG="v${MAJOR}.${NEW_MINOR}.0"
+          echo "NEW_TAG : $NEW_TAG"
+          
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        env:
+          TAG: ${{ steps.next-version.outputs.NEW_TAG }}
         run: |
-          echo "IF I HAD ONE!"
+          echo "Creating tag : $TAG"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag ${TAG}
+          git push origin ${TAG}
+
+      - name: Download dependencies and build binary
+        run: |
+          go mod download
+          go build -o minitwit ./src/main.go
+
+      - name: Create release with binary files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.next-version.outputs.NEW_TAG }}
+        run: |
+          echo "Creating tag : $TAG"
+
+          # Find the executable name
+          BINARY_NAME=$(basename $(go list -m))
+
+          gh release create "${TAG}" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="minitwit ${TAG}" \
+              --generate-notes
+
+          gh release upload "${TAG}" \
+            ${BINARY_NAME} \
+            --repo="$GITHUB_REPOSITORY"
 
   deploy:
     name: Deploy to DigitalOcean
