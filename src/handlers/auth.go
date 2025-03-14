@@ -81,6 +81,7 @@ func Register(c echo.Context) error {
 		}
 
 		if errorMessage := validateRegisterInput(username, email, password, password2); errorMessage != "" {
+			log.Printf("2")
 			return renderRegisterError(c, errorMessage)
 		}
 
@@ -131,35 +132,36 @@ func extractRegisterInput(c echo.Context) (string, string, string, string, strin
 
 	contentType := c.Request().Header.Get("Content-Type")
 
+	var username, email, password, password2, pwd string
+
 	if contentType == "application/json" {
 		payload := make(map[string]string)
 		if err := json.Unmarshal(bodyBytes, &payload); err == nil {
-
-			payloadAny := make(map[string]any)
-			for key, value := range payload {
-				payloadAny[key] = value
-			}
-
-			return helpers.GetStringValue(payloadAny, "username"),
-				helpers.GetStringValue(payloadAny, "email"),
-				helpers.GetStringValue(payloadAny, "password"),
-				helpers.GetStringValue(payloadAny, "password2"),
-				helpers.GetStringValue(payloadAny, "pwd"),
-				nil
+			username = payload["username"]
+			email = payload["email"]
+			password = payload["password"]
+			password2 = payload["password2"]
+			pwd = payload["pwd"]
 		} else {
 			log.Printf("❌ JSON Decoding Error: %v\n", err)
 		}
+	} else {
+		log.Println("✅ Extracted Form Payload (Fallback)")
+		username = c.FormValue("username")
+		email = c.FormValue("email")
+		password = c.FormValue("password")
+		password2 = c.FormValue("password2")
+		pwd = c.FormValue("pwd")
 	}
 
-	log.Println("✅ Extracted Form Payload (Fallback)")
-	username := c.FormValue("username")
-	email := c.FormValue("email")
-	password := c.FormValue("password")
-	password2 := c.FormValue("password2")
-	pwd := c.FormValue("pwd")
+	if password == "" {
+		password = pwd
+		password2 = pwd
+	}
 
 	return username, email, password, password2, pwd, nil
 }
+
 
 
 func validateRegisterInput(username, email, password, password2 string) string {
@@ -178,19 +180,29 @@ func validateRegisterInput(username, email, password, password2 string) string {
 }
 
 func createUser(username, email, password string) error {
-	hash, err := generatePasswordHash(password)
-	if err != nil {
-		return fmt.Errorf("error hashing password: %v", err)
-	}
+    log.Printf("🔹 Creating user: Username=%s, Email=%s", username, email)
 
-	newUser := &models.User{
-		Username: username,
-		Email:    email,
-		PwHash:   hash,
-	}
+    hash, err := generatePasswordHash(password)
+    if err != nil {
+        return fmt.Errorf("error hashing password: %v", err)
+    }
 
-	return userRepo.Create(context.Background(), newUser)
+    newUser := &models.User{
+        Username: username,
+        Email:    email,
+        PwHash:   hash,
+    }
+
+    err = userRepo.Create(context.Background(), newUser)
+    if err != nil {
+        log.Printf("❌ Error inserting user into DB: %v", err)
+        return err
+    }
+
+    log.Println("✅ User successfully inserted into DB")
+    return nil
 }
+
 
 func Logout(c echo.Context) error {
 	helpers.ClearSessionUserID(c)
