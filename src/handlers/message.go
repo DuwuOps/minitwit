@@ -44,7 +44,10 @@ func AddMessage(c echo.Context) error {
 	newMessage := newMessage(userId, text)
 
 	err = messageRepo.Create(c.Request().Context(), newMessage)
-
+	if err != nil {
+		return err 
+	}
+	
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
 		fmt.Printf("addFlash returned error: %v\n", err)
@@ -159,7 +162,6 @@ func Timeline(c echo.Context) error {
         return err
     }
 
-    // Get list of user IDs the logged-in user follows
 	conditions := map[string]any{"who_id": sessionUserId}
 	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
 	if err != nil {
@@ -167,8 +169,7 @@ func Timeline(c echo.Context) error {
 		return err
 	}
 
-	// Only include followed users + logged-in user in timeline
-	followedUserIDs := []int{sessionUserId}  // Always include self
+	followedUserIDs := []int{sessionUserId} 
 	for _, f := range followers {
 		followedUserIDs = append(followedUserIDs, f.WhomID)
 	}
@@ -185,7 +186,6 @@ func Timeline(c echo.Context) error {
 func handleRenderTimeline(c echo.Context, conditions map[string]any, user *models.User) error {
 	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		log.Printf("❌ Error retrieving messages: %v", err)
 		return err
 	}
 
@@ -193,7 +193,6 @@ func handleRenderTimeline(c echo.Context, conditions map[string]any, user *model
 	for _, msg := range messages {
 		author, err := getUserByID(c.Request().Context(), msg.AuthorID)
 		if err != nil {
-			log.Printf("⚠️ Warning: Could not find user for message author_id=%d", msg.AuthorID)
 			continue
 		}
 		
@@ -202,13 +201,6 @@ func handleRenderTimeline(c echo.Context, conditions map[string]any, user *model
 			"pub_date": msg.PubDate,
 			"username": author.Username,
 		})
-		
-
-		/*enrichedMessages = append(enrichedMessages, map[string]any{
-			"user":     author.Username,
-			"content":  msg.Text,
-			"pub_date": msg.PubDate,
-		})*/
 	}
 
 	log.Printf("📥 Filtered Messages Before Rendering: %+v", enrichedMessages)
@@ -279,10 +271,7 @@ func handleGetMessages(c echo.Context, user *models.User, useContentKey bool) ([
 
 	if user != nil {
 		conditions["author_id"] = user.UserID
-		log.Printf("🔍 Fetching messages for user: %s (ID: %d)", user.Username, user.UserID)
-	} else {
-		log.Println("🔍 Fetching all public messages")
-	}
+	} 
 
 	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 	if err != nil {
@@ -341,14 +330,12 @@ func getUserByID(ctx context.Context, userID int) (*models.User, error) {
 func handlePostMessage(c echo.Context, user *models.User) error {
 	requestData, err := extractMessageContent(c)
 	if err != nil {
-		log.Printf("Error extracting message content: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid message content"})
 	}
 
 	newMessage := newMessage(user.UserID, requestData)
 	err = messageRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
-		log.Printf("Error inserting message: %v", err)
 		return err
 	}
 
