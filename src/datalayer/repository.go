@@ -15,7 +15,6 @@ type Repository[T any] struct {
 	tableName string
 }
 
-var dbInstance *sql.DB
 var ErrRecordNotFound = errors.New("record not found")
 
 var _ IRepository[any] = (*Repository[any])(nil)
@@ -149,35 +148,6 @@ func detectPrimaryKey(tableName string) string {
 	}
 }
 
-
-func (r *Repository[T]) GetAll(ctx context.Context) ([]T, error) {
-	query := fmt.Sprintf("SELECT * FROM %s", r.tableName)
-	rows, err := r.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var results []T
-	for rows.Next() {
-		var entity T
-		val := reflect.ValueOf(&entity).Elem()
-
-		fields := make([]any, val.NumField())
-		for i := 0; i < val.NumField(); i++ {
-			fields[i] = val.Field(i).Addr().Interface()
-		}
-
-		if err := rows.Scan(fields...); err != nil {
-			log.Println("Error scanning row:", err)
-			continue
-		}
-
-		results = append(results, entity)
-	}
-	return results, nil
-}
-
 func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int, orderBy string) ([]T, error) {
     var whereClauses []string
     var values []any
@@ -259,11 +229,4 @@ func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[strin
     rowsAffected, _ := result.RowsAffected()
     log.Printf("Deleted %d rows from %s where %v", rowsAffected, r.tableName, conditions)
     return nil
-}
-
-
-func (r *Repository[T]) Remove(ctx context.Context, id int) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = ?", r.tableName)
-	_, err := r.db.ExecContext(ctx, query, id)
-	return err
 }
