@@ -43,6 +43,8 @@ func AddMessage(c echo.Context) error {
 	// 	})
 	// }
 
+	text := c.FormValue("text")
+	userId, err := helpers.GetSessionUserID(c)
 	newMessage := newMessage(userId, text)
 
 	err = messageRepo.Create(c.Request().Context(), newMessage)
