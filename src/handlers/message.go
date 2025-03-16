@@ -34,32 +34,34 @@ func AddMessage(c echo.Context) error {
 	if !loggedIn {
 		return c.String(http.StatusUnauthorized, "Unauthorized")
 	}
+
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		fmt.Printf("getSessionUserID returned error: %v\n", err)
-		return err
-	}
-	log.Printf("📩 DEBUG: Inserting message: userID=%d, text=%s", userId, text)
-	newMessage := newMessage(userId, text)
-	err = messageRepo.Create(c.Request().Context(), newMessage)
-
-	if err != nil {
-		errorMessage := fmt.Sprintf("DB insert failed: %v", err)
-		log.Printf("❌ ERROR: %s", errorMessage)  // ✅ Ensure it's logged
 		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": errorMessage,
+			"error": fmt.Sprintf("Session error: %v", err),
 		})
+	}
 
+	newMessage := newMessage(userId, text)
+
+	err = messageRepo.Create(c.Request().Context(), newMessage)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": fmt.Sprintf("DB insert failed: %v", err),
+		})
 	}
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": fmt.Sprintf("Flash message error: %v", err),
+		})
 	}
 
 	return c.Redirect(http.StatusFound, "/")
 }
+
 
 func Messages(c echo.Context) error {
     log.Println("User entered Messages via route \"/:msgs\"")
