@@ -48,5 +48,11 @@ func main() {
 
 	routes.SetupRoutes(app, db)
 
+	// Custom error handler to log and expose internal errors
+	app.HTTPErrorHandler = func(err error, c echo.Context) {
+		log.Printf("❌ SERVER ERROR: %v", err)  // Log error
+		c.JSON(500, map[string]string{"error": fmt.Sprintf("Server error: %v", err)})
+	}
+
 	app.Logger.Fatal(app.Start(":8000"))
 }
