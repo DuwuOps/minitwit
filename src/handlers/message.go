@@ -212,8 +212,13 @@ func handleRenderTimeline(c echo.Context, conditions map[string]any, user *model
 			"pub_date": msg.PubDate,
 			"username": author.Username,
 		})
+		if author.Email == "" {
+			author.Email = author.Username + "@example.com" // Fallback value
+		}
+	
 	}
 
+	
 	log.Printf("📥 Filtered Messages Before Rendering: %+v", enrichedMessages)
 
 	user, _ = GetCurrentUser(c)
