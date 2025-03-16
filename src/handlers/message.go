@@ -49,8 +49,10 @@ func AddMessage(c echo.Context) error {
 
 	err = messageRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
+		errorMessage := fmt.Sprintf("❌ ERROR: DB insert failed: %v", err)
+		log.Println(errorMessage) // ✅ Log the actual database error
 		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": fmt.Sprintf("DB insert failed: %v", err),
+			"error": errorMessage,
 		})
 	}
 

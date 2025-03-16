@@ -86,8 +86,6 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
     return nil
 }
 
-
-
 func (r *Repository[T]) GetByField(ctx context.Context, field string, value any) (*T, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = ?", r.tableName, field)
 	row := r.db.QueryRowContext(ctx, query, value)
