@@ -30,18 +30,18 @@ func SetFollowerRepo(repo *datalayer.Repository[models.Follower]) {
 var PER_PAGE = 30
 
 func AddMessage(c echo.Context) error {
-	loggedIn, _ := helpers.IsUserLoggedIn(c)
-	if !loggedIn {
-		return c.String(http.StatusUnauthorized, "Unauthorized")
-	}
+	// loggedIn, _ := helpers.IsUserLoggedIn(c)
+	// if !loggedIn {
+	// 	return c.String(http.StatusUnauthorized, "Unauthorized")
+	// }
 
-	text := c.FormValue("text")
-	userId, err := helpers.GetSessionUserID(c)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": fmt.Sprintf("Session error: %v", err),
-		})
-	}
+	// text := c.FormValue("text")
+	// userId, err := helpers.GetSessionUserID(c)
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, echo.Map{
+	// 		"error": fmt.Sprintf("Session error: %v", err),
+	// 	})
+	// }
 
 	newMessage := newMessage(userId, text)
 
@@ -52,12 +52,12 @@ func AddMessage(c echo.Context) error {
 		})
 	}
 
-	err = helpers.AddFlash(c, "Your message was recorded")
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": fmt.Sprintf("Flash message error: %v", err),
-		})
-	}
+	// err = helpers.AddFlash(c, "Your message was recorded")
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, echo.Map{
+	// 		"error": fmt.Sprintf("Flash message error: %v", err),
+	// 	})
+	// }
 
 	return c.Redirect(http.StatusFound, "/")
 }
