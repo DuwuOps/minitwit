@@ -40,14 +40,15 @@ func AddMessage(c echo.Context) error {
 		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-
+	log.Printf("📩 DEBUG: Inserting message: userID=%d, text=%s", userId, text)
 	newMessage := newMessage(userId, text)
-
 	err = messageRepo.Create(c.Request().Context(), newMessage)
+
 	if err != nil {
-		return err 
+		log.Printf("❌ ERROR: messageRepo.Create() failed: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB insert failed"})
 	}
-	
+
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
 		fmt.Printf("addFlash returned error: %v\n", err)
