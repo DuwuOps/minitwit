@@ -30,38 +30,30 @@ func SetFollowerRepo(repo *datalayer.Repository[models.Follower]) {
 var PER_PAGE = 30
 
 func AddMessage(c echo.Context) error {
-	// loggedIn, _ := helpers.IsUserLoggedIn(c)
-	// if !loggedIn {
-	// 	return c.String(http.StatusUnauthorized, "Unauthorized")
-	// }
-
-	// text := c.FormValue("text")
-	// userId, err := helpers.GetSessionUserID(c)
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, echo.Map{
-	// 		"error": fmt.Sprintf("Session error: %v", err),
-	// 	})
-	// }
+	loggedIn, _ := helpers.IsUserLoggedIn(c)
+	if !loggedIn {
+		return c.String(http.StatusUnauthorized, "Unauthorized")
+	}
 
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
+
 	newMessage := newMessage(userId, text)
 
 	err = messageRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
 		errorMessage := fmt.Sprintf("❌ ERROR: DB insert failed: %v", err)
-		log.Println(errorMessage) // ✅ Log the actual database error
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": errorMessage,
 		})
 	}
 
-	// err = helpers.AddFlash(c, "Your message was recorded")
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, echo.Map{
-	// 		"error": fmt.Sprintf("Flash message error: %v", err),
-	// 	})
-	// }
+	err = helpers.AddFlash(c, "Your message was recorded")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": fmt.Sprintf("Flash message error: %v", err),
+		})
+	}
 
 	return c.Redirect(http.StatusFound, "/")
 }
@@ -146,8 +138,6 @@ func UserTimeline(c echo.Context) error {
 		"Flashes":     flashes,
 	}
 
-	log.Printf("📤 Data passed to template: %v", data)
-
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
@@ -156,7 +146,7 @@ func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
 
 	conditions := map[string]any{"flagged": 0} 
-	return handleRenderTimeline(c, conditions, nil)
+	return handleRenderTimeline(c, conditions, []int{}, nil)
 }
 
 func Timeline(c echo.Context) error {
@@ -185,53 +175,55 @@ func Timeline(c echo.Context) error {
 		followedUserIDs = append(followedUserIDs, f.WhomID)
 	}
 
-	log.Printf("🔍 Fetching messages for users: %v", followedUserIDs)
+	user, _ := GetCurrentUser(c)
 
 	return handleRenderTimeline(c, map[string]any{
 		"flagged": 0,
-		"author_id": followedUserIDs, 
-	}, nil)	
+	}, followedUserIDs, user)  
 }
 
 
-func handleRenderTimeline(c echo.Context, conditions map[string]any, user *models.User) error {
+func handleRenderTimeline(c echo.Context, conditions map[string]any, followedUserIDs []int, user *models.User) error {
+    if len(followedUserIDs) > 0 {
+		conditions["author_id"] = followedUserIDs
+	}
+	
 	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
-	if err != nil {
-		return err
-	}
+    if err != nil {
+        return err
+    }
 
-	var enrichedMessages []map[string]any
-	for _, msg := range messages {
-		author, err := getUserByID(c.Request().Context(), msg.AuthorID)
-		if err != nil {
-			continue
-		}
-		
-		enrichedMessages = append(enrichedMessages, map[string]any{
-			"text":     msg.Text,
-			"pub_date": msg.PubDate,
-			"username": author.Username,
-		})
-		if author.Email == "" {
-			author.Email = author.Username + "@example.com" // Fallback value
-		}
-	
-	}
+    var enrichedMessages []map[string]any
+    for _, msg := range messages {
+        username := "Unknown"
+        email := ""
 
-	
-	log.Printf("📥 Filtered Messages Before Rendering: %+v", enrichedMessages)
+        author, err := getUserByID(c.Request().Context(), msg.AuthorID)
+        if err == nil {
+            username = author.Username
+            email = author.Email
+        } else {
+            log.Printf("⚠️ Warning: Could not find user for message author_id=%d", msg.AuthorID)
+        }
 
-	user, _ = GetCurrentUser(c)
-	flashes, _ := getFlashes(c)
+        enrichedMessages = append(enrichedMessages, map[string]any{
+            "text":     msg.Text,
+            "pub_date": msg.PubDate,
+            "username": username,
+            "email":    email,
+        })
+    }
 
-	data := map[string]any{
-		"Messages": enrichedMessages,
-		"Endpoint": c.Path(),
-		"User":     user,
-		"Flashes":  flashes,
-	}
+    flashes, _ := getFlashes(c)
 
-	return c.Render(http.StatusOK, "timeline.html", data)
+    data := map[string]any{
+        "Messages": enrichedMessages,
+        "Endpoint": c.Path(),
+        "User":     user,
+        "Flashes":  flashes,
+    }
+
+    return c.Render(http.StatusOK, "timeline.html", data)
 }
 
 
