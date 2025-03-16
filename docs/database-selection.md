@@ -2,7 +2,7 @@
 
 
 ## Preface
-For the choice of database to use, we have compared some of the most popular RDBMS choices based on the Stack Overflow 2024 Developer Survey[^1]. For the scope of this exercise, we have not considered cloud databases, or noSQL databases - since we're seeking to replace the current SQLite database.
+For the choice of database to use, we have compared some of the most popular RDBMS choices based on the Stack Overflow 2024 Developer Survey[^1]. For the scope of this exercise, we have not considered cloud databases or noSQL databases - since we're seeking to replace the current SQLite database.
 
 A central requirement, is that the RDBM's license is open-source.
 
@@ -37,9 +37,9 @@ Due to these concerns, MySQL was has not been chosen as our RDBMS.
 
 Many resources compares MariaDB and PostgreSQL head-to-head as two robust choices of databases.
 * MariaDB is often commended for its MySQL compatability and its advanced storage engines[^12] - often being mentioned as an easy-to-use highly stable drop-in replacement for MySQL[^17].
-* PostgreSQL is praised for SQL-compliance[^13], advanced sequrity setup[^12], and it's NoSQL feature est such as JSON, XML, and HStore[^15].
+* PostgreSQL is praised for its SQL-compliance[^13], advanced security setup[^12], and its NoSQL features such as JSON, XML, and HStore[^15].
 
-PostgreSQL was chosen in favor of MariaDB - due to its strong community adoption[^1], and the fact that the contributors of the project are not previously experienced in MySQL - and will therefore not appreciate the interoperability of MariaDB's MySQL interoperability.
+PostgreSQL was chosen in favor of MariaDB - due to its strong community adoption[^1], and the fact that the contributors of the project are not previously experienced in MySQL - and will therefore not appreciate the interoperability between MariaDB and MySQL.
 
 
 ## Sources
