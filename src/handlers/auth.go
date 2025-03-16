@@ -81,7 +81,6 @@ func Register(c echo.Context) error {
 		}
 
 		if errorMessage := validateRegisterInput(username, email, password, password2); errorMessage != "" {
-			log.Printf("2")
 			return renderRegisterError(c, errorMessage)
 		}
 
