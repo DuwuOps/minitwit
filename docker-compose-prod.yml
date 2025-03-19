@@ -24,7 +24,7 @@ services:
 #   image: ${DOCKER_USERNAME}/prometheus:latest
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - "0.0.0.0:9090:9090"
     networks:
       - main
 
