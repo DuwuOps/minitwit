@@ -1,3 +1,5 @@
+name: "minitwit"
+
 services:
   app:
     build: 
@@ -7,5 +9,19 @@ services:
       - sqliteDB:/minitwit/tmp
     ports:
       - 8000:8000
+
+  # Database
+  database:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=minitwit
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+
 volumes:
   sqliteDB:
+  pgdata:
