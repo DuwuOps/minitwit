@@ -45,3 +45,4 @@ services:
 
 volumes:
   grafana-storage: {}
+  sqliteDB: {}
