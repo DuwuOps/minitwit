@@ -15,7 +15,6 @@ RUN go mod download
 COPY ./src/*.go ./src/
 COPY ./src/datalayer ./src/datalayer
 COPY ./src/handlers ./src/handlers
-COPY ./src/metrics ./src/metrics
 COPY ./src/models ./src/models
 COPY ./src/routes ./src/routes
 COPY ./src/template_rendering ./src/template_rendering
