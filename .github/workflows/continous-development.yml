@@ -103,7 +103,6 @@ jobs:
           tags: ${{ vars.DOCKER_USERNAME }}/prometheus:latest
           cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/prometheus:webbuildcache
           cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/prometheus:webbuildcache,mode=max
-          build-args: PROMETHEUS_YML='prometheus-prod.yml'
   
     
   release:
@@ -177,6 +176,9 @@ jobs:
     needs: push
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
@@ -202,4 +204,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
-            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} sudo docker compose -f docker-compose-prod up -d --pull always
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose -f docker-compose-prod.yml up -d --pull always
