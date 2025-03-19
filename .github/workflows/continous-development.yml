@@ -185,6 +185,15 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
 
+      - name: copy files to target server via scp
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "./docker-compose-prod.yml"
+          target: "~/.deploy/${{ github.event.repository.name }}/"
+
       - name: Deploy to Digital Ocean droplet via SSH action
         env:
           DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
