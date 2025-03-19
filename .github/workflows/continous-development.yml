@@ -83,7 +83,7 @@ jobs:
           tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
           cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
           cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
-
+          
       - name: Build and Push Grafana Docker image 
         uses: docker/build-push-action@v6
         with:
@@ -195,15 +195,11 @@ jobs:
           target: "~/.deploy/${{ github.event.repository.name }}/"
 
       - name: Deploy to Digital Ocean droplet via SSH action
-        env:
-          DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.SSH_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs: DOCKER_IMAGE
           script: |
-            docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
-            docker image pull $DOCKER_IMAGE
-            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v sqliteDB:/minitwit/tmp $DOCKER_IMAGE
+            cd ~/.deploy/${{ github.event.repository.name }}
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} sudo docker compose -f docker-compose-prod up -d --pull always
