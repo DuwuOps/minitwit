@@ -136,4 +136,4 @@ jobs:
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
-            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} sudo docker compose -f docker-compose-prod.yml up -d --pull always
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose -f docker-compose-prod.yml up -d --pull always
