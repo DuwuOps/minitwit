@@ -99,7 +99,7 @@ jobs:
           #tags: ${{ vars.DOCKER_USERNAME }}/prometheus:latest
           cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/prometheus:webbuildcache
           cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/prometheus:webbuildcache,mode=max
-          build-args: PROMETHEUS_YML='prometheus-prod.yml'
+          build-args: PROMETHEUS_YML=prometheus-prod.yml
   
 
   deploy:
