@@ -35,9 +35,12 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"  
+    environment:
+      - PROMETHEUS_HOST=prometheus:9090
     networks:
       - main
     volumes:
+      - ./.infrastructure/grafana:/etc/grafana/provisioning
       - grafana-storage:/var/lib/grafana
 
 
