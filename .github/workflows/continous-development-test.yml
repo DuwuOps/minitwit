@@ -5,7 +5,7 @@ on:
   push:
     # Run workflow every time something is pushed to this branch (for testing reasons)
     branches:
-      - 86-server-monitoring
+      - 86-server-monitoring-rebased
 
   workflow_dispatch:
     manual: true
