@@ -7,44 +7,22 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"log"
 
 	"github.com/labstack/echo/v4"
 )
 
 var LATEST_PROCESSED string = "../../../latest_processed_sim_action_id.txt"
 
-func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
-	var result []map[string]any
-	cols, _ := rows.Columns()
-
-	for rows.Next() {
-		// Create a slice of interface{}'s (any's) to represent each column,
-		// and a second slice to contain pointers to each item in the columns slice.
-		columns := make([]any, len(cols))
-		columnPointers := make([]any, len(cols))
-		for i, _ := range columns {
-			columnPointers[i] = &columns[i]
-		}
-
-		// Scan the result into the column pointers...
-		if err := rows.Scan(columnPointers...); err != nil {
-			fmt.Printf("rows.Scan returned error: %v\n", err)
-			return nil, err
-		}
-
-		// Create our map, and retrieve the value for each column from the pointers slice,
-		// storing it in the map with the name of the column as the key.
-		m := make(map[string]any)
-		for i, colName := range cols {
-			val := columnPointers[i].(*any)
-			m[colName] = *val
-		}
-
-		// Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...]
-		result = append(result, m)
+func ValidateRequest(c echo.Context) error {
+	if err := UpdateLatest(c); err != nil {
+		log.Printf("Error updating latest: %v", err)
+		return err
 	}
-
-	return result, nil
+	if err := NotReqFromSimulator(c); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetLatest(c echo.Context, db *sql.DB) error {
@@ -91,3 +69,4 @@ func UpdateLatest(c echo.Context) error {
 		return nil
 	}
 }
+
