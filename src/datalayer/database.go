@@ -13,7 +13,7 @@ import (
 
 const (
 	QueriesFile = "queries/schema.sql"
-	MaxRetries 	= 10
+	MaxRetries  = 10
 	RetryDelay  = 2 * time.Second
 )
 
@@ -33,7 +33,7 @@ func connectDB() (*sql.DB, error) {
 		log.Printf("sql.Open returned error: %v\n", err)
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
-	
+
 	// Try multiple (10) times (sometimes it takes the postgres database a second to start)
 	for i := range MaxRetries {
 		err = db.Ping()
@@ -41,11 +41,11 @@ func connectDB() (*sql.DB, error) {
 			fmt.Printf("Successfully connected to database on attempt %d\n", i+1)
 			return db, nil
 		}
-		
+
 		fmt.Printf("Failed to connect to database (attempt %d/%d): %v\n", i+1, MaxRetries, err)
 		time.Sleep(RetryDelay)
 	}
-	
+
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
 }
 
@@ -58,7 +58,7 @@ func CreateTables(db *sql.DB) error {
 		db.Close()
 		return fmt.Errorf("failed to read schema file: %w", err)
 	}
-	
+
 	// Execture contents of queries-file
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
