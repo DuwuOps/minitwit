@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -17,6 +18,8 @@ const (
 	DbPort      = 5432
 	QueriesFile = "queries/schema.sql"
 	SSLMode		= "disable"
+	MaxRetries  = 10
+	RetryDelay  = 2 * time.Second
 )
 
 func connectDB() (*sql.DB, error) {
@@ -29,10 +32,16 @@ func connectDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 	
-	err = db.Ping()
-	if err != nil {
-		log.Printf("db.Ping returned error: %v\n", err)
-		return nil, err
+	// Try multiple times (sometimes it takes the postgres database a second to start)
+	for i := range MaxRetries {
+		err = db.Ping()
+		if err == nil {
+			fmt.Printf("Successfully connected to database on attempt %d\n", i+1)
+			return db, nil
+		}
+		
+		fmt.Printf("Failed to connect to database (attempt %d/%d): %v\n", i+1, MaxRetries, err)
+		time.Sleep(RetryDelay)
 	}
 	
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
