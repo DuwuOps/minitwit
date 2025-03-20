@@ -4,7 +4,7 @@ go 1.23.6
 
 require (
 	github.com/gorilla/sessions v1.4.0
-	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.21.1
 	github.com/shirou/gopsutil/v4 v4.25.3
 )
