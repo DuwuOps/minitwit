@@ -73,7 +73,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          tags: ${{ vars.DOCKER_USERNAME }}/minitwit:test
           cache-from: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache
           cache-to: type=registry,ref=${{ vars.DOCKER_USERNAME }}/minitwit:webbuildcache,mode=max
 
@@ -98,7 +98,7 @@ jobs:
           DB_HOST: ${{ vars.TEST_ENV_DB_HOST }}
           DB_PORT: ${{ vars.DB_PORT }}
           DB_NAME: ${{ vars.DB_NAME }}
-          DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
+          DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:test
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.TEST_ENV_SSH_HOST }}
