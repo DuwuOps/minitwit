@@ -17,6 +17,12 @@ services:
     environment:
       - SNAPSHOT_TIME_INTERVAL_SECONDS=300
       - FOLLOWER_BUCKETS=1-20,21-50,51-100,101-500,501-1500,1501-3000,3001-6000,6001-12000,12001-24000,24001-48000,48001-999999
+      - DB_USER=${DB_USER:-admin}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=${DB_HOST:-database}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-minitwit}
+      - DB_SSL_MODE=${DB_SSL_MODE:-disable}
 
   prometheus:
     build: 
@@ -71,9 +77,9 @@ services:
     ports:
       - 5433:5432
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=minitwit
+      - POSTGRES_USER=${DB_USER:-admin}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-minitwit}
     volumes:
       - pgdata:/var/lib/postgresql/data 
 
