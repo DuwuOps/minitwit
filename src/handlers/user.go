@@ -27,11 +27,6 @@ func GetCurrentUser(c echo.Context) (*models.User, error) {
 		return nil, err
 	}
 
-	fmt.Printf("Found user in database! %v\n", user)
-	fmt.Printf("user.UserID: %v\n", user.UserID)
-	fmt.Printf("user.Username: %v\n", user.Username)
-	fmt.Printf("user.Email: %v\n", user.Email)
-	fmt.Printf("user.PwHash: %v\n", user.PwHash)
 	return user, nil
 }
 
