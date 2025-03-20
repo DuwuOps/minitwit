@@ -3,11 +3,11 @@ package datalayer
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
 	"strings"
-	"errors"
 )
 
 type Repository[T any] struct {
@@ -170,7 +170,6 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 
     return results, nil
 }
-
 
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
