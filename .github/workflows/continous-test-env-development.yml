@@ -4,8 +4,8 @@ name: Continuous Deployment (Testing Environment)
 on:
   push:
     # Run workflow every time something is pushed to this branch (for testing reasons)
-    branches:
-      - 79-database-migration
+    tags:        
+      - 'test-env*'
 
   workflow_dispatch:
     manual: true
