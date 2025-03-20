@@ -215,7 +215,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
     var values []any
-    paramCount := 1
+    paramCount := 0
 
     for field, value := range conditions {
         paramCount++
