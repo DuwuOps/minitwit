@@ -160,8 +160,6 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
         values = append(values, limit)
     }
 
-    log.Printf("📝 Executing Query: %s | Values: %v", query, values)
-    
     rows, err := r.db.QueryContext(ctx, query, values...)
     if err != nil {
         log.Printf("Query failed: %v", err)
