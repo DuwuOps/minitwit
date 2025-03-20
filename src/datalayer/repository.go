@@ -74,8 +74,6 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
 
     query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", r.tableName, strings.Join(columns, ","), strings.Join(placeholders, ","))
 
-    log.Printf("📝 Executing INSERT Query: %s | Values: %v", query, values)
-
     result, err := r.db.ExecContext(ctx, query, values...)
     if err != nil {
         log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
