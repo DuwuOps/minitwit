@@ -3,11 +3,11 @@ package datalayer
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
 	"strings"
-	"errors"
 )
 
 type Repository[T any] struct {
