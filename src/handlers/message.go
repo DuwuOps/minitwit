@@ -172,7 +172,7 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
                    VALUES (?, ?, ?, 0)`
 
 		db.Exec(query,
-			userId, requestData, noMsgs, time.Now().Unix(),
+			userId, requestData, time.Now().Unix(),
 		)
 
 		return c.JSON(http.StatusNoContent, nil)
