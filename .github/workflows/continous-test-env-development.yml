@@ -93,14 +93,32 @@ jobs:
 
       - name: Deploy to Digital Ocean droplet via SSH action
         env:
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.TEST_ENV_DB_PASSWORD }}
+          DB_HOST: ${{ vars.TEST_ENV_DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
           DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:latest
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.TEST_ENV_SSH_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-          envs: DOCKER_IMAGE
+          envs:
+            DOCKER_IMAGE,
+            DB_USER,
+            DB_PASSWORD,
+            DB_HOST,
+            DB_PORT,
+            DB_NAME
           script: |
             docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
             docker image pull $DOCKER_IMAGE
-            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v sqliteDB:/minitwit/tmp $DOCKER_IMAGE
+            sudo docker run -d -p 0.0.0.0:80:8000 --restart=always --name app \
+              -e DB_USER=$DB_USER \
+              -e DB_PASSWORD=$DB_PASSWORD \
+              -e DB_HOST=$DB_HOST \
+              -e DB_PORT=$DB_PORT \
+              -e DB_NAME=$DB_NAME \
+              -e DB_SSL_MODE=disable \
+              $DOCKER_IMAGE
