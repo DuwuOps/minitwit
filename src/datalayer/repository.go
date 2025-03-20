@@ -3,11 +3,11 @@ package datalayer
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
 	"strings"
-	"errors"
 )
 
 type Repository[T any] struct {
@@ -73,7 +73,7 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
     }
 
     query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", r.tableName, strings.Join(columns, ","), strings.Join(placeholders, ","))
-    
+
     log.Printf("📝 Executing INSERT Query: %s | Values: %v", query, values)
 
     result, err := r.db.ExecContext(ctx, query, values...)
@@ -211,7 +211,6 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 
     return results, nil
 }
-
 
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
