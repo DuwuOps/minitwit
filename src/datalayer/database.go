@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"minitwit/src/handlers/helpers"
 	"os"
 	"time"
 
@@ -11,20 +12,21 @@ import (
 )
 
 const (
-	DbHost      = "database"
-	DbUserName  = "admin"
-	DbPass      = "postgres"
-	DbName      = "minitwit"
-	DbPort      = 5432
 	QueriesFile = "queries/schema.sql"
-	SSLMode		= "disable"
-	MaxRetries  = 10
+	MaxRetries 	= 10
 	RetryDelay  = 2 * time.Second
 )
 
 func connectDB() (*sql.DB, error) {
+	DbUserName := helpers.GetEnvVar("DB_USER", "admin")
+	DbPass := helpers.GetEnvVar("DB_PASSWORD", "localhost")
+	DbHost := helpers.GetEnvVar("DB_HOST", "database")
+	DbPort := helpers.GetEnvVar("DB_PORT", "5433")
+	DbName := helpers.GetEnvVar("DB_NAME", "minitwit")
+	SSLMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
+
 	//Returns a new connection to the database.
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s", DbUserName, DbPass, DbHost, DbPort, DbName, SSLMode)
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", DbUserName, DbPass, DbHost, DbPort, DbName, SSLMode)
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -32,7 +34,7 @@ func connectDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 	
-	// Try multiple times (sometimes it takes the postgres database a second to start)
+	// Try multiple (10) times (sometimes it takes the postgres database a second to start)
 	for i := range MaxRetries {
 		err = db.Ping()
 		if err == nil {
