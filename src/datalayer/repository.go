@@ -40,6 +40,7 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
     var columns []string
     var placeholders []string
     var values []interface{}
+    paramCount := 0
 
     for i := 0; i < val.NumField(); i++ {
         field := typeOfEntity.Field(i)
@@ -62,7 +63,8 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
         }
 
         columns = append(columns, fieldName)
-        placeholders = append(placeholders, "?")
+        paramCount++
+        placeholders = append(placeholders, formatParamIndex(paramCount))
         values = append(values, val.Field(i).Interface())
     }
 
@@ -108,19 +110,22 @@ func detectPrimaryKey(tableName string) string {
 func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]any, limit int, orderBy string) ([]T, error) {
     var whereClauses []string
     var values []any
+    paramCount := 0
 
     for key, value := range conditions {
         if slice, ok := value.([]int); ok {  
             if len(slice) > 0 {
                 placeholders := make([]string, len(slice))
                 for i, v := range slice {
-                    placeholders[i] = "?"
+                    paramCount++
+                    placeholders[i] = formatParamIndex(paramCount)
                     values = append(values, v)
                 }
                 whereClauses = append(whereClauses, fmt.Sprintf("%s IN (%s)", key, strings.Join(placeholders, ",")))
             }
         } else {
-            whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", key))
+            paramCount++
+            whereClauses = append(whereClauses, fmt.Sprintf("%s = %s", key, formatParamIndex(paramCount)))
             values = append(values, value)
         }
     }
@@ -133,7 +138,8 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
         query += " ORDER BY " + orderBy
     }
     if limit > 0 {
-        query += " LIMIT ?"
+        paramCount++
+        query += fmt.Sprintf(" LIMIT %s", formatParamIndex(paramCount))
         values = append(values, limit)
     }
 
@@ -171,9 +177,11 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
     var values []any
+    paramCount := 1
 
     for field, value := range conditions {
-        whereClauses = append(whereClauses, fmt.Sprintf("%s = ?", field))
+        paramCount++
+        whereClauses = append(whereClauses, fmt.Sprintf("%s = %s", field, formatParamIndex(paramCount)))
         values = append(values, value)
     }
 
@@ -190,7 +198,7 @@ func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[strin
 
 func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...any) (*T, error) {
     
-    query := fmt.Sprintf("SELECT * FROM %s WHERE %s = ?", r.tableName, field)
+    query := fmt.Sprintf("SELECT * FROM %s WHERE %s = #1", r.tableName, field)
     log.Printf("📝 Executing Query: %s | Values: %v", query, values)
 
 	row := r.db.QueryRowContext(ctx, query, values...)
@@ -226,4 +234,8 @@ func (r *Repository[T]) executeQuery(ctx context.Context, query string, values .
     rowsAffected, _ := result.RowsAffected()
     
     return rowsAffected, nil
+}
+
+func formatParamIndex(i int) (string) {
+    return fmt.Sprintf("$%d", i)
 }
