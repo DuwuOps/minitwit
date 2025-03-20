@@ -210,7 +210,7 @@ func (r *Repository[T]) CountRowsWhenGroupedByFieldInRange(ctx context.Context, 
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
     var values []any
-    paramCount := 1
+    paramCount := 0
 
     for field, value := range conditions {
         paramCount++
