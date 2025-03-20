@@ -135,7 +135,7 @@ func (r *Repository[T]) GetByID(ctx context.Context, id int) (*T, error) {
 
 func detectPrimaryKey(tableName string) string {
 	switch tableName {
-	case "user":
+	case "users":
 		return "user_id"
 	case "message":
 		return "message_id"
