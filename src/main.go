@@ -32,7 +32,7 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-	userRepo := datalayer.NewRepository[models.User](db, "user")
+	userRepo := datalayer.NewRepository[models.User](db, "users")
 	messageRepo := datalayer.NewRepository[models.Message](db, "message")
 	followerRepo := datalayer.NewRepository[models.Follower](db, "follower")
 	handlers.SetUserRepo(userRepo)
