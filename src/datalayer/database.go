@@ -49,8 +49,8 @@ func connectDB() (*sql.DB, error) {
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
 }
 
-// Creates the database tables from quer
-func CreateTables(db *sql.DB) error {
+// Creates the database tables from query in {QueriesFile}
+func createTablesIfNotExists(db *sql.DB) error {
 	// Read queries-file
 	sqlFile, err := os.ReadFile(QueriesFile)
 	if err != nil {
@@ -79,10 +79,9 @@ func InitDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// TODO: Fix that this would drop and create the tables at every reset (pretty bad)
-	err = CreateTables(db)
+	err = createTablesIfNotExists(db)
 	if err != nil {
-		log.Printf("CreateTables returned error: %v\n", err)
+		fmt.Printf("InitDB : createTablesIfNotExists returned error: %v\n", err)
 		return nil, err
 	}
 

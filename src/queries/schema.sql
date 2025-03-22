@@ -1,19 +1,16 @@
-drop table if exists users;
-create table users (
+create table if not exists users (
   user_id serial primary key,
   username text not null,
   email text not null,
   pw_hash text not null
 );
 
-drop table if exists follower;
-create table follower (
+create table if not exists follower (
   who_id integer,
   whom_id integer
 );
 
-drop table if exists message;
-create table message (
+create table if not exists message (
   message_id serial primary key,
   author_id integer not null,
   text text not null,
