@@ -19,9 +19,11 @@ import (
 )
 
 var userRepo *datalayer.Repository[models.User]
+var userSqliteRepo *datalayer.SqliteRepository[models.User]
 
-func SetUserRepo(repo *datalayer.Repository[models.User]) {
+func SetUserRepo(repo *datalayer.Repository[models.User], sqliteRepo *datalayer.SqliteRepository[models.User]) {
 	userRepo = repo
+	userSqliteRepo = sqliteRepo
 }
 
 func Login(c echo.Context) error {
@@ -36,7 +38,7 @@ func Login(c echo.Context) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		user, err := userRepo.GetByField(context.Background(), "username", username)
+		user, err := userSqliteRepo.GetByField(context.Background(), "username", username)
 		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
@@ -84,7 +86,7 @@ func Register(c echo.Context) error {
 			return renderRegisterError(c, errorMessage)
 		}
 
-		if existingUser, _ := userRepo.GetByField(context.Background(), "username", username); existingUser != nil {
+		if existingUser, _ := userSqliteRepo.GetByField(context.Background(), "username", username); existingUser != nil {
 			return renderRegisterError(c, "The username is already taken")
 		}
 
@@ -192,9 +194,15 @@ func createUser(username, email, password string) error {
         PwHash:   hash,
     }
 
-    err = userRepo.Create(context.Background(), newUser)
+    err = userSqliteRepo.Create(context.Background(), newUser)
     if err != nil {
         log.Printf("❌ Error inserting user into DB: %v", err)
+        return err
+    }
+
+	err = userRepo.Create(context.Background(), newUser)
+    if err != nil {
+        log.Printf("❌ Error inserting user into Postgres DB: %v", err)
         return err
     }
 

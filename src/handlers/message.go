@@ -16,15 +16,19 @@ import (
 )
 
 var messageRepo *datalayer.Repository[models.Message]
+var messageSqliteRepo *datalayer.SqliteRepository[models.Message]
 
-func SetMessageRepo(repo *datalayer.Repository[models.Message]) {
+func SetMessageRepo(repo *datalayer.Repository[models.Message], sqliteRepo *datalayer.SqliteRepository[models.Message]) {
 	messageRepo = repo
+	messageSqliteRepo = sqliteRepo
 }
 
 var followerRepo *datalayer.Repository[models.Follower]
+var followerSqliteRepo *datalayer.SqliteRepository[models.Follower]
 
-func SetFollowerRepo(repo *datalayer.Repository[models.Follower]) {
+func SetFollowerRepo(repo *datalayer.Repository[models.Follower], sqliteRepo *datalayer.SqliteRepository[models.Follower]) {
 	followerRepo = repo
+	followerSqliteRepo = sqliteRepo
 }
 
 var PER_PAGE = 30
@@ -40,9 +44,17 @@ func AddMessage(c echo.Context) error {
 
 	newMessage := newMessage(userId, text)
 
-	err = messageRepo.Create(c.Request().Context(), newMessage)
+	err = messageSqliteRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
 		errorMessage := fmt.Sprintf("❌ ERROR: DB insert failed: %v", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": errorMessage,
+		})
+	}
+
+	err = messageRepo.Create(c.Request().Context(), newMessage)
+	if err != nil {
+		errorMessage := fmt.Sprintf("❌ ERROR: Postgres DB insert failed: %v", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"error": errorMessage,
 		})
@@ -164,7 +176,7 @@ func Timeline(c echo.Context) error {
     }
 
 	conditions := map[string]any{"who_id": sessionUserId}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+	followers, err := followerSqliteRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
 	if err != nil {
 		log.Printf("Error fetching followers: %v\n", err)
 		return err
@@ -188,7 +200,7 @@ func handleRenderTimeline(c echo.Context, conditions map[string]any, followedUse
 		conditions["author_id"] = followedUserIDs
 	}
 	
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
+	messages, err := messageSqliteRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
     if err != nil {
         return err
     }
@@ -237,7 +249,7 @@ func isFollowingUser(c echo.Context, profileUserID int) bool {
 		"who_id":  sessionUserID,
 		"whom_id": profileUserID,
 	}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
+	followers, err := followerSqliteRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
 
 	return err == nil && len(followers) > 0
 }
@@ -252,7 +264,7 @@ func newMessage(authorID int, text string) *models.Message {
 }
 
 func getUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	user, err := userRepo.GetByField(ctx, "username", username)
+	user, err := userSqliteRepo.GetByField(ctx, "username", username)
 	if err != nil {
 		log.Printf("User not found: %s", username)
 		return nil, err
@@ -281,7 +293,7 @@ func handleGetMessages(c echo.Context, user *models.User, useContentKey bool) ([
 		conditions["author_id"] = user.UserID
 	} 
 
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+	messages, err := messageSqliteRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 	if err != nil {
 		log.Printf("❌ Error retrieving messages: %v", err)
 		return nil, err
@@ -291,7 +303,7 @@ func handleGetMessages(c echo.Context, user *models.User, useContentKey bool) ([
 	for _, msg := range messages {
 		username := "Unknown"
 
-		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+		author, _ := userSqliteRepo.GetByID(c.Request().Context(), msg.AuthorID)
 		if author != nil {
 			username = author.Username
 		}
@@ -327,7 +339,7 @@ func getFlashes(c echo.Context) ([]string, error) {
 }
 
 func getUserByID(ctx context.Context, userID int) (*models.User, error) {
-	user, err := userRepo.GetByID(ctx, userID)
+	user, err := userSqliteRepo.GetByID(ctx, userID)
 	if err != nil {
 		log.Printf("User not found for ID: %d", userID)
 		return nil, err
@@ -342,6 +354,11 @@ func handlePostMessage(c echo.Context, user *models.User) error {
 	}
 
 	newMessage := newMessage(user.UserID, requestData)
+	err = messageSqliteRepo.Create(c.Request().Context(), newMessage)
+	if err != nil {
+		return err
+	}
+
 	err = messageRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
 		return err

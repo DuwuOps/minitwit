@@ -20,7 +20,7 @@ func GetCurrentUser(c echo.Context) (*models.User, error) {
 		return nil, err
 	}
 
-	user, err := userRepo.GetByID(c.Request().Context(), id)
+	user, err := userSqliteRepo.GetByID(c.Request().Context(), id)
 
 	if err != nil {
 		log.Printf("User not found in database for userID %d: %v", id, err)
@@ -98,6 +98,23 @@ func handleUserFollowAction(c echo.Context, follow bool) error {
 		return err
 	}
 
+	if follow {
+		err = followerSqliteRepo.Create(c.Request().Context(), &models.Follower{
+			WhoID:  sessionUserId,
+			WhomID: user.UserID,
+		})
+	} else {
+		err = followerSqliteRepo.DeleteByFields(c.Request().Context(), map[string]any{
+			"who_id":  sessionUserId,
+			"whom_id": user.UserID,
+		})
+	}
+
+	if err != nil {
+		log.Printf("Error processing follow/unfollow action for user %s: %v", username, err)
+		return err
+	}
+
 	message := fmt.Sprintf("You are %s \"%s\"", 
 		map[bool]string{true: "now following", false: "no longer following"}[follow], username)
 	helpers.AddFlash(c, message)
@@ -152,6 +169,24 @@ func processFollowAction(ctx context.Context, userID int, targetUsername string,
 		return err
 	}
 
+	
+	if follow {
+		err = followerSqliteRepo.Create(ctx, &models.Follower{
+			WhoID:  userID,
+			WhomID: targetUser.UserID,
+		})
+	} else {
+		err = followerSqliteRepo.DeleteByFields(ctx, map[string]any{
+			"who_id":  userID,
+			"whom_id": targetUser.UserID,
+		})
+	}
+
+	if err != nil {
+		log.Printf("Error processing follow/unfollow action for %s: %v", targetUsername, err)
+		return err
+	}
+
 	action := map[bool]string{true: "followed", false: "unfollowed"}[follow]
 	log.Printf("User %d %s %s", userID, action, targetUsername)
 	return nil 
@@ -161,7 +196,7 @@ func processFollowAction(ctx context.Context, userID int, targetUsername string,
 func handleGetFollowers(c echo.Context, userID int) error {
     noFollowers := parseQueryParam(c, "no", 100)
 
-    followers, err := followerRepo.GetFiltered(c.Request().Context(), map[string]any{
+    followers, err := followerSqliteRepo.GetFiltered(c.Request().Context(), map[string]any{
         "who_id": userID,
     }, noFollowers, "")
 

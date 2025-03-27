@@ -32,12 +32,22 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
+
+	sqliteDb, err := datalayer.InitSqliteDB()
+	if err != nil {
+		fmt.Printf("initDB returned error: %v\n", err)
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer sqliteDb.Close()
 	userRepo := datalayer.NewRepository[models.User](db, "users")
+	userSqliteRepo := datalayer.NewSqliteRepository[models.User](sqliteDb, "user")
 	messageRepo := datalayer.NewRepository[models.Message](db, "message")
+	messageSqliteRepo := datalayer.NewSqliteRepository[models.Message](sqliteDb, "message")
 	followerRepo := datalayer.NewRepository[models.Follower](db, "follower")
-	handlers.SetUserRepo(userRepo)
-	handlers.SetMessageRepo(messageRepo)
-	handlers.SetFollowerRepo(followerRepo)
+	followerSqliteRepo := datalayer.NewSqliteRepository[models.Follower](sqliteDb, "follower")
+	handlers.SetUserRepo(userRepo, userSqliteRepo)
+	handlers.SetMessageRepo(messageRepo, messageSqliteRepo)
+	handlers.SetFollowerRepo(followerRepo, followerSqliteRepo)
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
@@ -46,7 +56,7 @@ func main() {
 
 	helpers.CreateLatestFile()
 
-	routes.SetupRoutes(app, db)
+	routes.SetupRoutes(app, sqliteDb)
 
 	// Custom error handler to log and expose internal errors
 	app.HTTPErrorHandler = func(err error, c echo.Context) {
