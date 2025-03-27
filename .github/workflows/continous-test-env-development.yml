@@ -1,5 +1,5 @@
 ---
-name: Continuous Deployment (Testing Environment)
+name: Testing Deployment
 
 on:
   push:
