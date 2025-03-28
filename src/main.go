@@ -13,8 +13,6 @@ import (
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/handlers"
-	"minitwit/src/models"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -32,12 +30,7 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-	userRepo := datalayer.NewRepository[models.User](db, "user")
-	messageRepo := datalayer.NewRepository[models.Message](db, "message")
-	followerRepo := datalayer.NewRepository[models.Follower](db, "follower")
-	handlers.SetUserRepo(userRepo)
-	handlers.SetMessageRepo(messageRepo)
-	handlers.SetFollowerRepo(followerRepo)
+
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
@@ -47,12 +40,6 @@ func main() {
 	helpers.CreateLatestFile()
 
 	routes.SetupRoutes(app, db)
-
-	// Custom error handler to log and expose internal errors
-	app.HTTPErrorHandler = func(err error, c echo.Context) {
-		log.Printf("❌ SERVER ERROR: %v", err)  // Log error
-		c.JSON(500, map[string]string{"error": fmt.Sprintf("Server error: %v", err)})
-	}
 
 	app.Logger.Fatal(app.Start(":8000"))
 }

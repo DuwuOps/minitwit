@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
-	"context"
 
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
@@ -15,113 +15,217 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var messageRepo *datalayer.Repository[models.Message]
-
-func SetMessageRepo(repo *datalayer.Repository[models.Message]) {
-	messageRepo = repo
-}
-
-var followerRepo *datalayer.Repository[models.Follower]
-
-func SetFollowerRepo(repo *datalayer.Repository[models.Follower]) {
-	followerRepo = repo
-}
-
 var PER_PAGE = 30
 
-func AddMessage(c echo.Context) error {
+func AddMessage(c echo.Context, db *sql.DB) error {
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		return c.String(http.StatusUnauthorized, "Unauthorized")
+		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
-
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
-
-	newMessage := newMessage(userId, text)
-
-	err = messageRepo.Create(c.Request().Context(), newMessage)
 	if err != nil {
-		errorMessage := fmt.Sprintf("❌ ERROR: DB insert failed: %v", err)
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": errorMessage,
-		})
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		return err
 	}
+
+	db.Exec(`insert into message (author_id, text, pub_date, flagged)
+			 values (?, ?, ?, 0)`,
+		userId, text, time.Now().Unix(),
+	)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"error": fmt.Sprintf("Flash message error: %v", err),
-		})
+		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
 	return c.Redirect(http.StatusFound, "/")
 }
 
+func Messages(c echo.Context, db *sql.DB) error {
+	fmt.Printf("User entered Messages via route \"/:msgs\"")
 
-func Messages(c echo.Context) error {
-    log.Println("User entered Messages via route \"/:msgs\"")
-
-    if err := helpers.ValidateRequest(c); err != nil {
-        log.Printf("Request blocked by NotReqFromSimulator: %v", err)
-        return c.JSON(http.StatusForbidden, map[string]string{"error": "Forbidden"})
-    }
-
-    messages, err := handleGetMessages(c, nil, true)
-    if err != nil {
-        log.Printf("Error fetching messages: %v", err)
-        return err
-    }
-
-    return c.JSON(http.StatusOK, messages)
-}
-
-func MessagesPerUser(c echo.Context) error {
-	username := c.Param("username")
-	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
-
-	if err := helpers.ValidateRequest(c); err != nil {
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		return err
+	}
+
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
 	}
 
 	if c.Request().Method == http.MethodGet {
-		messages, err := handleGetMessages(c, user, true)
+		rows, err := datalayer.QueryDB(db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND message.author_id = user.user_id
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			noMsgs,
+		)
 		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
 			return err
 		}
-		return c.JSON(http.StatusOK, messages)
-	} else if c.Request().Method == http.MethodPost {
-		return handlePostMessage(c, user)
+
+		msgs, err := helpers.RowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]any{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]any{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
 	}
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
-func UserTimeline(c echo.Context) error {
+func MessagesPerUser(c echo.Context, db *sql.DB) error {
 	username := c.Param("username")
-	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	err := helpers.UpdateLatest(c)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		return err
 	}
 
-	followed := isFollowingUser(c, user.UserID)
-
-	messages, err := handleGetMessages(c, user, false)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("📝 Messages for user %s: %v", user.Username, messages)
+	noMsgsStr := c.QueryParam("no")
+	noMsgs := 100
+	if noMsgsStr != "" {
+		val, err := strconv.Atoi(noMsgsStr)
+		if err == nil {
+			noMsgs = val
+		}
+	}
 
-	loggedInUser, err := GetCurrentUser(c)
+	userId, err := datalayer.GetUserId(username, db)
 	if err != nil {
-		log.Printf("No user found. GetCurrentUser returned error: %v\n", err)
+		return err
+	}
+
+	if c.Request().Method == http.MethodGet {
+
+		rows, err := datalayer.QueryDB(db, `SELECT message.*, user.* FROM message, user
+					WHERE message.flagged = 0 AND
+					user.user_id = message.author_id AND user.user_id = ?
+					ORDER BY message.pub_date DESC LIMIT ?`,
+			userId, noMsgs,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		msgs, err := helpers.RowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		filteredMsgs := []map[string]any{}
+		for _, msg := range msgs {
+			filteredMsg := map[string]any{
+				"content":  msg["text"],
+				"pub_date": msg["pub_date"],
+				"user":     msg["username"],
+			}
+			filteredMsgs = append(filteredMsgs, filteredMsg)
+		}
+
+		return c.JSON(http.StatusOK, filteredMsgs)
+	} else if c.Request().Method == http.MethodPost {
+		payload, err := helpers.ExtractJson(c)
+
+		var requestData string
+
+		if err == nil {
+			requestData = helpers.GetStringValue(payload, "content")
+		} else {
+			requestData = c.FormValue("content")
+		}
+
+		fmt.Printf("requestData: %v\n", requestData)
+		query := `INSERT INTO message (author_id, text, pub_date, flagged)
+                   VALUES (?, ?, ?, 0)`
+
+		db.Exec(query,
+			userId, requestData, time.Now().Unix(),
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+	}
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+func UserTimeline(c echo.Context, db *sql.DB) error {
+	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
+	row := datalayer.QueryDbSingle(db, "select * from user where username = ?", username)
+	var requestedUser models.User
+	err := row.Scan(&requestedUser.UserID, &requestedUser.Username, &requestedUser.Email, &requestedUser.PwHash)
+	if err != nil {
+		fmt.Printf("row.Scan returned error: %v\n", err)
+		c.String(http.StatusNotFound, "Not found")
+	}
+
+	followed := false
+	loggedIn, _ := helpers.IsUserLoggedIn(c)
+	if loggedIn {
+		sessionUserId, _ := helpers.GetSessionUserID(c)
+		follow_result := datalayer.QueryDbSingle(db, `select 1 from follower where
+             follower.who_id = ? and follower.whom_id = ?`,
+			sessionUserId, requestedUser.UserID)
+
+		// The query should return a 1, if the user follows the user of the timeline.
+		var result int
+		err := follow_result.Scan(&result)
+		followed = err == nil
+	}
+
+	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user where
+                            user.user_id = message.author_id and user.user_id = ?
+                            order by message.pub_date desc limit ?`,
+		requestedUser.UserID, PER_PAGE,
+	)
+
+	if err != nil {
+		fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
+		return err
+	}
+
+	msgs, err := helpers.RowsToMapList(rows)
+	if err != nil {
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
+		return err
+	}
+
+	user, err := GetCurrentUser(c, db)
+	if err != nil {
+		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
@@ -130,231 +234,98 @@ func UserTimeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages":    messages,
+		"Messages":    msgs,
 		"Followed":    followed,
-		"ProfileUser": user,
-		"User":        loggedInUser,
+		"ProfileUser": requestedUser,
+		"User":        user,
 		"Endpoint":    c.Path(),
 		"Flashes":     flashes,
 	}
-
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
-
-func PublicTimeline(c echo.Context) error {
+func PublicTimeline(c echo.Context, db *sql.DB) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
 
-	conditions := map[string]any{"flagged": 0} 
-	return handleRenderTimeline(c, conditions, []int{}, nil)
-}
-
-func Timeline(c echo.Context) error {
-    log.Println("User entered Timeline via route \"/\"")
-    log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
-
-    if loggedIn, _ := helpers.IsUserLoggedIn(c); !loggedIn {
-        return c.Redirect(http.StatusFound, "/public")
-    }
-
-    sessionUserId, err := helpers.GetSessionUserID(c)
-    if err != nil {
-        log.Printf("Failed to get session user ID: %v\n", err)
-        return err
-    }
-
-	conditions := map[string]any{"who_id": sessionUserId}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user
+                            where message.flagged = 0 and message.author_id = user.user_id
+                            order by message.pub_date desc limit ?`,
+		PER_PAGE,
+	)
 	if err != nil {
-		log.Printf("Error fetching followers: %v\n", err)
+		fmt.Printf("PublicTimeline: queryDB returned error: %v\n", err)
 		return err
 	}
 
-	followedUserIDs := []int{sessionUserId} 
-	for _, f := range followers {
-		followedUserIDs = append(followedUserIDs, f.WhomID)
-	}
-
-	user, _ := GetCurrentUser(c)
-
-	return handleRenderTimeline(c, map[string]any{
-		"flagged": 0,
-	}, followedUserIDs, user)  
-}
-
-
-func handleRenderTimeline(c echo.Context, conditions map[string]any, followedUserIDs []int, user *models.User) error {
-    if len(followedUserIDs) > 0 {
-		conditions["author_id"] = followedUserIDs
-	}
-	
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
-    if err != nil {
-        return err
-    }
-
-    var enrichedMessages []map[string]any
-    for _, msg := range messages {
-        username := "Unknown"
-        email := ""
-
-        author, err := getUserByID(c.Request().Context(), msg.AuthorID)
-        if err == nil {
-            username = author.Username
-            email = author.Email
-        } else {
-            log.Printf("⚠️ Warning: Could not find user for message author_id=%d", msg.AuthorID)
-        }
-
-        enrichedMessages = append(enrichedMessages, map[string]any{
-            "text":     msg.Text,
-            "pub_date": msg.PubDate,
-            "username": username,
-            "email":    email,
-        })
-    }
-
-    flashes, _ := getFlashes(c)
-
-    data := map[string]any{
-        "Messages": enrichedMessages,
-        "Endpoint": c.Path(),
-        "User":     user,
-        "Flashes":  flashes,
-    }
-
-    return c.Render(http.StatusOK, "timeline.html", data)
-}
-
-
-func isFollowingUser(c echo.Context, profileUserID int) bool {
-	sessionUserID, err := helpers.GetSessionUserID(c)
-	if err != nil || sessionUserID == 0 {
-		return false
-	}
-
-	conditions := map[string]any{
-		"who_id":  sessionUserID,
-		"whom_id": profileUserID,
-	}
-	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
-
-	return err == nil && len(followers) > 0
-}
-
-func newMessage(authorID int, text string) *models.Message {
-	return &models.Message{
-		AuthorID: authorID,
-		Text:     text,
-		PubDate:  time.Now().Unix(),
-		Flagged:  0,
-	}
-}
-
-func getUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	user, err := userRepo.GetByField(ctx, "username", username)
+	msgs, err := helpers.RowsToMapList(rows)
 	if err != nil {
-		log.Printf("User not found: %s", username)
-		return nil, err
-	}
-	return user, nil
-}
-
-func parseMessageLimit(c echo.Context) int {
-	noMsgs := 100
-	if noMsgsStr := c.QueryParam("no"); noMsgsStr != "" {
-		if val, err := strconv.Atoi(noMsgsStr); err == nil {
-			noMsgs = val
-		}
-	}
-	return noMsgs
-}
-
-func handleGetMessages(c echo.Context, user *models.User, useContentKey bool) ([]map[string]any, error) {
-	noMsgs := parseMessageLimit(c)
-
-	conditions := map[string]any{
-		"flagged": 0,
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
+		return err
 	}
 
-	if user != nil {
-		conditions["author_id"] = user.UserID
-	} 
-
-	messages, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+	user, err := GetCurrentUser(c, db)
 	if err != nil {
-		log.Printf("❌ Error retrieving messages: %v", err)
-		return nil, err
+		fmt.Printf("getCurrentUser returned error: %v\n", err)
 	}
 
-	var filteredMsgs []map[string]any
-	for _, msg := range messages {
-		username := "Unknown"
-
-		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-		if author != nil {
-			username = author.Username
-		}
-
-		messageData := map[string]any{
-			"pub_date": msg.PubDate,
-		}
-
-		if useContentKey {
-			messageData["content"] = msg.Text
-			messageData["user"] = username
-		} else {
-			messageData["text"] = msg.Text
-			messageData["username"] = username
-		}
-
-		filteredMsgs = append(filteredMsgs, messageData)
-	}
-
-	log.Printf("📥 Filtered Messages: %v", filteredMsgs)
-	return filteredMsgs, nil
-}
-
-
-
-func getFlashes(c echo.Context) ([]string, error) {
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		log.Printf("getFlashes returned error: %v", err)
-		return nil, err
+		fmt.Printf("getFlashes returned error: %v\n", err)
 	}
-	return flashes, nil
+
+	data := map[string]any{
+		"Messages": msgs,
+		"Endpoint": c.Path(),
+		"User":     user,
+		"Flashes":  flashes,
+	}
+	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
-func getUserByID(ctx context.Context, userID int) (*models.User, error) {
-	user, err := userRepo.GetByID(ctx, userID)
-	if err != nil {
-		log.Printf("User not found for ID: %d", userID)
-		return nil, err
-	}
-	return user, nil
-}
-
-func handlePostMessage(c echo.Context, user *models.User) error {
-	requestData, err := extractMessageContent(c)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid message content"})
+func Timeline(c echo.Context, db *sql.DB) error {
+	log.Println("User entered Timeline via route \"/\"")
+	log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
+	loggedIn, _ := helpers.IsUserLoggedIn(c)
+	if !loggedIn {
+		return c.Redirect(http.StatusFound, "/public")
 	}
 
-	newMessage := newMessage(user.UserID, requestData)
-	err = messageRepo.Create(c.Request().Context(), newMessage)
+	sessionUserId, _ := helpers.GetSessionUserID(c)
+	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user
+                          where message.flagged = 0 and message.author_id = user.user_id and (
+                              user.user_id = ? or
+                              user.user_id in (select whom_id from follower
+                                                      where who_id = ?))
+                          order by message.pub_date desc limit ?`,
+		sessionUserId, sessionUserId, PER_PAGE,
+	)
+
 	if err != nil {
+		fmt.Printf("Timeline: queryDB returned error: %v\n", err)
 		return err
 	}
 
-	return c.JSON(http.StatusNoContent, nil)
-}
-
-func extractMessageContent(c echo.Context) (string, error) {
-	payload, err := helpers.ExtractJson(c)
-	if err == nil {
-		return helpers.GetStringValue(payload, "content"), nil
+	msgs, err := helpers.RowsToMapList(rows)
+	if err != nil {
+		fmt.Printf("rowsToMapList returned error: %v\n", err)
+		return err
 	}
-	return c.FormValue("content"), nil
-}
 
+	user, err := GetCurrentUser(c, db)
+	if err != nil {
+		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
+	}
+
+	flashes, err := helpers.GetFlashes(c)
+	if err != nil {
+		fmt.Printf("addFlash returned error: %v\n", err)
+	}
+
+	data := map[string]any{
+		"Messages": msgs,
+		"User":     user,
+		"Endpoint": c.Path(),
+		"Flashes":  flashes,
+	}
+	return c.Render(http.StatusOK, "timeline.html", data)
+}

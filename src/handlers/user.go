@@ -1,215 +1,224 @@
 package handlers
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
-	"log"
-	"context"
 	"strconv"
 
+	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/models"
 
 	"github.com/labstack/echo/v4"
 )
 
-func GetCurrentUser(c echo.Context) (*models.User, error) {
+func GetCurrentUser(c echo.Context, db *sql.DB) (*models.User, error) {
 	id, err := helpers.GetSessionUserID(c)
+	var user models.User
+
 	if err != nil {
 		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return nil, err
 	}
 
-	user, err := userRepo.GetByID(c.Request().Context(), id)
+	rows := datalayer.QueryDbSingle(db, "select * from user where user_id = ?",
+		id,
+	)
 
+	err = rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
-		log.Printf("User not found in database for userID %d: %v", id, err)
+		fmt.Printf("rows.Scan returned error: %v\n", err)
 		return nil, err
 	}
-
 	fmt.Printf("Found user in database! %v\n", user)
 	fmt.Printf("user.UserID: %v\n", user.UserID)
 	fmt.Printf("user.Username: %v\n", user.Username)
 	fmt.Printf("user.Email: %v\n", user.Email)
 	fmt.Printf("user.PwHash: %v\n", user.PwHash)
-	return user, nil
+	return &user, nil
 }
 
-func Follow(c echo.Context) error {
+func Follow(c echo.Context, db *sql.DB) error {
 	username := c.Param("username")
-	log.Printf("User entered Follow via route \"/fllws/%s\"", username)
+	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
 
-	if err := helpers.ValidateRequest(c); err != nil {
+	err := helpers.UpdateLatest(c)
+	if err != nil {
+		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
-	}
-
-	switch c.Request().Method {
-	case http.MethodPost:
-		return handleFollowAction(c, user.UserID)
-	case http.MethodGet:
-		return handleGetFollowers(c, user.UserID)
-	default:
-		log.Printf("Invalid request method for Follow route: %s", c.Request().Method)
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request method"})
-	}
-}
-
-func FollowUser(c echo.Context) error {
-	return handleUserFollowAction(c, true)
-}
-
-func UnfollowUser(c echo.Context) error {
-	return handleUserFollowAction(c, false)
-}
-
-func handleUserFollowAction(c echo.Context, follow bool) error {
-	username := c.Param("username")
-	log.Printf("User entered %s via route \"/%s\"", 
-		map[bool]string{true: "FollowUser", false: "UnfollowUser"}[follow], username)
-
-	if err := enforceLogin(c); err != nil {
+		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
 		return err
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	userId, err := datalayer.GetUserId(username, db)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		fmt.Printf("getUserId returned error: %v\n", err)
+		return err
+	}
+
+	payload, err := helpers.ExtractJson(c)
+
+	var followsUsername string
+	var unfollowsUsername string
+
+	if err == nil {
+		followsUsername = helpers.GetStringValue(payload, "follow")
+		unfollowsUsername = helpers.GetStringValue(payload, "unfollow")
+	} else {
+		followsUsername = c.FormValue("follow")
+		unfollowsUsername = c.FormValue("unfollow")
+	}
+
+	if c.Request().Method == http.MethodPost && followsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
+
+		followsUserId, err := datalayer.GetUserId(followsUsername, db)
+		if err != nil {
+			fmt.Printf("getUserIdreturned error: %v\n", err)
+			return err
+		}
+
+		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
+		db.Exec(query,
+			userId, followsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
+		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
+
+		unfollowsUserId, err := datalayer.GetUserId(unfollowsUsername, db)
+		if err != nil {
+			fmt.Printf("getUserId returned error: %v\n", err)
+			return err
+		}
+
+		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
+		db.Exec(query,
+			userId, unfollowsUserId,
+		)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	} else if c.Request().Method == http.MethodGet {
+		fmt.Printf("\"/fllws/:username\" running as a Get-Method\n")
+
+		noFollowersStr := c.QueryParam("no")
+		noFollowers := 100
+		if noFollowersStr != "" {
+			val, err := strconv.Atoi(noFollowersStr)
+			if err == nil {
+				noFollowers = val
+			}
+		}
+		query := `SELECT user.username FROM user
+                  INNER JOIN follower ON follower.whom_id=user.user_id
+                  WHERE follower.who_id=?
+                  LIMIT ?`
+
+		rows, err := datalayer.QueryDB(db, query,
+			userId, noFollowers,
+		)
+		if err != nil {
+			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			return err
+		}
+
+		follows, err := helpers.RowsToMapList(rows)
+		if err != nil {
+			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			return err
+		}
+
+		var followList []any
+
+		for _, follow := range follows {
+			followList = append(followList, follow["username"])
+		}
+
+		data := map[string]any{
+			"follows": followList,
+		}
+		fmt.Printf("data: %v\n", data)
+
+		return c.JSON(http.StatusOK, data)
+	}
+
+	fmt.Printf("ERROR: \"/fllws/:username\" was entered wrongly!\n")
+	return c.JSON(http.StatusBadRequest, nil)
+}
+
+func FollowUser(c echo.Context, db *sql.DB) error {
+	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
+	loggedIn, _ := helpers.IsUserLoggedIn(c)
+	if !loggedIn {
+		c.String(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	row := db.QueryRow(`SELECT * FROM user
+						WHERE username = ?`,
+		username,
+	)
+	var user models.User
+	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	if err != nil {
+		fmt.Printf("row.Scan returned error: %v\n", err)
+		c.String(http.StatusNotFound, "Not found")
 	}
 
 	sessionUserId, err := helpers.GetSessionUserID(c)
 	if err != nil {
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-
-	if follow {
-		err = followerRepo.Create(c.Request().Context(), &models.Follower{
-			WhoID:  sessionUserId,
-			WhomID: user.UserID,
-		})
-	} else {
-		err = followerRepo.DeleteByFields(c.Request().Context(), map[string]any{
-			"who_id":  sessionUserId,
-			"whom_id": user.UserID,
-		})
-	}
-
+	db.Exec("insert into follower (who_id, whom_id) values (?, ?)", sessionUserId, user.UserID)
+	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
 	if err != nil {
-		log.Printf("Error processing follow/unfollow action for user %s: %v", username, err)
-		return err
+		fmt.Printf("addFlash returned error: %v\n", err)
 	}
-
-	message := fmt.Sprintf("You are %s \"%s\"", 
-		map[bool]string{true: "now following", false: "no longer following"}[follow], username)
-	helpers.AddFlash(c, message)
 
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
-func enforceLogin(c echo.Context) error {
+func UnfollowUser(c echo.Context, db *sql.DB) error {
+	username := c.Param("username")
+	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Unauthorized"})
-	}
-	return nil
-}
-
-func handleFollowAction(c echo.Context, userID int) error {
-	ctx := c.Request().Context()
-	followUsername, unfollowUsername := extractFollowRequest(c)
-
-	if followUsername != "" {
-		return processFollowAction(ctx, userID, followUsername, true)
+		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	if unfollowUsername != "" {
-		return processFollowAction(ctx, userID, unfollowUsername, false)
-	}
-
-	return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid follow request"})
-}
-
-func processFollowAction(ctx context.Context, userID int, targetUsername string, follow bool) error {
-	targetUser, err := getUserByUsername(ctx, targetUsername)
+	row := db.QueryRow(`SELECT * FROM user
+						WHERE username = ?`,
+		username,
+	)
+	var user models.User
+	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
 	if err != nil {
-		log.Printf("Follow/unfollow target not found: %s", targetUsername)
-		return fmt.Errorf("user not found")
+		fmt.Printf("row.Scan returned error: %v\n", err)
+		c.String(http.StatusNotFound, "Not found")
 	}
 
-	if follow {
-		err = followerRepo.Create(ctx, &models.Follower{
-			WhoID:  userID,
-			WhomID: targetUser.UserID,
-		})
-	} else {
-		err = followerRepo.DeleteByFields(ctx, map[string]any{
-			"who_id":  userID,
-			"whom_id": targetUser.UserID,
-		})
-	}
-
+	sessionUserId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		log.Printf("Error processing follow/unfollow action for %s: %v", targetUsername, err)
+		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
+	db.Exec("delete from follower where who_id=? and whom_id=?", sessionUserId, user.UserID)
 
-	action := map[bool]string{true: "followed", false: "unfollowed"}[follow]
-	log.Printf("User %d %s %s", userID, action, targetUsername)
-	return nil 
-}
-
-
-func handleGetFollowers(c echo.Context, userID int) error {
-    noFollowers := parseQueryParam(c, "no", 100)
-
-    followers, err := followerRepo.GetFiltered(c.Request().Context(), map[string]any{
-        "who_id": userID,
-    }, noFollowers, "")
-
-    if err != nil {
-        log.Printf("Error retrieving followers for userID=%d: %v", userID, err)
-        return err
-    }
-
-    var followerUsernames []string
-    for _, follower := range followers {
-        targetUser, err := getUserByID(c.Request().Context(), follower.WhomID)
-        if err == nil {
-            followerUsernames = append(followerUsernames, targetUser.Username)
-        }
-    }
-
-    log.Printf("Raw followers retrieved for user %d: %+v", userID, followers)
-    log.Printf("Processed follower usernames: %+v", followerUsernames)
-
-    return c.JSON(http.StatusOK, map[string]any{"follows": followerUsernames})
-}
-
-
-
-func extractFollowRequest(c echo.Context) (string, string) {
-	payload, err := helpers.ExtractJson(c)
-	if err == nil {
-		return helpers.GetStringValue(payload, "follow"), helpers.GetStringValue(payload, "unfollow")
-	}
-	return c.FormValue("follow"), c.FormValue("unfollow")
-}
-
-func parseQueryParam(c echo.Context, param string, defaultValue int) int {
-	valueStr := c.QueryParam(param)
-	if valueStr == "" {
-		return defaultValue
-	}
-
-	value, err := strconv.Atoi(valueStr)
+	err = helpers.AddFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
 	if err != nil {
-		log.Printf("Invalid query param %s: %v", param, err)
-		return defaultValue
+		fmt.Printf("addFlash returned error: %v\n", err)
 	}
 
-	return value
+	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
