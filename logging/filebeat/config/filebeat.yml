@@ -1,0 +1,25 @@
+name: filebeat
+
+filebeat.autodiscover:
+  providers:
+    # The Docker autodiscover provider automatically retrieves logs from Docker
+    # containers as they start and stop.
+    - type: docker
+      hints.enabled: true
+      hints.default_config:
+        type: container
+        paths:
+          - /var/lib/docker/containers/${data.container.id}/*-json.log
+
+monitoring:
+  enabled: true
+  elasticsearch:
+    hosts: ["http://elasticsearch:9200"]
+    username: beats_system
+    password: ${BEATS_SYSTEM_PASSWORD}
+
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+
