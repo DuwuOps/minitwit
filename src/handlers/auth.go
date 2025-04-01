@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"database/sql"
+	"context"
 	"errors"
 	"fmt"
 	"log"
-	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/models"
 	"net/http"
 	"strings"
 

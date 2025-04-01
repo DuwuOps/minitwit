@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/models"
 
 	"github.com/labstack/echo/v4"
 )
