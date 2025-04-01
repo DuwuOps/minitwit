@@ -42,5 +42,5 @@ COPY ./src/queries ./queries
 COPY ./logging ./logging
 
 # Expose port and run binary-file
-EXPOSE 8000
+EXPOSE 8000 
 CMD ["./minitwit"]

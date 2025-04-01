@@ -75,9 +75,15 @@
     deploy:
       name: Deploy to DigitalOcean
       runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./
       needs: push
   
       steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
+
         - name: Configure SSH
           run: |
             mkdir -p ~/.ssh/
@@ -86,26 +92,45 @@
           env:
             TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
   
+        - name: Deploy to Digital Ocean droplet via SSH action
+          env:
+            DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:test
             ELASTIC_VERSION: ${{ vars.ELASTIC_VERSION }}
             ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
             LOGSTASH_INTERNAL_PASSWORD: ${{ secrets.LOGSTASH_INTERNAL_PASSWORD }}
             KIBANA_SYSTEM_PASSWORD: ${{ secrets.KIBANA_SYSTEM_PASSWORD }}
-            METRICBEAT_INTERNAL_PASSWORD: ${{ secrets.METRICBEAT_INTERNAL_PASSWORD }}
             FILEBEAT_INTERNAL_PASSWORD: ${{ secrets.FILEBEAT_INTERNAL_PASSWORD }}
-            HEARTBEAT_INTERNAL_PASSWORD: ${{ secrets.HEARTBEAT_INTERNAL_PASSWORD }}
-            MONITORING_INTERNAL_PASSWORD: ${{ secrets.MONITORING_INTERNAL_PASSWORD }}
             BEATS_SYSTEM_PASSWORD: ${{ secrets.BEATS_SYSTEM_PASSWORD }}
-
-        - name: Deploy to Digital Ocean droplet via SSH action
-          env:
-            DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:test
-          uses: appleboy/ssh-action@master
+          uses: 
+            appleboy/ssh-action@master
           with:
             host: ${{ vars.TEST_ENV_SSH_HOST }}
             username: ${{ vars.SSH_USER }}
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-            envs: DOCKER_IMAGE
+            envs: DOCKER_IMAGE,ELASTIC_PASSWORD,KIBANA_SYSTEM_PASSWORD,LOGSTASH_INTERNAL_PASSWORD,FILEBEAT_INTERNAL_PASSWORD,BEATS_SYSTEM_PASSWORD
             script: |
-              docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
+              
+              if [ ! -d "/root/minitwit" ]; then
+                git clone https://github.com/DuwuOps/minitwit.git /root/minitwit
+                git checkout 98-logging
+                cd root/minitwit
+              else
+                cd /root/minitwit
+                git checkout 98-logging
+                git pull
+              fi
+              
+              export ELASTIC_VERSION=${ELASTIC_VERSION:-8.12.2}
+              export ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+              export KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD:-changeme}
+              export LOGSTASH_INTERNAL_PASSWORD=${LOGSTASH_INTERNAL_PASSWORD:-changeme}
+              export FILEBEAT_INTERNAL_PASSWORD=${FILEBEAT_INTERNAL_PASSWORD:-changeme}
+              export BEATS_SYSTEM_PASSWORD=${BEATS_SYSTEM_PASSWORD:-changeme}
+
+              docker compose up setup
+              docker compose up -d
+
+              docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}")) || true
               docker image pull $DOCKER_IMAGE
               sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v sqliteDB:/minitwit/tmp $DOCKER_IMAGE
+      
