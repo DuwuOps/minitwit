@@ -28,21 +28,21 @@ services:
     build:
       context: logging/setup/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+        ELASTIC_VERSION: ${ELASTIC_VERSION:-8.12.2}
     init: true
     volumes:
       - ./logging/setup/entrypoint.sh:/entrypoint.sh:ro,Z
       - ./logging/setup/lib.sh:/lib.sh:ro,Z
       - ./logging/setup/roles:/roles:ro,Z
     environment:
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
-      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-changeme}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-changeme}
       METRICBEAT_INTERNAL_PASSWORD: ${METRICBEAT_INTERNAL_PASSWORD:-}
-      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-}
+      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_INTERNAL_PASSWORD:-changeme}
       HEARTBEAT_INTERNAL_PASSWORD: ${HEARTBEAT_INTERNAL_PASSWORD:-}
       MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
-      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
+      BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-changeme}
     networks:
       - elk
     depends_on:
@@ -52,7 +52,7 @@ services:
     build:
       context: logging/elasticsearch/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+        ELASTIC_VERSION: ${ELASTIC_VERSION:-8.12.2}
     volumes:
       - ./logging/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,Z
       - elasticsearch:/usr/share/elasticsearch/data:Z
@@ -64,7 +64,7 @@ services:
       # Bootstrap password.
       # Used to initialize the keystore during the initial startup of
       # Elasticsearch. Ignored on subsequent runs.
-      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
       # Use single node discovery in order to disable production mode and avoid bootstrap checks.
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
@@ -76,7 +76,7 @@ services:
     build:
       context: logging/logstash/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+        ELASTIC_VERSION: ${ELASTIC_VERSION:-8.12.2}
     volumes:
       - ./logging/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
       - ./logging/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
@@ -84,7 +84,7 @@ services:
       - 5044:5044 # Beats input
     environment:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
-      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-changeme}
     networks:
       - elk
     depends_on:
@@ -100,13 +100,13 @@ services:
     build:
       context: logging/kibana/
       args:
-        ELASTIC_VERSION: ${ELASTIC_VERSION}
+        ELASTIC_VERSION: ${ELASTIC_VERSION:-8.12.2}
     volumes:
       - ./logging/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:
       - 5601:5601 # Kibana UI Dashboard
     environment:
-      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
+      KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-changeme}
     networks:
       - elk
     depends_on:
