@@ -10,9 +10,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"minitwit/src/datalayer"
+	"minitwit/src/handlers"
+	"minitwit/src/handlers/helpers"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
-	"minitwit/src/handlers/helpers"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -30,7 +31,9 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
+	
 	handlers.InitRepos(db)
+	
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
