@@ -116,37 +116,37 @@ func MessagesPerUser(c echo.Context) error {
 		}
 	}
 
-	userId, err := datalayer.GetUserId(username, db)
+	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
 	}
 
 	if c.Request().Method == http.MethodGet {
-
-		rows, err := datalayer.QueryDB(db, `SELECT message.*, user.* FROM message, user
-					WHERE message.flagged = 0 AND
-					user.user_id = message.author_id AND user.user_id = ?
-					ORDER BY message.pub_date DESC LIMIT ?`,
-			userId, noMsgs,
-		)
-		if err != nil {
-			fmt.Printf("messages: queryDB returned error: %v\n", err)
-			return err
+		conditions := map[string]any{
+			"flagged": 0,
+			"author_id": user.UserID,
 		}
 
-		msgs, err := helpers.RowsToMapList(rows)
+		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 		if err != nil {
-			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			fmt.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
 			return err
 		}
 
 		filteredMsgs := []map[string]any{}
 		for _, msg := range msgs {
 			filteredMsg := map[string]any{
-				"content":  msg["text"],
-				"pub_date": msg["pub_date"],
-				"user":     msg["username"],
+				"pub_date": msg.PubDate,
+				"content": msg.Text,
 			}
+			
+			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+			if author != nil {
+				filteredMsg["user"] = author.Username
+			} else {
+				filteredMsg["user"] = "Unknown"
+			}
+	
 			filteredMsgs = append(filteredMsgs, filteredMsg)
 		}
 
@@ -162,13 +162,8 @@ func MessagesPerUser(c echo.Context) error {
 			requestData = c.FormValue("content")
 		}
 
-		fmt.Printf("requestData: %v\n", requestData)
-		query := `INSERT INTO message (author_id, text, pub_date, flagged)
-                   VALUES (?, ?, ?, 0)`
-
-		db.Exec(query,
-			userId, requestData, time.Now().Unix(),
-		)
+		newMessage := newMessage(user.UserID, requestData)
+		messageRepo.Create(c.Request().Context(), newMessage)
 
 		return c.JSON(http.StatusNoContent, nil)
 	}

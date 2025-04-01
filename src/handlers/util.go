@@ -1,11 +1,21 @@
 package handlers
 
 import (
+	"context"
 	"errors"
+	"log"
 	"minitwit/src/models"
 	"time"
 )
 
+func getUserByUsername(ctx context.Context, username string) (*models.User, error) {
+	user, err := userRepo.GetByField(ctx, "username", username)
+	if err != nil {
+		log.Printf("User not found: %s", username)
+		return nil, err
+	}
+	return user, nil
+}
 
 var ErrRecordNotFound = errors.New("record not found")
 
