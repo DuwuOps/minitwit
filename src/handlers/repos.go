@@ -1,6 +1,10 @@
 package handlers
 
-import "minitwit/src/models"
+import (
+	"database/sql"
+	"minitwit/src/datalayer"
+	"minitwit/src/models"
+)
 
 var userRepo *datalayer.Repository[models.User]
 var messageRepo *datalayer.Repository[models.Message]
