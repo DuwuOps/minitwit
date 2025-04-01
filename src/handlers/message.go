@@ -26,10 +26,8 @@ func AddMessage(c echo.Context) error {
 		return err
 	}
 
-	db.Exec(`insert into message (author_id, text, pub_date, flagged)
-			 values (?, ?, ?, 0)`,
-		userId, text, time.Now().Unix(),
-	)
+	newMessage := newMessage(userId, text)
+	messageRepo.Create(c.Request().Context(), newMessage)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
