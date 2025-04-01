@@ -61,29 +61,29 @@ func Messages(c echo.Context) error {
 	}
 
 	if c.Request().Method == http.MethodGet {
-		rows, err := datalayer.QueryDB(db, `SELECT message.*, user.* FROM message, user
-					WHERE message.flagged = 0 AND message.author_id = user.user_id
-					ORDER BY message.pub_date DESC LIMIT ?`,
-			noMsgs,
-		)
-		if err != nil {
-			fmt.Printf("messages: queryDB returned error: %v\n", err)
-			return err
+		conditions := map[string]any{
+			"flagged": 0,
 		}
-
-		msgs, err := helpers.RowsToMapList(rows)
+		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 		if err != nil {
-			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
+			fmt.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
 			return err
 		}
 
 		filteredMsgs := []map[string]any{}
 		for _, msg := range msgs {
 			filteredMsg := map[string]any{
-				"content":  msg["text"],
-				"pub_date": msg["pub_date"],
-				"user":     msg["username"],
+				"pub_date": msg.PubDate,
+				"content": msg.Text,
 			}
+			
+			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+			if author != nil {
+				filteredMsg["user"] = author.Username
+			} else {
+				filteredMsg["user"] = "Unknown"
+			}
+	
 			filteredMsgs = append(filteredMsgs, filteredMsg)
 		}
 
