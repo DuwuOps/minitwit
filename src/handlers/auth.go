@@ -106,8 +106,8 @@ func Register(c echo.Context) error {
 		case password != password2:
 			errorMessage = "The two passwords do not match"
 		default:
-			existingID, _ := datalayer.GetUserId(username, db)
-			if existingID != 0 {
+			existingUser, _ := userRepo.GetByField(context.Background(), "username", username)
+			if existingUser != nil {
 				errorMessage = "The username is already taken"
 			} else {
 				hash, err := generatePasswordHash(password)
@@ -115,12 +115,10 @@ func Register(c echo.Context) error {
 					fmt.Printf("generatePasswordHash returned error: %v\n", err)
 					return err
 				}
-				_, err = db.Exec(`
-                    INSERT INTO user (username, email, pw_hash)
-                    VALUES (?, ?, ?)
-                `, username, email, hash)
+
+				err = userRepo.Create(c.Request().Context(), newUser(username, email, hash))
 				if err != nil {
-					fmt.Printf("Db.Exec returned error: %v\n", err)
+					fmt.Printf("userRepo.Create returned error: %v\n", err)
 					return err
 				}
 
