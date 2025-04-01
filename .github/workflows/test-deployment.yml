@@ -86,6 +86,16 @@
           env:
             TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
   
+            ELASTIC_VERSION: ${{ vars.ELASTIC_VERSION }}
+            ELASTIC_PASSWORD: ${{ secrets.ELASTIC_PASSWORD }}
+            LOGSTASH_INTERNAL_PASSWORD: ${{ secrets.LOGSTASH_INTERNAL_PASSWORD }}
+            KIBANA_SYSTEM_PASSWORD: ${{ secrets.KIBANA_SYSTEM_PASSWORD }}
+            METRICBEAT_INTERNAL_PASSWORD: ${{ secrets.METRICBEAT_INTERNAL_PASSWORD }}
+            FILEBEAT_INTERNAL_PASSWORD: ${{ secrets.FILEBEAT_INTERNAL_PASSWORD }}
+            HEARTBEAT_INTERNAL_PASSWORD: ${{ secrets.HEARTBEAT_INTERNAL_PASSWORD }}
+            MONITORING_INTERNAL_PASSWORD: ${{ secrets.MONITORING_INTERNAL_PASSWORD }}
+            BEATS_SYSTEM_PASSWORD: ${{ secrets.BEATS_SYSTEM_PASSWORD }}
+
         - name: Deploy to Digital Ocean droplet via SSH action
           env:
             DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:test
