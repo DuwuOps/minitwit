@@ -20,31 +20,25 @@ func Login(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	var dbUser models.User
-
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		dbUser.Username = username
 
-		err := db.QueryRow(`
-            SELECT user_id, pw_hash FROM user
-            WHERE username = ?
-        `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
+		user, err := userRepo.GetByField(c.Request().Context(), "username", username)
 
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
 			fmt.Printf("Db.QueryRow returned error: %v\n", err)
 			return err
 		} else {
-			if !checkPasswordHash(dbUser.PwHash, password) {
+			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
 			} else {
 				helpers.AddFlash(c, "You were logged in")
-				helpers.SetSessionUserID(c, dbUser.UserID)
+				helpers.SetSessionUserID(c, user.UserID)
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
