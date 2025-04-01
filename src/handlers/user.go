@@ -36,7 +36,7 @@ func GetCurrentUser(c echo.Context, db *sql.DB) (*models.User, error) {
 	return &user, nil
 }
 
-func Follow(c echo.Context, db *sql.DB) error {
+func Follow(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
 
@@ -151,7 +151,7 @@ func Follow(c echo.Context, db *sql.DB) error {
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
-func FollowUser(c echo.Context, db *sql.DB) error {
+func FollowUser(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
@@ -185,7 +185,7 @@ func FollowUser(c echo.Context, db *sql.DB) error {
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
 }
 
-func UnfollowUser(c echo.Context, db *sql.DB) error {
+func UnfollowUser(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 

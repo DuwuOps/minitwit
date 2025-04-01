@@ -47,7 +47,7 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
 	return result, nil
 }
 
-func GetLatest(c echo.Context, db *sql.DB) error {
+func GetLatest(c echo.Context) error {
 	id, err := os.ReadFile(LATEST_PROCESSED)
 	if err != nil {
 		fmt.Printf("could not read from latest_processed_sim_action_id.txt: %v\n", err)

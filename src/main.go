@@ -42,7 +42,7 @@ func main() {
 
 	helpers.CreateLatestFile()
 
-	routes.SetupRoutes(app, db)
+	routes.SetupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
 }

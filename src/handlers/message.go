@@ -14,7 +14,7 @@ import (
 
 var PER_PAGE = 30
 
-func AddMessage(c echo.Context, db *sql.DB) error {
+func AddMessage(c echo.Context) error {
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
 		c.String(http.StatusUnauthorized, "Unauthorized")
@@ -39,7 +39,7 @@ func AddMessage(c echo.Context, db *sql.DB) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
-func Messages(c echo.Context, db *sql.DB) error {
+func Messages(c echo.Context) error {
 	fmt.Printf("User entered Messages via route \"/:msgs\"")
 
 	err := helpers.UpdateLatest(c)
@@ -94,7 +94,7 @@ func Messages(c echo.Context, db *sql.DB) error {
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
-func MessagesPerUser(c echo.Context, db *sql.DB) error {
+func MessagesPerUser(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
 
@@ -177,7 +177,7 @@ func MessagesPerUser(c echo.Context, db *sql.DB) error {
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
-func UserTimeline(c echo.Context, db *sql.DB) error {
+func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
@@ -241,7 +241,7 @@ func UserTimeline(c echo.Context, db *sql.DB) error {
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
-func PublicTimeline(c echo.Context, db *sql.DB) error {
+func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
 
 	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user
@@ -279,7 +279,7 @@ func PublicTimeline(c echo.Context, db *sql.DB) error {
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
-func Timeline(c echo.Context, db *sql.DB) error {
+func Timeline(c echo.Context) error {
 	log.Println("User entered Timeline via route \"/\"")
 	log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)

@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(c echo.Context, db *sql.DB) error {
+func Login(c echo.Context) error {
 	log.Println("User entered Login via route \"/login\"")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
@@ -59,7 +59,7 @@ func Login(c echo.Context, db *sql.DB) error {
 	return c.Render(http.StatusOK, "login.html", data)
 }
 
-func Register(c echo.Context, db *sql.DB) error {
+func Register(c echo.Context) error {
 	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
