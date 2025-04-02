@@ -63,7 +63,7 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
-		log.Printf("User \"/%v\" has requested to unfollow \"/%v\"\n", username, unfollowsUsername)
+		log.Printf("User \"%v\" has requested to unfollow \"%v\"\n", username, unfollowsUsername)
 		unfollow, err := getUserByUsername(c.Request().Context(), unfollowsUsername)
 		if err != nil {
 			log.Printf("getUserId returned error: %v\n", err)
