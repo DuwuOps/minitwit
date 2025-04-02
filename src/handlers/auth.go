@@ -26,7 +26,7 @@ func Login(c echo.Context) error {
 		password := c.FormValue("password")
 
 
-		user, err := userRepo.GetByField(c.Request().Context(), "username", username)
+		user, err := userRepo.GetByField(context.Background(), "username", username)
 
 		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
@@ -119,7 +119,7 @@ func Register(c echo.Context) error {
 					return err
 				}
 
-				err = userRepo.Create(c.Request().Context(), newUser(username, email, hash))
+				err = userRepo.Create(context.Background(), newUser(username, email, hash))
 				if err != nil {
 					log.Printf("userRepo.Create returned error: %v\n", err)
 					return err
