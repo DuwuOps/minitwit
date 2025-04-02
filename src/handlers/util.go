@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"log"
+	"minitwit/src/handlers/helpers"
 	"minitwit/src/models"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 func getUserByUsername(ctx context.Context, username string) (*models.User, error) {
@@ -15,6 +18,21 @@ func getUserByUsername(ctx context.Context, username string) (*models.User, erro
 		return nil, err
 	}
 	return user, nil
+}
+
+func isFollowingUser(c echo.Context, profileUserID int) bool {
+	sessionUserID, err := helpers.GetSessionUserID(c)
+	if err != nil || sessionUserID == 0 {
+		return false
+	}
+
+	conditions := map[string]any{
+		"who_id":  sessionUserID,
+		"whom_id": profileUserID,
+	}
+	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
+
+	return err == nil && len(followers) > 0
 }
 
 var ErrRecordNotFound = errors.New("record not found")

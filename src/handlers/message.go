@@ -174,46 +174,47 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
-	row := datalayer.QueryDbSingle(db, "select * from user where username = ?", username)
-	var requestedUser models.User
-	err := row.Scan(&requestedUser.UserID, &requestedUser.Username, &requestedUser.Email, &requestedUser.PwHash)
+	requestedUser, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("row.Scan returned error: %v\n", err)
+		fmt.Printf("getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
 	followed := false
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
-		sessionUserId, _ := helpers.GetSessionUserID(c)
-		follow_result := datalayer.QueryDbSingle(db, `select 1 from follower where
-             follower.who_id = ? and follower.whom_id = ?`,
-			sessionUserId, requestedUser.UserID)
-
-		// The query should return a 1, if the user follows the user of the timeline.
-		var result int
-		err := follow_result.Scan(&result)
-		followed = err == nil
+		followed = isFollowingUser(c, requestedUser.UserID)
 	}
 
-	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user where
-                            user.user_id = message.author_id and user.user_id = ?
-                            order by message.pub_date desc limit ?`,
-		requestedUser.UserID, PER_PAGE,
-	)
 
+	conditions := map[string]any{
+		"author_id": requestedUser.UserID,
+	}
+
+	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("UserTimeline: queryDB returned error: %v\n", err)
+		fmt.Printf("UserTimeline: messageRepo.GetFiltered returned error: %v\n", err)
 		return err
 	}
 
-	msgs, err := helpers.RowsToMapList(rows)
-	if err != nil {
-		fmt.Printf("rowsToMapList returned error: %v\n", err)
-		return err
+	filteredMsgs := []map[string]any{}
+	for _, msg := range msgs {
+		filteredMsg := map[string]any{
+			"pub_date": msg.PubDate,
+			"text": msg.Text,
+		}
+		
+		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+		if author != nil {
+			filteredMsg["username"] = author.Username
+		} else {
+			filteredMsg["username"] = "Unknown"
+		}
+
+		filteredMsgs = append(filteredMsgs, filteredMsg)
 	}
 
-	user, err := GetCurrentUser(c, db)
+	user, err := GetCurrentUser(c)
 	if err != nil {
 		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
@@ -224,7 +225,7 @@ func UserTimeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages":    msgs,
+		"Messages":    filteredMsgs,
 		"Followed":    followed,
 		"ProfileUser": requestedUser,
 		"User":        user,
