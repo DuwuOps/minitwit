@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"minitwit/src/handlers/helpers"
 
@@ -69,7 +68,7 @@ func Messages(c echo.Context) error {
 			fmt.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
 			return err
 		}
-
+	
 		filteredMsgs := []map[string]any{}
 		for _, msg := range msgs {
 			filteredMsg := map[string]any{
@@ -115,7 +114,7 @@ func MessagesPerUser(c echo.Context) error {
 			noMsgs = val
 		}
 	}
-
+	
 	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
@@ -237,7 +236,7 @@ func UserTimeline(c echo.Context) error {
 
 func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
-
+	
 	conditions := map[string]any{"flagged": 0}
 	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
