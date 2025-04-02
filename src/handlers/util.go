@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"minitwit/src/handlers/helpers"
@@ -45,8 +44,6 @@ func getUserByID(ctx context.Context, userID int) (*models.User, error) {
 	}
 	return user, nil
 }
-
-var ErrRecordNotFound = errors.New("record not found")
 
 func newMessage(authorID int, text string) *models.Message {
 	return &models.Message{

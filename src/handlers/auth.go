@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/datalayer"
 	"net/http"
 	"strings"
 
@@ -28,7 +29,7 @@ func Login(c echo.Context) error {
 
 		user, err := userRepo.GetByField(c.Request().Context(), "username", username)
 
-		if errors.Is(err, ErrRecordNotFound) {
+		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
 			fmt.Printf("Db.QueryRow returned error: %v\n", err)
