@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -48,6 +49,8 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
 }
 
 func GetLatest(c echo.Context) error {
+	log.Println("🎺 User entered GetLatest via route \"/latest\"")
+	
 	id, err := os.ReadFile(LATEST_PROCESSED)
 	if err != nil {
 		fmt.Printf("could not read from latest_processed_sim_action_id.txt: %v\n", err)

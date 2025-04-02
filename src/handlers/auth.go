@@ -15,7 +15,7 @@ import (
 )
 
 func Login(c echo.Context) error {
-	log.Println("User entered Login via route \"/login\"")
+	log.Printf("🎺 User entered Login via route \"/login\" and HTTP method %v\n", c.Request().Method)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -55,7 +55,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
+	log.Printf("🎺 User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -153,6 +153,7 @@ func Register(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
+	log.Println("🎺 User entered Logout via route \"/logout\"")
 	helpers.ClearSessionUserID(c)
 	helpers.AddFlash(c, "You were logged out")
 	return c.Redirect(http.StatusFound, "/public")

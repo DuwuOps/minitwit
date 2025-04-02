@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,7 @@ import (
 
 func Follow(c echo.Context) error {
 	username := c.Param("username")
-	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
+	log.Printf("🎺 User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
@@ -123,7 +124,7 @@ func Follow(c echo.Context) error {
 
 func FollowUser(c echo.Context) error {
 	username := c.Param("username")
-	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+	log.Printf("🎺 User entered FollowUser via route \"/:username/follow\" as \"/%v\"\n", username)
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
@@ -155,7 +156,7 @@ func FollowUser(c echo.Context) error {
 
 func UnfollowUser(c echo.Context) error {
 	username := c.Param("username")
-	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+	log.Printf("🎺 User entered UnfollowUser via route \"/:username/unfollow\" as \"/%v\"\n", username)
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {

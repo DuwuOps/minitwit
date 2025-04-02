@@ -14,6 +14,8 @@ import (
 var PER_PAGE = 30
 
 func AddMessage(c echo.Context) error {
+	log.Println("🎺 User entered AddMessage via route \"/add_message\"")
+
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
 		c.String(http.StatusUnauthorized, "Unauthorized")
@@ -37,7 +39,7 @@ func AddMessage(c echo.Context) error {
 }
 
 func Messages(c echo.Context) error {
-	fmt.Printf("User entered Messages via route \"/:msgs\"")
+	log.Println("🎺 User entered Messages via route \"/msgs\"")
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
@@ -93,7 +95,7 @@ func Messages(c echo.Context) error {
 
 func MessagesPerUser(c echo.Context) error {
 	username := c.Param("username")
-	fmt.Printf("User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\"\n", username)
+	log.Printf("🎺 User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\" and HTTP method %v\n", username, c.Request().Method)
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
@@ -174,7 +176,7 @@ func MessagesPerUser(c echo.Context) error {
 
 func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
-	fmt.Printf("User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+	log.Printf("🎺 User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
 	requestedUser, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
@@ -238,7 +240,7 @@ func UserTimeline(c echo.Context) error {
 }
 
 func PublicTimeline(c echo.Context) error {
-	log.Println("User entered PublicTimeline via route \"/public\"")
+	log.Println("🎺 User entered PublicTimeline via route \"/public\"")
 	
 	conditions := map[string]any{"flagged": 0}
 	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
@@ -266,8 +268,8 @@ func PublicTimeline(c echo.Context) error {
 }
 
 func Timeline(c echo.Context) error {
-	log.Println("User entered Timeline via route \"/\"")
-	log.Printf("We got a visitor from: %s", c.Request().RemoteAddr)
+	log.Println("🎺 User entered Timeline via route \"/\"")
+
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
 		return c.Redirect(http.StatusFound, "/public")
