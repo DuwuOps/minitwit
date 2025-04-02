@@ -1,0 +1,26 @@
+services:
+  app:
+    build: !reset null
+    ports:
+      - 0.0.0.0:80:8000
+    restart: always
+    volumes:
+      - sqliteDB:/minitwit/tmp
+
+
+  prometheus:
+    build: !reset null
+    ports: !override
+      - "0.0.0.0:9090:9090"
+
+  grafana:
+    build: !reset null
+    ports: !override
+      - "0.0.0.0:3000:3000"  
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+
+volumes:
+  grafana-storage: {}
+  sqliteDB: {}
