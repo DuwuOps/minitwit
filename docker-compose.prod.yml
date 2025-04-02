@@ -2,7 +2,7 @@ services:
   app:
     build: !reset null
     ports:
-      - 0.0.0.0:81:8000
+      - 0.0.0.0:80:8000
     restart: always
     volumes:
       - sqliteDB:/minitwit/tmp
@@ -10,7 +10,7 @@ services:
 
   prometheus:
     build: !reset null
-    
+
   grafana:
     build: !reset null
     ports: !override
