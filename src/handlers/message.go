@@ -80,11 +80,9 @@ func Messages(c echo.Context) error {
 			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
 			if author != nil {
 				enrichedMsg["user"] = author.Username
-				enrichedMsg["email"] = author.Email
 			} else {
 				log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
 				enrichedMsg["user"] = "Unknown"
-				enrichedMsg["email"] = ""
 			}
 	
 			enrichedMsgs = append(enrichedMsgs, enrichedMsg)
