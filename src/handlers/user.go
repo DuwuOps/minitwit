@@ -152,14 +152,9 @@ func FollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	row := db.QueryRow(`SELECT * FROM user
-						WHERE username = ?`,
-		username,
-	)
-	var user models.User
-	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("row.Scan returned error: %v\n", err)
+		fmt.Printf("FollowUser: getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
@@ -168,7 +163,10 @@ func FollowUser(c echo.Context) error {
 		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-	db.Exec("insert into follower (who_id, whom_id) values (?, ?)", sessionUserId, user.UserID)
+	
+	follower := newFollower(sessionUserId, user.UserID)
+	followerRepo.Create(c.Request().Context(), follower)
+
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
 	if err != nil {
 		fmt.Printf("addFlash returned error: %v\n", err)
