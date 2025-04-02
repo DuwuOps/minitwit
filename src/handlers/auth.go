@@ -71,6 +71,9 @@ func Register(c echo.Context) error {
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
+		if err != nil {
+			fmt.Printf("Register: ExtractJson returned error: %v\n", err)
+		}
 
 		var username string
 		var email string
@@ -78,7 +81,7 @@ func Register(c echo.Context) error {
 		var password string
 		var password2 string
 
-		if err == nil {
+		if payload != nil {
 			username = helpers.GetStringValue(payload, "username")
 			email = helpers.GetStringValue(payload, "email")
 			pwd = helpers.GetStringValue(payload, "pwd")

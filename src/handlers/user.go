@@ -33,11 +33,15 @@ func Follow(c echo.Context) error {
 	}
 
 	payload, err := helpers.ExtractJson(c)
+	if err != nil {
+		fmt.Printf("Follow: ExtractJson returned error: %v\n", err)
+	}
+	
 
 	var followsUsername string
 	var unfollowsUsername string
 
-	if err == nil {
+	if payload != nil {
 		followsUsername = helpers.GetStringValue(payload, "follow")
 		unfollowsUsername = helpers.GetStringValue(payload, "unfollow")
 	} else {

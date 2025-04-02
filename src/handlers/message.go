@@ -152,10 +152,13 @@ func MessagesPerUser(c echo.Context) error {
 		return c.JSON(http.StatusOK, filteredMsgs)
 	} else if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
+		if err != nil {
+			fmt.Printf("MessagesPerUser: ExtractJson returned error: %v\n", err)
+		}
 
 		var requestData string
 
-		if err == nil {
+		if payload != nil {
 			requestData = helpers.GetStringValue(payload, "content")
 		} else {
 			requestData = c.FormValue("content")
