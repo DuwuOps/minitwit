@@ -68,6 +68,7 @@ func GetCurrentUser(c echo.Context) (*models.User, error) {
 	user, err := userRepo.GetByID(c.Request().Context(), id)
 	if err != nil {
 		log.Printf("GetCurrentUser: userRepo.GetByID returned error: %v\n", err)
+		return nil, err
 	}
 	return user, nil
 }
