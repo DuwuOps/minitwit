@@ -3,10 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"minitwit/src/handlers/helpers"
 	"minitwit/src/datalayer"
+	"minitwit/src/handlers/helpers"
 	"net/http"
 	"strings"
 
@@ -32,7 +31,7 @@ func Login(c echo.Context) error {
 		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
-			fmt.Printf("Db.QueryRow returned error: %v\n", err)
+			log.Printf("Db.QueryRow returned error: %v\n", err)
 			return err
 		} else {
 			if !checkPasswordHash(user.PwHash, password) {
@@ -63,7 +62,7 @@ func Register(c echo.Context) error {
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
@@ -72,7 +71,7 @@ func Register(c echo.Context) error {
 	if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
-			fmt.Printf("Register: ExtractJson returned error: %v\n", err)
+			log.Printf("Register: ExtractJson returned error: %v\n", err)
 		}
 
 		var username string
@@ -116,13 +115,13 @@ func Register(c echo.Context) error {
 			} else {
 				hash, err := generatePasswordHash(password)
 				if err != nil {
-					fmt.Printf("generatePasswordHash returned error: %v\n", err)
+					log.Printf("generatePasswordHash returned error: %v\n", err)
 					return err
 				}
 
 				err = userRepo.Create(c.Request().Context(), newUser(username, email, hash))
 				if err != nil {
-					fmt.Printf("userRepo.Create returned error: %v\n", err)
+					log.Printf("userRepo.Create returned error: %v\n", err)
 					return err
 				}
 

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -23,7 +22,7 @@ func AddMessage(c echo.Context) error {
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		log.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
 
@@ -32,7 +31,7 @@ func AddMessage(c echo.Context) error {
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		log.Printf("addFlash returned error: %v\n", err)
 	}
 
 	return c.Redirect(http.StatusFound, "/")
@@ -43,7 +42,7 @@ func Messages(c echo.Context) error {
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
@@ -67,7 +66,7 @@ func Messages(c echo.Context) error {
 		}
 		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 		if err != nil {
-			fmt.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
+			log.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
 			return err
 		}
 	
@@ -99,7 +98,7 @@ func MessagesPerUser(c echo.Context) error {
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
@@ -130,7 +129,7 @@ func MessagesPerUser(c echo.Context) error {
 
 		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
 		if err != nil {
-			fmt.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
+			log.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
 			return err
 		}
 
@@ -155,7 +154,7 @@ func MessagesPerUser(c echo.Context) error {
 	} else if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
-			fmt.Printf("MessagesPerUser: ExtractJson returned error: %v\n", err)
+			log.Printf("MessagesPerUser: ExtractJson returned error: %v\n", err)
 		}
 
 		var requestData string
@@ -180,7 +179,7 @@ func UserTimeline(c echo.Context) error {
 
 	requestedUser, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("getUserByUsername returned error: %v\n", err)
+		log.Printf("getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
@@ -197,7 +196,7 @@ func UserTimeline(c echo.Context) error {
 
 	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("UserTimeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("UserTimeline: messageRepo.GetFiltered returned error: %v\n", err)
 		return err
 	}
 
@@ -220,12 +219,12 @@ func UserTimeline(c echo.Context) error {
 
 	user, err := GetCurrentUser(c)
 	if err != nil {
-		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
+		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		log.Printf("addFlash returned error: %v\n", err)
 	}
 
 	data := map[string]any{
@@ -245,17 +244,17 @@ func PublicTimeline(c echo.Context) error {
 	conditions := map[string]any{"flagged": 0}
 	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("PublicTimeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("PublicTimeline: messageRepo.GetFiltered returned error: %v\n", err)
 	}
 
 	user, err := GetCurrentUser(c)
 	if err != nil {
-		fmt.Printf("getCurrentUser returned error: %v\n", err)
+		log.Printf("getCurrentUser returned error: %v\n", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		fmt.Printf("getFlashes returned error: %v\n", err)
+		log.Printf("getFlashes returned error: %v\n", err)
 	}
 
 	data := map[string]any{
@@ -291,7 +290,7 @@ func Timeline(c echo.Context) error {
 	}
 	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("Timeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("Timeline: messageRepo.GetFiltered returned error: %v\n", err)
 		return err
 	}
 
@@ -319,12 +318,12 @@ func Timeline(c echo.Context) error {
 
 	user, err := GetCurrentUser(c)
 	if err != nil {
-		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
+		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		log.Printf("addFlash returned error: %v\n", err)
 	}
 
 	data := map[string]any{

@@ -17,25 +17,25 @@ func Follow(c echo.Context) error {
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
 	err = helpers.NotReqFromSimulator(c)
 	if err != nil {
-		fmt.Printf("notReqFromSimulator returned error: %v\n", err)
+		log.Printf("notReqFromSimulator returned error: %v\n", err)
 		return err
 	}
 
 	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("getUserId returned error: %v\n", err)
+		log.Printf("getUserId returned error: %v\n", err)
 		return err
 	}
 
 	payload, err := helpers.ExtractJson(c)
 	if err != nil {
-		fmt.Printf("Follow: ExtractJson returned error: %v\n", err)
+		log.Printf("Follow: ExtractJson returned error: %v\n", err)
 	}
 	
 
@@ -51,11 +51,11 @@ func Follow(c echo.Context) error {
 	}
 
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
-		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
+		log.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
 
 		following, err := getUserByUsername(c.Request().Context(), username)
 		if err != nil {
-			fmt.Printf("getUserIdreturned error: %v\n", err)
+			log.Printf("getUserIdreturned error: %v\n", err)
 			return err
 		}
 
@@ -64,11 +64,11 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
-		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
+		log.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
 
 		unfollow, err := getUserByUsername(c.Request().Context(), username)
 		if err != nil {
-			fmt.Printf("getUserId returned error: %v\n", err)
+			log.Printf("getUserId returned error: %v\n", err)
 			return err
 		}
 
@@ -81,7 +81,7 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodGet {
-		fmt.Printf("\"/fllws/:username\" running as a Get-Method\n")
+		log.Printf("\"/fllws/:username\" running as a Get-Method\n")
 
 		noFollowersStr := c.QueryParam("no")
 		noFollowers := 100
@@ -98,7 +98,7 @@ func Follow(c echo.Context) error {
 		followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, noFollowers, "")
 	
 		if err != nil {
-			fmt.Printf("Follow: Error retrieving followers for userID=%d: %v", user.UserID, err)
+			log.Printf("Follow: Error retrieving followers for userID=%d: %v", user.UserID, err)
 			return err
 		}
 
@@ -113,12 +113,12 @@ func Follow(c echo.Context) error {
 		data := map[string]any{
 			"follows": followList,
 		}
-		fmt.Printf("data: %v\n", data)
+		log.Printf("data: %v\n", data)
 
 		return c.JSON(http.StatusOK, data)
 	}
 
-	fmt.Printf("ERROR: \"/fllws/:username\" was entered wrongly!\n")
+	log.Printf("ERROR: \"/fllws/:username\" was entered wrongly!\n")
 	return c.JSON(http.StatusBadRequest, nil)
 }
 
@@ -133,13 +133,13 @@ func FollowUser(c echo.Context) error {
 
 	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("FollowUser: getUserByUsername returned error: %v\n", err)
+		log.Printf("FollowUser: getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
 	sessionUserId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		log.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
 	
@@ -148,7 +148,7 @@ func FollowUser(c echo.Context) error {
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		log.Printf("addFlash returned error: %v\n", err)
 	}
 
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))
@@ -165,13 +165,13 @@ func UnfollowUser(c echo.Context) error {
 
 	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		fmt.Printf("row.Scan returned error: %v\n", err)
+		log.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
 	sessionUserId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		fmt.Printf("getSessionUserID returned error: %v\n", err)
+		log.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
 	
@@ -183,7 +183,7 @@ func UnfollowUser(c echo.Context) error {
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
 	if err != nil {
-		fmt.Printf("addFlash returned error: %v\n", err)
+		log.Printf("addFlash returned error: %v\n", err)
 	}
 
 	return c.Redirect(http.StatusFound, fmt.Sprintf("/%s", username))

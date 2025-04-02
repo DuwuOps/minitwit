@@ -3,7 +3,6 @@ package helpers
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -29,7 +28,7 @@ func RowsToMapList(rows *sql.Rows) ([]map[string]any, error) {
 
 		// Scan the result into the column pointers...
 		if err := rows.Scan(columnPointers...); err != nil {
-			fmt.Printf("rows.Scan returned error: %v\n", err)
+			log.Printf("rows.Scan returned error: %v\n", err)
 			return nil, err
 		}
 
@@ -53,13 +52,13 @@ func GetLatest(c echo.Context) error {
 	
 	id, err := os.ReadFile(LATEST_PROCESSED)
 	if err != nil {
-		fmt.Printf("could not read from latest_processed_sim_action_id.txt: %v\n", err)
+		log.Printf("could not read from latest_processed_sim_action_id.txt: %v\n", err)
 		return err
 	}
 
 	latestProcessedCommandId, err := strconv.Atoi(string(id))
 	if err != nil {
-		fmt.Printf("latestProcessedCommandId is not an int: %v\n", err)
+		log.Printf("latestProcessedCommandId is not an int: %v\n", err)
 		return err
 	}
 
@@ -74,7 +73,7 @@ func CreateLatestFile() {
 	if _, err := os.Stat(LATEST_PROCESSED); errors.Is(err, os.ErrNotExist) {
 		_, err := os.Create(LATEST_PROCESSED)
 		if err != nil {
-			fmt.Printf("Could not create file. %v\n", err)
+			log.Printf("Could not create file. %v\n", err)
 			return
 		}
 		os.WriteFile(LATEST_PROCESSED, []byte("0"), 0644) // If latest_processed_sim_action_id.txt does not exist, create it with an initial value.

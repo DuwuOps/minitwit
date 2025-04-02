@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gorilla/sessions"
@@ -27,7 +26,7 @@ func main() {
 
 	db, err := datalayer.InitDB()
 	if err != nil {
-		fmt.Printf("initDB returned error: %v\n", err)
+		log.Printf("initDB returned error: %v\n", err)
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
