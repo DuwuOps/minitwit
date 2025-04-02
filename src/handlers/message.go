@@ -70,24 +70,27 @@ func Messages(c echo.Context) error {
 			return err
 		}
 	
-		filteredMsgs := []map[string]any{}
+		enrichedMsgs := []map[string]any{}
 		for _, msg := range msgs {
-			filteredMsg := map[string]any{
+			enrichedMsg := map[string]any{
 				"pub_date": msg.PubDate,
 				"content": msg.Text,
 			}
 			
 			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
 			if author != nil {
-				filteredMsg["user"] = author.Username
+				enrichedMsg["user"] = author.Username
+				enrichedMsg["email"] = author.Email
 			} else {
-				filteredMsg["user"] = "Unknown"
+				log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
+				enrichedMsg["user"] = "Unknown"
+				enrichedMsg["email"] = ""
 			}
 	
-			filteredMsgs = append(filteredMsgs, filteredMsg)
+			enrichedMsgs = append(enrichedMsgs, enrichedMsg)
 		}
 
-		return c.JSON(http.StatusOK, filteredMsgs)
+		return c.JSON(http.StatusOK, enrichedMsgs)
 	}
 	return c.JSON(http.StatusBadRequest, nil)
 }
@@ -133,24 +136,25 @@ func MessagesPerUser(c echo.Context) error {
 			return err
 		}
 
-		filteredMsgs := []map[string]any{}
+		enrichedMsgs := []map[string]any{}
 		for _, msg := range msgs {
-			filteredMsg := map[string]any{
+			enrichedMsg := map[string]any{
 				"pub_date": msg.PubDate,
 				"content": msg.Text,
 			}
 			
 			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
 			if author != nil {
-				filteredMsg["user"] = author.Username
+				enrichedMsg["user"] = author.Username
 			} else {
-				filteredMsg["user"] = "Unknown"
+				log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
+				enrichedMsg["user"] = "Unknown"
 			}
 	
-			filteredMsgs = append(filteredMsgs, filteredMsg)
+			enrichedMsgs = append(enrichedMsgs, enrichedMsg)
 		}
 
-		return c.JSON(http.StatusOK, filteredMsgs)
+		return c.JSON(http.StatusOK, enrichedMsgs)
 	} else if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
@@ -200,21 +204,24 @@ func UserTimeline(c echo.Context) error {
 		return err
 	}
 
-	filteredMsgs := []map[string]any{}
+	enrichedMsgs := []map[string]any{}
 	for _, msg := range msgs {
-		filteredMsg := map[string]any{
+		enrichedMsg := map[string]any{
 			"pub_date": msg.PubDate,
 			"text": msg.Text,
 		}
 		
 		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
 		if author != nil {
-			filteredMsg["username"] = author.Username
+			enrichedMsg["username"] = author.Username
+			enrichedMsg["email"] = author.Email
 		} else {
-			filteredMsg["username"] = "Unknown"
+			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
+			enrichedMsg["username"] = "Unknown"
+			enrichedMsg["email"] = ""
 		}
 
-		filteredMsgs = append(filteredMsgs, filteredMsg)
+		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
 	}
 
 	user, err := GetCurrentUser(c)
@@ -228,7 +235,7 @@ func UserTimeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages":    filteredMsgs,
+		"Messages":    enrichedMsgs,
 		"Followed":    followed,
 		"ProfileUser": requestedUser,
 		"User":        user,
@@ -247,6 +254,26 @@ func PublicTimeline(c echo.Context) error {
 		log.Printf("PublicTimeline: messageRepo.GetFiltered returned error: %v\n", err)
 	}
 
+	enrichedMsgs := []map[string]any{}
+	for _, msg := range msgs {
+		enrichedMsg := map[string]any{
+			"pub_date": msg.PubDate,
+			"text": msg.Text,
+		}
+
+		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+		if author != nil {
+			enrichedMsg["username"] = author.Username
+			enrichedMsg["email"] = author.Email
+		} else {
+			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
+			enrichedMsg["username"] = "Unknown"
+			enrichedMsg["email"] = ""
+		}
+
+		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
+	}
+
 	user, err := GetCurrentUser(c)
 	if err != nil {
 		log.Printf("getCurrentUser returned error: %v\n", err)
@@ -258,7 +285,7 @@ func PublicTimeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages": msgs,
+		"Messages": enrichedMsgs,
 		"Endpoint": c.Path(),
 		"User":     user,
 		"Flashes":  flashes,
@@ -294,26 +321,24 @@ func Timeline(c echo.Context) error {
 		return err
 	}
 
-	var enrichedMessages []map[string]any
+	var enrichedMsgs []map[string]any
     for _, msg := range msgs {
-        username := "Unknown"
-        email := ""
+		enrichedMsg := map[string]any{
+			"pub_date": msg.PubDate,
+			"text": msg.Text,
+		}
 
-        author, err := getUserByID(c.Request().Context(), msg.AuthorID)
-        if author != nil {
-            username = author.Username
-            email = author.Email
-        } 
-		if err != nil {
-            log.Printf("⚠️ Warning: Could not find user for message author_id=%d", msg.AuthorID)
-        }
+		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
+		if author != nil {
+			enrichedMsg["username"] = author.Username
+			enrichedMsg["email"] = author.Email
+		} else {
+			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
+			enrichedMsg["username"] = "Unknown"
+			enrichedMsg["email"] = ""
+		}
 
-        enrichedMessages = append(enrichedMessages, map[string]any{
-            "text":     msg.Text,
-            "pub_date": msg.PubDate,
-            "username": username,
-            "email":    email,
-        })
+		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
     }
 
 	user, err := GetCurrentUser(c)
@@ -327,7 +352,7 @@ func Timeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages": enrichedMessages,
+		"Messages": enrichedMsgs,
 		"User":     user,
 		"Endpoint": c.Path(),
 		"Flashes":  flashes,
