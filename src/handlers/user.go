@@ -52,7 +52,7 @@ func Follow(c echo.Context) error {
 		return err
 	}
 
-	userId, err := datalayer.GetUserId(username, db)
+	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		fmt.Printf("getUserId returned error: %v\n", err)
 		return err
@@ -74,32 +74,30 @@ func Follow(c echo.Context) error {
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
 		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
 
-		followsUserId, err := datalayer.GetUserId(followsUsername, db)
+		following, err := getUserByUsername(c.Request().Context(), username)
 		if err != nil {
 			fmt.Printf("getUserIdreturned error: %v\n", err)
 			return err
 		}
 
-		query := `INSERT INTO follower (who_id, whom_id) VALUES (?, ?)`
-		db.Exec(query,
-			userId, followsUserId,
-		)
+		followerRepo.Create(c.Request().Context(), newFollower(user.UserID, following.UserID))
 
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
 		fmt.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
 
-		unfollowsUserId, err := datalayer.GetUserId(unfollowsUsername, db)
+		unfollow, err := getUserByUsername(c.Request().Context(), username)
 		if err != nil {
 			fmt.Printf("getUserId returned error: %v\n", err)
 			return err
 		}
 
-		query := `DELETE FROM follower WHERE who_id=? and WHOM_ID=?`
-		db.Exec(query,
-			userId, unfollowsUserId,
-		)
+		conditions := map[string]any{
+			"who_id": user.UserID, 
+			"WHOM_ID": unfollow.UserID,
+		}
+		followerRepo.DeleteByFields(c.Request().Context(), conditions)
 
 		return c.JSON(http.StatusNoContent, nil)
 
@@ -114,29 +112,23 @@ func Follow(c echo.Context) error {
 				noFollowers = val
 			}
 		}
-		query := `SELECT user.username FROM user
-                  INNER JOIN follower ON follower.whom_id=user.user_id
-                  WHERE follower.who_id=?
-                  LIMIT ?`
 
-		rows, err := datalayer.QueryDB(db, query,
-			userId, noFollowers,
-		)
+		conditions := map[string]any{
+			"who_id": user.UserID,
+		}
+		followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, noFollowers, "")
+	
 		if err != nil {
-			fmt.Printf("messages: queryDB returned error: %v\n", err)
+			fmt.Printf("Follow: Error retrieving followers for userID=%d: %v", user.UserID, err)
 			return err
 		}
 
-		follows, err := helpers.RowsToMapList(rows)
-		if err != nil {
-			fmt.Printf("messages: rowsToMapList returned error: %v\n", err)
-			return err
-		}
-
-		var followList []any
-
-		for _, follow := range follows {
-			followList = append(followList, follow["username"])
+		var followList []string
+		for _, follower := range followers {
+			targetUser, err := getUserByID(c.Request().Context(), follower.WhomID)
+			if err == nil {
+				followList = append(followList, targetUser.Username)
+			}
 		}
 
 		data := map[string]any{
