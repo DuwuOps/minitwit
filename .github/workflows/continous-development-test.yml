@@ -103,7 +103,7 @@ jobs:
           host: ${{ vars.TEST_ENV_SSH_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-          source: "./docker-compose-prod.yml"
+          source: "./docker-compose.yml,./docker-compose.ci.yml,./docker-compose.prod.yml"
           target: "~/.deploy/${{ github.event.repository.name }}/"
 
       - name: Deploy to Digital Ocean droplet via SSH action
@@ -114,4 +114,8 @@ jobs:
           key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
-            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose -f docker-compose-prod.yml up -d --pull always
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
+              -f docker-compose.yml \
+              -f docker-compose.ci.yml \
+              -f docker-compose.prod.yml \
+              up -d --pull always
