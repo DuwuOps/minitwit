@@ -184,12 +184,7 @@ func UnfollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	row := db.QueryRow(`SELECT * FROM user
-						WHERE username = ?`,
-		username,
-	)
-	var user models.User
-	err := row.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
+	user, err := getUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		fmt.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -200,7 +195,12 @@ func UnfollowUser(c echo.Context) error {
 		fmt.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-	db.Exec("delete from follower where who_id=? and whom_id=?", sessionUserId, user.UserID)
+	
+	conditions := map[string]any{
+		"who_id":  sessionUserId,
+		"whom_id": user.UserID,
+	}
+	followerRepo.DeleteByFields(c.Request().Context(), conditions)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
 	if err != nil {

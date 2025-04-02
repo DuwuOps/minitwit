@@ -53,3 +53,10 @@ func newUser(username string, email string, hash string) *models.User {
 		PwHash: hash,
 	}
 }
+
+func newFollower(whoID int, whomID int) *models.Follower {
+	return &models.Follower{
+		WhoID: whoID,
+		WhomID: whomID,
+	}
+}
