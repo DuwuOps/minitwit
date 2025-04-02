@@ -238,23 +238,13 @@ func UserTimeline(c echo.Context) error {
 func PublicTimeline(c echo.Context) error {
 	log.Println("User entered PublicTimeline via route \"/public\"")
 
-	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user
-                            where message.flagged = 0 and message.author_id = user.user_id
-                            order by message.pub_date desc limit ?`,
-		PER_PAGE,
-	)
+	conditions := map[string]any{"flagged": 0}
+	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("PublicTimeline: queryDB returned error: %v\n", err)
-		return err
+		fmt.Printf("PublicTimeline: messageRepo.GetFiltered returned error: %v\n", err)
 	}
 
-	msgs, err := helpers.RowsToMapList(rows)
-	if err != nil {
-		fmt.Printf("rowsToMapList returned error: %v\n", err)
-		return err
-	}
-
-	user, err := GetCurrentUser(c, db)
+	user, err := GetCurrentUser(c)
 	if err != nil {
 		fmt.Printf("getCurrentUser returned error: %v\n", err)
 	}
