@@ -5,7 +5,6 @@ import (
 	"log"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/models"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -32,30 +31,6 @@ func isFollowingUser(c echo.Context, profileUserID int) bool {
 	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
 
 	return err == nil && len(followers) > 0
-}
-
-func newMessage(authorID int, text string) *models.Message {
-	return &models.Message{
-		AuthorID: authorID,
-		Text:     text,
-		PubDate:  time.Now().Unix(),
-		Flagged:  0,
-	}
-}
-
-func newUser(username string, email string, hash string) *models.User {
-	return &models.User{
-		Username: username,
-		Email: email,
-		PwHash: hash,
-	}
-}
-
-func newFollower(whoID int, whomID int) *models.Follower {
-	return &models.Follower{
-		WhoID: whoID,
-		WhomID: whomID,
-	}
 }
 
 func GetCurrentUser(c echo.Context) (*models.User, error) {

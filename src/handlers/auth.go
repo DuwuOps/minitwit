@@ -118,8 +118,9 @@ func Register(c echo.Context) error {
 					log.Printf("generatePasswordHash returned error: %v\n", err)
 					return err
 				}
-
-				err = userRepo.Create(context.Background(), newUser(username, email, hash))
+				
+				newUser := helpers.NewUser(username, email, hash)
+				err = userRepo.Create(context.Background(), newUser)
 				if err != nil {
 					log.Printf("userRepo.Create returned error: %v\n", err)
 					return err

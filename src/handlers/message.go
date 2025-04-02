@@ -26,7 +26,7 @@ func AddMessage(c echo.Context) error {
 		return err
 	}
 
-	newMessage := newMessage(userId, text)
+	newMessage := helpers.NewMessage(userId, text)
 	messageRepo.Create(c.Request().Context(), newMessage)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
@@ -167,7 +167,7 @@ func MessagesPerUser(c echo.Context) error {
 			requestData = c.FormValue("content")
 		}
 
-		newMessage := newMessage(user.UserID, requestData)
+		newMessage := helpers.NewMessage(user.UserID, requestData)
 		messageRepo.Create(c.Request().Context(), newMessage)
 
 		return c.JSON(http.StatusNoContent, nil)

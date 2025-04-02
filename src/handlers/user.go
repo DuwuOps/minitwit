@@ -58,7 +58,8 @@ func Follow(c echo.Context) error {
 			return err
 		}
 
-		followerRepo.Create(c.Request().Context(), newFollower(user.UserID, follow.UserID))
+		newFollower := helpers.NewFollower(user.UserID, follow.UserID)
+		followerRepo.Create(c.Request().Context(), newFollower)
 
 		return c.JSON(http.StatusNoContent, nil)
 
@@ -139,7 +140,7 @@ func FollowUser(c echo.Context) error {
 		return err
 	}
 	
-	follower := newFollower(sessionUserId, user.UserID)
+	follower := helpers.NewFollower(sessionUserId, user.UserID)
 	followerRepo.Create(c.Request().Context(), follower)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
