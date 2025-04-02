@@ -34,16 +34,6 @@ func isFollowingUser(c echo.Context, profileUserID int) bool {
 	return err == nil && len(followers) > 0
 }
 
-
-func getUserByID(ctx context.Context, userID int) (*models.User, error) {
-	user, err := userRepo.GetByID(ctx, userID)
-	if err != nil {
-		log.Printf("User not found for ID: %d", userID)
-		return nil, err
-	}
-	return user, nil
-}
-
 func newMessage(authorID int, text string) *models.Message {
 	return &models.Message{
 		AuthorID: authorID,

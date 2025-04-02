@@ -100,7 +100,7 @@ func Follow(c echo.Context) error {
 
 		var followList []string
 		for _, follower := range followers {
-			targetUser, err := getUserByID(c.Request().Context(), follower.WhomID)
+			targetUser, err := userRepo.GetByID(c.Request().Context(), follower.WhomID)
 			if err == nil {
 				followList = append(followList, targetUser.Username)
 			}
