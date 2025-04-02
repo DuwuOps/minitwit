@@ -51,7 +51,7 @@ func Follow(c echo.Context) error {
 	}
 
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
-		log.Printf("User \"/%v\" has requested to follow \"/%v\"\n", username, followsUsername)
+		log.Printf("User \"%v\" has requested to follow \"%v\"\n", username, followsUsername)
 		follow, err := getUserByUsername(c.Request().Context(), followsUsername)
 		if err != nil {
 			log.Printf("getUserIdreturned error: %v\n", err)
