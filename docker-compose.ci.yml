@@ -1,9 +1,9 @@
 services:
   app:
-    image: ${DOCKER_USERNAME}/minitwit:monitoringtest
+    image: ${DOCKER_USERNAME}/minitwit:latest
 
   prometheus:
-    image: ${DOCKER_USERNAME}/prometheus:monitoringtest
+    image: ${DOCKER_USERNAME}/prometheus:latest
 
   grafana:
-    image: ${DOCKER_USERNAME}/grafana:monitoringtest
+    image: ${DOCKER_USERNAME}/grafana:latest
