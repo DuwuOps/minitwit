@@ -10,9 +10,7 @@ services:
 
   prometheus:
     build: !reset null
-    ports: !override
-      - "0.0.0.0:9090:9090"
-
+    
   grafana:
     build: !reset null
     ports: !override
