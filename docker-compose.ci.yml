@@ -1,0 +1,9 @@
+services:
+  app:
+    image: ${DOCKER_USERNAME}/minitwit:monitoringtest
+
+  prometheus:
+    image: ${DOCKER_USERNAME}/prometheus:monitoringtest
+
+  grafana:
+    image: ${DOCKER_USERNAME}/grafana:monitoringtest
