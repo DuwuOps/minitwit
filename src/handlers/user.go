@@ -51,22 +51,20 @@ func Follow(c echo.Context) error {
 	}
 
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
-		log.Printf("\"/fllws/:username\" running as a Post-Method, where follow in c.FormParams()")
-
-		following, err := getUserByUsername(c.Request().Context(), username)
+		log.Printf("User \"/%v\" has requested to follow \"/%v\"\n", username, followsUsername)
+		follow, err := getUserByUsername(c.Request().Context(), followsUsername)
 		if err != nil {
 			log.Printf("getUserIdreturned error: %v\n", err)
 			return err
 		}
 
-		followerRepo.Create(c.Request().Context(), newFollower(user.UserID, following.UserID))
+		followerRepo.Create(c.Request().Context(), newFollower(user.UserID, follow.UserID))
 
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
-		log.Printf("\"/fllws/:username\" running as a Post-Method, where unfollow in c.FormParams()\n")
-
-		unfollow, err := getUserByUsername(c.Request().Context(), username)
+		log.Printf("User \"/%v\" has requested to unfollow \"/%v\"\n", username, unfollowsUsername)
+		unfollow, err := getUserByUsername(c.Request().Context(), unfollowsUsername)
 		if err != nil {
 			log.Printf("getUserId returned error: %v\n", err)
 			return err
@@ -81,8 +79,6 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodGet {
-		log.Printf("\"/fllws/:username\" running as a Get-Method\n")
-
 		noFollowersStr := c.QueryParam("no")
 		noFollowers := 100
 		if noFollowersStr != "" {
