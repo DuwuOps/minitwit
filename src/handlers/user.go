@@ -10,32 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetCurrentUser(c echo.Context, db *sql.DB) (*models.User, error) {
-	id, err := helpers.GetSessionUserID(c)
-	var user models.User
-
-	if err != nil {
-		fmt.Printf("getSessionUserID returned error: %v\n", err)
-		return nil, err
-	}
-
-	rows := datalayer.QueryDbSingle(db, "select * from user where user_id = ?",
-		id,
-	)
-
-	err = rows.Scan(&user.UserID, &user.Username, &user.Email, &user.PwHash)
-	if err != nil {
-		fmt.Printf("rows.Scan returned error: %v\n", err)
-		return nil, err
-	}
-	fmt.Printf("Found user in database! %v\n", user)
-	fmt.Printf("user.UserID: %v\n", user.UserID)
-	fmt.Printf("user.Username: %v\n", user.Username)
-	fmt.Printf("user.Email: %v\n", user.Email)
-	fmt.Printf("user.PwHash: %v\n", user.PwHash)
-	return &user, nil
-}
-
 func Follow(c echo.Context) error {
 	username := c.Param("username")
 	fmt.Printf("User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)

@@ -60,3 +60,17 @@ func newFollower(whoID int, whomID int) *models.Follower {
 		WhomID: whomID,
 	}
 }
+
+func GetCurrentUser(c echo.Context) (*models.User, error) {
+	id, err := helpers.GetSessionUserID(c)
+	if err != nil {
+		fmt.Printf("GetCurrentUser: getSessionUserID returned error: %v\n", err)
+		return nil, err
+	}
+
+	user, err := userRepo.GetByID(c.Request().Context(), id)
+	if err != nil {
+		fmt.Printf("GetCurrentUser: userRepo.GetByID returned error: %v\n", err)
+	}
+	return user, nil
+}
