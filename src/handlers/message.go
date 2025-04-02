@@ -272,27 +272,48 @@ func Timeline(c echo.Context) error {
 	}
 
 	sessionUserId, _ := helpers.GetSessionUserID(c)
-	rows, err := datalayer.QueryDB(db, `select message.*, user.* from message, user
-                          where message.flagged = 0 and message.author_id = user.user_id and (
-                              user.user_id = ? or
-                              user.user_id in (select whom_id from follower
-                                                      where who_id = ?))
-                          order by message.pub_date desc limit ?`,
-		sessionUserId, sessionUserId, PER_PAGE,
-	)
 
+	conditions := map[string]any{"who_id": sessionUserId}
+	followings, _ := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+
+	followedUserIDs := []int{sessionUserId} 
+	for _, f := range followings {
+		followedUserIDs = append(followedUserIDs, f.WhomID)
+	}
+
+	conditions = map[string]any{
+		"flagged": 0,
+		"author_id": followedUserIDs,
+	}
+	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
 	if err != nil {
-		fmt.Printf("Timeline: queryDB returned error: %v\n", err)
+		fmt.Printf("Timeline: messageRepo.GetFiltered returned error: %v\n", err)
 		return err
 	}
 
-	msgs, err := helpers.RowsToMapList(rows)
-	if err != nil {
-		fmt.Printf("rowsToMapList returned error: %v\n", err)
-		return err
-	}
+	var enrichedMessages []map[string]any
+    for _, msg := range msgs {
+        username := "Unknown"
+        email := ""
 
-	user, err := GetCurrentUser(c, db)
+        author, err := getUserByID(c.Request().Context(), msg.AuthorID)
+        if author != nil {
+            username = author.Username
+            email = author.Email
+        } 
+		if err != nil {
+            log.Printf("⚠️ Warning: Could not find user for message author_id=%d", msg.AuthorID)
+        }
+
+        enrichedMessages = append(enrichedMessages, map[string]any{
+            "text":     msg.Text,
+            "pub_date": msg.PubDate,
+            "username": username,
+            "email":    email,
+        })
+    }
+
+	user, err := GetCurrentUser(c)
 	if err != nil {
 		fmt.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
@@ -303,7 +324,7 @@ func Timeline(c echo.Context) error {
 	}
 
 	data := map[string]any{
-		"Messages": msgs,
+		"Messages": enrichedMessages,
 		"User":     user,
 		"Endpoint": c.Path(),
 		"Flashes":  flashes,
