@@ -8,7 +8,6 @@ on:
       - 86-server-monitoring-rebased
 
   workflow_dispatch:
-    manual: true
 
 jobs:
   # tests:
