@@ -1,4 +1,4 @@
-package handlers
+package repository_wrappers
 
 import (
 	"database/sql"
