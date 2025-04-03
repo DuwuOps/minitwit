@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/handlers/repository_wrappers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -58,8 +59,7 @@ func Follow(c echo.Context) error {
 			return err
 		}
 
-		newFollower := helpers.NewFollower(user.UserID, follow.UserID)
-		followerRepo.Create(c.Request().Context(), newFollower)
+		_ = repository_wrappers.CreateFollower(c, user.UserID, follow.UserID)
 
 		return c.JSON(http.StatusNoContent, nil)
 
@@ -71,11 +71,7 @@ func Follow(c echo.Context) error {
 			return err
 		}
 
-		conditions := map[string]any{
-			"who_id": user.UserID, 
-			"WHOM_ID": unfollow.UserID,
-		}
-		followerRepo.DeleteByFields(c.Request().Context(), conditions)
+		_ = repository_wrappers.DeleteFollower(c, user.UserID, unfollow.UserID)
 
 		return c.JSON(http.StatusNoContent, nil)
 
@@ -92,7 +88,8 @@ func Follow(c echo.Context) error {
 		conditions := map[string]any{
 			"who_id": user.UserID,
 		}
-		followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, noFollowers, "")
+		
+		followers, err := repository_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
 	
 		if err != nil {
 			log.Printf("Follow: Error retrieving followers for userID=%d: %v", user.UserID, err)
@@ -140,8 +137,7 @@ func FollowUser(c echo.Context) error {
 		return err
 	}
 	
-	follower := helpers.NewFollower(sessionUserId, user.UserID)
-	followerRepo.Create(c.Request().Context(), follower)
+	_ = repository_wrappers.CreateFollower(c, sessionUserId, user.UserID)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
 	if err != nil {
@@ -171,12 +167,8 @@ func UnfollowUser(c echo.Context) error {
 		log.Printf("getSessionUserID returned error: %v\n", err)
 		return err
 	}
-	
-	conditions := map[string]any{
-		"who_id":  sessionUserId,
-		"whom_id": user.UserID,
-	}
-	followerRepo.DeleteByFields(c.Request().Context(), conditions)
+
+	_ = repository_wrappers.DeleteFollower(c, sessionUserId, user.UserID)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
 	if err != nil {

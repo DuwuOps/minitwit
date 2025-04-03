@@ -302,7 +302,7 @@ func Timeline(c echo.Context) error {
 	sessionUserId, _ := helpers.GetSessionUserID(c)
 
 	conditions := map[string]any{"who_id": sessionUserId}
-	followings, _ := followerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+	followings, _ := repository_wrappers.GetFollowerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
 
 	followedUserIDs := []int{sessionUserId} 
 	for _, f := range followings {
