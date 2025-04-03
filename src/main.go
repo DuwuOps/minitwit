@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"minitwit/src/datalayer"
-	"minitwit/src/handlers"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/handlers/repository_wrappers"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
 )
@@ -31,7 +31,7 @@ func main() {
 	}
 	defer db.Close()
 	
-	handlers.InitRepos(db)
+	repository_wrappers.InitRepos(db)
 	
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
