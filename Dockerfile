@@ -39,7 +39,8 @@ COPY --from=builder /build/minitwit .
 COPY ./src/templates ./templates
 COPY ./src/static ./static
 COPY ./src/queries ./queries
+COPY ./logging ./logging
 
 # Expose port and run binary-file
-EXPOSE 8000
+EXPOSE 8000 
 CMD ["./minitwit"]

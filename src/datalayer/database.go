@@ -86,9 +86,7 @@ func QueryDbSingle(db *sql.DB, query string, args ...any) *sql.Row {
 }
 
 func QueryDB(db *sql.DB, query string, args ...any) (*sql.Rows, error) {
-	fmt.Printf("\nqueryDB called with following arguments:\n")
-	fmt.Printf(" - query: %v\n", query)
-	fmt.Printf(" - args: %v\n\n", args)
+	fmt.Printf("\nqueryDB called with following arguments:\n - query: %v\n - args: %v\n\n", query, args)
 
 	//Queries the database and returns a list of QueryResults.
 	if db == nil {
