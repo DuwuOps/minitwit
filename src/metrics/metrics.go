@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	CpuUsage = prometheus.NewGaugeVec(
+	MemoryUsage = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "minitwit_cpu_usage_gauge",
 			Help: "CPU Usage",
