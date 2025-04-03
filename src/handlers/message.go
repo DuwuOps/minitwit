@@ -102,8 +102,7 @@ func MessagesPerUser(c echo.Context) error {
 			noMsgs = val
 		}
 	}
-	
-	user, err := getUserByUsername(c.Request().Context(), username)
+	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
 	}
@@ -148,7 +147,7 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	log.Printf("🎺 User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
-	requestedUser, err := getUserByUsername(c.Request().Context(), username)
+	requestedUser, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")

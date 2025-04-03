@@ -28,7 +28,7 @@ func Follow(c echo.Context) error {
 		return err
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("getUserId returned error: %v\n", err)
 		return err
@@ -53,7 +53,7 @@ func Follow(c echo.Context) error {
 
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
 		log.Printf("User \"%v\" has requested to follow \"%v\"\n", username, followsUsername)
-		follow, err := getUserByUsername(c.Request().Context(), followsUsername)
+		follow, err := repository_wrappers.GetUserByUsername(c.Request().Context(), followsUsername)
 		if err != nil {
 			log.Printf("getUserIdreturned error: %v\n", err)
 			return err
@@ -65,7 +65,7 @@ func Follow(c echo.Context) error {
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
 		log.Printf("User \"%v\" has requested to unfollow \"%v\"\n", username, unfollowsUsername)
-		unfollow, err := getUserByUsername(c.Request().Context(), unfollowsUsername)
+		unfollow, err := repository_wrappers.GetUserByUsername(c.Request().Context(), unfollowsUsername)
 		if err != nil {
 			log.Printf("getUserId returned error: %v\n", err)
 			return err
@@ -98,7 +98,7 @@ func Follow(c echo.Context) error {
 
 		var followList []string
 		for _, follower := range followers {
-			targetUser, err := userRepo.GetByID(c.Request().Context(), follower.WhomID)
+			targetUser, err := repository_wrappers.GetUserByID(c, follower.WhomID)
 			if err == nil {
 				followList = append(followList, targetUser.Username)
 			}
@@ -125,7 +125,7 @@ func FollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("FollowUser: getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -156,7 +156,7 @@ func UnfollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	user, err := getUserByUsername(c.Request().Context(), username)
+	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
