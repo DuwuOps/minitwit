@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repository_wrappers"
@@ -76,14 +75,7 @@ func Follow(c echo.Context) error {
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodGet {
-		noFollowersStr := c.QueryParam("no")
-		noFollowers := 100
-		if noFollowersStr != "" {
-			val, err := strconv.Atoi(noFollowersStr)
-			if err == nil {
-				noFollowers = val
-			}
-		}
+		noFollowers := GetNumber(c)
 
 		conditions := map[string]any{
 			"who_id": user.UserID,

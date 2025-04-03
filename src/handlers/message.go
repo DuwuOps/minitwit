@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repository_wrappers"
@@ -51,14 +50,7 @@ func Messages(c echo.Context) error {
 		return err
 	}
 
-	noMsgsStr := c.QueryParam("no")
-	noMsgs := 100
-	if noMsgsStr != "" {
-		val, err := strconv.Atoi(noMsgsStr)
-		if err == nil {
-			noMsgs = val
-		}
-	}
+	noMsgs := GetNumber(c)
 
 	if c.Request().Method == http.MethodGet {
 		conditions := map[string]any{
@@ -94,14 +86,8 @@ func MessagesPerUser(c echo.Context) error {
 		return err
 	}
 
-	noMsgsStr := c.QueryParam("no")
-	noMsgs := 100
-	if noMsgsStr != "" {
-		val, err := strconv.Atoi(noMsgsStr)
-		if err == nil {
-			noMsgs = val
-		}
-	}
+	noMsgs := GetNumber(c)
+	
 	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
