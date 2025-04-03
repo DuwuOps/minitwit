@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/handlers/repository_wrappers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,8 +27,7 @@ func AddMessage(c echo.Context) error {
 		return err
 	}
 
-	newMessage := helpers.NewMessage(userId, text)
-	messageRepo.Create(c.Request().Context(), newMessage)
+	_ = repository_wrappers.CreateMessage(c, userId, text)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
@@ -64,29 +64,15 @@ func Messages(c echo.Context) error {
 		conditions := map[string]any{
 			"flagged": 0,
 		}
-		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+
+		msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
+			log.Printf("Messages: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
 			return err
 		}
-	
-		enrichedMsgs := []map[string]any{}
-		for _, msg := range msgs {
-			enrichedMsg := map[string]any{
-				"pub_date": msg.PubDate,
-				"content": msg.Text,
-			}
-			
-			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-			if author != nil {
-				enrichedMsg["user"] = author.Username
-			} else {
-				log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
-				enrichedMsg["user"] = "Unknown"
-			}
-	
-			enrichedMsgs = append(enrichedMsgs, enrichedMsg)
-		}
+		
+		
+		enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, true)
 
 		return c.JSON(http.StatusOK, enrichedMsgs)
 	}
@@ -128,29 +114,13 @@ func MessagesPerUser(c echo.Context) error {
 			"author_id": user.UserID,
 		}
 
-		msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, noMsgs, "pub_date DESC")
+		msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("messages: messageRepo.GetFiltered returned error: %v\n", err)
+			log.Printf("MessagesPerUser: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
 			return err
 		}
 
-		enrichedMsgs := []map[string]any{}
-		for _, msg := range msgs {
-			enrichedMsg := map[string]any{
-				"pub_date": msg.PubDate,
-				"content": msg.Text,
-			}
-			
-			author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-			if author != nil {
-				enrichedMsg["user"] = author.Username
-			} else {
-				log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
-				enrichedMsg["user"] = "Unknown"
-			}
-	
-			enrichedMsgs = append(enrichedMsgs, enrichedMsg)
-		}
+		enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, true)
 
 		return c.JSON(http.StatusOK, enrichedMsgs)
 	} else if c.Request().Method == http.MethodPost {
@@ -167,8 +137,7 @@ func MessagesPerUser(c echo.Context) error {
 			requestData = c.FormValue("content")
 		}
 
-		newMessage := helpers.NewMessage(user.UserID, requestData)
-		messageRepo.Create(c.Request().Context(), newMessage)
+		repository_wrappers.CreateMessage(c, user.UserID, requestData)
 
 		return c.JSON(http.StatusNoContent, nil)
 	}
@@ -196,33 +165,15 @@ func UserTimeline(c echo.Context) error {
 		"author_id": requestedUser.UserID,
 	}
 
-	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
+	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("UserTimeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("UserTimeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
 		return err
 	}
 
-	enrichedMsgs := []map[string]any{}
-	for _, msg := range msgs {
-		enrichedMsg := map[string]any{
-			"pub_date": msg.PubDate,
-			"text": msg.Text,
-		}
-		
-		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-		if author != nil {
-			enrichedMsg["username"] = author.Username
-			enrichedMsg["email"] = author.Email
-		} else {
-			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
-			enrichedMsg["username"] = "Unknown"
-			enrichedMsg["email"] = ""
-		}
+	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
 
-		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
-	}
-
-	user, err := GetCurrentUser(c)
+	user, err := repository_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
@@ -247,32 +198,15 @@ func PublicTimeline(c echo.Context) error {
 	log.Println("🎺 User entered PublicTimeline via route \"/public\"")
 	
 	conditions := map[string]any{"flagged": 0}
-	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
+	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("PublicTimeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("PublicTimeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		return err
 	}
 
-	enrichedMsgs := []map[string]any{}
-	for _, msg := range msgs {
-		enrichedMsg := map[string]any{
-			"pub_date": msg.PubDate,
-			"text": msg.Text,
-		}
+	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
 
-		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-		if author != nil {
-			enrichedMsg["username"] = author.Username
-			enrichedMsg["email"] = author.Email
-		} else {
-			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
-			enrichedMsg["username"] = "Unknown"
-			enrichedMsg["email"] = ""
-		}
-
-		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
-	}
-
-	user, err := GetCurrentUser(c)
+	user, err := repository_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("getCurrentUser returned error: %v\n", err)
 	}
@@ -313,33 +247,15 @@ func Timeline(c echo.Context) error {
 		"flagged": 0,
 		"author_id": followedUserIDs,
 	}
-	msgs, err := messageRepo.GetFiltered(c.Request().Context(), conditions, PER_PAGE, "pub_date DESC")
+	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("Timeline: messageRepo.GetFiltered returned error: %v\n", err)
+		log.Printf("Timeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
 		return err
 	}
 
-	var enrichedMsgs []map[string]any
-    for _, msg := range msgs {
-		enrichedMsg := map[string]any{
-			"pub_date": msg.PubDate,
-			"text": msg.Text,
-		}
+	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
 
-		author, _ := userRepo.GetByID(c.Request().Context(), msg.AuthorID)
-		if author != nil {
-			enrichedMsg["username"] = author.Username
-			enrichedMsg["email"] = author.Email
-		} else {
-			log.Printf("⚠️ Warning: Could not find user for message author_id=%d\n", msg.AuthorID)
-			enrichedMsg["username"] = "Unknown"
-			enrichedMsg["email"] = ""
-		}
-
-		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
-    }
-
-	user, err := GetCurrentUser(c)
+	user, err := repository_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
