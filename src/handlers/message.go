@@ -156,7 +156,7 @@ func UserTimeline(c echo.Context) error {
 	followed := false
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
-		followed = isFollowingUser(c, requestedUser.UserID)
+		followed = repository_wrappers.IsFollowingUser(c, requestedUser.UserID)
 	}
 
 
@@ -235,7 +235,7 @@ func Timeline(c echo.Context) error {
 	sessionUserId, _ := helpers.GetSessionUserID(c)
 
 	conditions := map[string]any{"who_id": sessionUserId}
-	followings, _ := repository_wrappers.GetFollowerRepo.GetFiltered(c.Request().Context(), conditions, -1, "")
+	followings, _ := repository_wrappers.GetFollowerFiltered(c, conditions, -1)
 
 	followedUserIDs := []int{sessionUserId} 
 	for _, f := range followings {
