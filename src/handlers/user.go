@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/handlers/repository_wrappers"
+	"minitwit/src/handlers/repo_wrappers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -27,7 +27,7 @@ func Follow(c echo.Context) error {
 		return err
 	}
 
-	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
+	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("getUserId returned error: %v\n", err)
 		return err
@@ -52,25 +52,25 @@ func Follow(c echo.Context) error {
 
 	if c.Request().Method == http.MethodPost && followsUsername != "" {
 		log.Printf("User \"%v\" has requested to follow \"%v\"\n", username, followsUsername)
-		follow, err := repository_wrappers.GetUserByUsername(c.Request().Context(), followsUsername)
+		follow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), followsUsername)
 		if err != nil {
 			log.Printf("getUserIdreturned error: %v\n", err)
 			return err
 		}
 
-		_ = repository_wrappers.CreateFollower(c, user.UserID, follow.UserID)
+		_ = repo_wrappers.CreateFollower(c, user.UserID, follow.UserID)
 
 		return c.JSON(http.StatusNoContent, nil)
 
 	} else if c.Request().Method == http.MethodPost && unfollowsUsername != "" {
 		log.Printf("User \"%v\" has requested to unfollow \"%v\"\n", username, unfollowsUsername)
-		unfollow, err := repository_wrappers.GetUserByUsername(c.Request().Context(), unfollowsUsername)
+		unfollow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), unfollowsUsername)
 		if err != nil {
 			log.Printf("getUserId returned error: %v\n", err)
 			return err
 		}
 
-		_ = repository_wrappers.DeleteFollower(c, user.UserID, unfollow.UserID)
+		_ = repo_wrappers.DeleteFollower(c, user.UserID, unfollow.UserID)
 
 		return c.JSON(http.StatusNoContent, nil)
 
@@ -81,7 +81,7 @@ func Follow(c echo.Context) error {
 			"who_id": user.UserID,
 		}
 		
-		followers, err := repository_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
+		followers, err := repo_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
 	
 		if err != nil {
 			log.Printf("Follow: Error retrieving followers for userID=%d: %v", user.UserID, err)
@@ -90,7 +90,7 @@ func Follow(c echo.Context) error {
 
 		var followList []string
 		for _, follower := range followers {
-			targetUser, err := repository_wrappers.GetUserByID(c, follower.WhomID)
+			targetUser, err := repo_wrappers.GetUserByID(c, follower.WhomID)
 			if err == nil {
 				followList = append(followList, targetUser.Username)
 			}
@@ -117,7 +117,7 @@ func FollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
+	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("FollowUser: getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -129,7 +129,7 @@ func FollowUser(c echo.Context) error {
 		return err
 	}
 	
-	_ = repository_wrappers.CreateFollower(c, sessionUserId, user.UserID)
+	_ = repo_wrappers.CreateFollower(c, sessionUserId, user.UserID)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
 	if err != nil {
@@ -148,7 +148,7 @@ func UnfollowUser(c echo.Context) error {
 		c.String(http.StatusUnauthorized, "Unauthorized")
 	}
 
-	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
+	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("row.Scan returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -160,7 +160,7 @@ func UnfollowUser(c echo.Context) error {
 		return err
 	}
 
-	_ = repository_wrappers.DeleteFollower(c, sessionUserId, user.UserID)
+	_ = repo_wrappers.DeleteFollower(c, sessionUserId, user.UserID)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are no longer following \"%s\"", username))
 	if err != nil {

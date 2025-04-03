@@ -10,7 +10,7 @@ import (
 
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/handlers/repository_wrappers"
+	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
 )
@@ -31,7 +31,7 @@ func main() {
 	}
 	defer db.Close()
 	
-	repository_wrappers.InitRepos(db)
+	repo_wrappers.InitRepos(db)
 	
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 

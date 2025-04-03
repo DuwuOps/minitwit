@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/handlers/repository_wrappers"
+	"minitwit/src/handlers/repo_wrappers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,7 +26,7 @@ func AddMessage(c echo.Context) error {
 		return err
 	}
 
-	_ = repository_wrappers.CreateMessage(c, userId, text)
+	_ = repo_wrappers.CreateMessage(c, userId, text)
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
@@ -57,14 +57,14 @@ func Messages(c echo.Context) error {
 			"flagged": 0,
 		}
 
-		msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
+		msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("Messages: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+			log.Printf("Messages: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
 			return err
 		}
 		
 		
-		enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, true)
+		enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, true)
 
 		return c.JSON(http.StatusOK, enrichedMsgs)
 	}
@@ -88,7 +88,7 @@ func MessagesPerUser(c echo.Context) error {
 
 	noMsgs := GetNumber(c)
 	
-	user, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
+	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
 	}
@@ -99,13 +99,13 @@ func MessagesPerUser(c echo.Context) error {
 			"author_id": user.UserID,
 		}
 
-		msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
+		msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("MessagesPerUser: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+			log.Printf("MessagesPerUser: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
 			return err
 		}
 
-		enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, true)
+		enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, true)
 
 		return c.JSON(http.StatusOK, enrichedMsgs)
 	} else if c.Request().Method == http.MethodPost {
@@ -122,7 +122,7 @@ func MessagesPerUser(c echo.Context) error {
 			requestData = c.FormValue("content")
 		}
 
-		repository_wrappers.CreateMessage(c, user.UserID, requestData)
+		repo_wrappers.CreateMessage(c, user.UserID, requestData)
 
 		return c.JSON(http.StatusNoContent, nil)
 	}
@@ -133,7 +133,7 @@ func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
 	log.Printf("🎺 User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
 
-	requestedUser, err := repository_wrappers.GetUserByUsername(c.Request().Context(), username)
+	requestedUser, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		log.Printf("getUserByUsername returned error: %v\n", err)
 		c.String(http.StatusNotFound, "Not found")
@@ -142,7 +142,7 @@ func UserTimeline(c echo.Context) error {
 	followed := false
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
-		followed = repository_wrappers.IsFollowingUser(c, requestedUser.UserID)
+		followed = repo_wrappers.IsFollowingUser(c, requestedUser.UserID)
 	}
 
 
@@ -150,15 +150,15 @@ func UserTimeline(c echo.Context) error {
 		"author_id": requestedUser.UserID,
 	}
 
-	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
+	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("UserTimeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		log.Printf("UserTimeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
 		return err
 	}
 
-	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
+	enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, false)
 
-	user, err := repository_wrappers.GetCurrentUser(c)
+	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}
@@ -183,15 +183,15 @@ func PublicTimeline(c echo.Context) error {
 	log.Println("🎺 User entered PublicTimeline via route \"/public\"")
 	
 	conditions := map[string]any{"flagged": 0}
-	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
+	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("PublicTimeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		log.Printf("PublicTimeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
 		return err
 	}
 
-	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
+	enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, false)
 
-	user, err := repository_wrappers.GetCurrentUser(c)
+	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("getCurrentUser returned error: %v\n", err)
 	}
@@ -221,7 +221,7 @@ func Timeline(c echo.Context) error {
 	sessionUserId, _ := helpers.GetSessionUserID(c)
 
 	conditions := map[string]any{"who_id": sessionUserId}
-	followings, _ := repository_wrappers.GetFollowerFiltered(c, conditions, -1)
+	followings, _ := repo_wrappers.GetFollowerFiltered(c, conditions, -1)
 
 	followedUserIDs := []int{sessionUserId} 
 	for _, f := range followings {
@@ -232,15 +232,15 @@ func Timeline(c echo.Context) error {
 		"flagged": 0,
 		"author_id": followedUserIDs,
 	}
-	msgs, err := repository_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
+	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("Timeline: repository_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		log.Printf("Timeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
 		return err
 	}
 
-	enrichedMsgs := repository_wrappers.EnhanceMessages(c, msgs, false)
+	enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, false)
 
-	user, err := repository_wrappers.GetCurrentUser(c)
+	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
 		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
 	}

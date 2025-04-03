@@ -1,4 +1,4 @@
-package repository_wrappers
+package repo_wrappers
 
 import (
 	"log"

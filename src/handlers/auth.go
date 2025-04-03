@@ -6,7 +6,7 @@ import (
 	"log"
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/handlers/repository_wrappers"
+	"minitwit/src/handlers/repo_wrappers"
 	"net/http"
 	"strings"
 
@@ -27,7 +27,7 @@ func Login(c echo.Context) error {
 		password := c.FormValue("password")
 
 
-		user, err := repository_wrappers.GetUserByUsername(context.Background(), username)
+		user, err := repo_wrappers.GetUserByUsername(context.Background(), username)
 
 		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
@@ -110,7 +110,7 @@ func Register(c echo.Context) error {
 		case password != password2:
 			errorMessage = "The two passwords do not match"
 		default:
-			existingUser, _ := repository_wrappers.GetUserByUsername(context.Background(), username)
+			existingUser, _ := repo_wrappers.GetUserByUsername(context.Background(), username)
 			if existingUser != nil {
 				errorMessage = "The username is already taken"
 			} else {
@@ -120,7 +120,7 @@ func Register(c echo.Context) error {
 					return err
 				}
 				
-				_ = repository_wrappers.CreateUser(username, email, hash)
+				_ = repo_wrappers.CreateUser(username, email, hash)
 				
 
 				if pwd == "" {
