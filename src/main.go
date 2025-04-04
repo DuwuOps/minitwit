@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gorilla/sessions"
@@ -10,9 +9,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"minitwit/src/datalayer"
+	"minitwit/src/handlers/helpers"
+	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/routes"
 	"minitwit/src/template_rendering"
-	"minitwit/src/handlers/helpers"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -26,11 +26,13 @@ func main() {
 
 	db, err := datalayer.InitDB()
 	if err != nil {
-		fmt.Printf("initDB returned error: %v\n", err)
+		log.Printf("initDB returned error: %v\n", err)
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer db.Close()
-
+	
+	repo_wrappers.InitRepos(db)
+	
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
@@ -39,7 +41,7 @@ func main() {
 
 	helpers.CreateLatestFile()
 
-	routes.SetupRoutes(app, db)
+	routes.SetupRoutes(app)
 
 	app.Logger.Fatal(app.Start(":8000"))
 }

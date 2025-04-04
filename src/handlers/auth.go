@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"database/sql"
+	"context"
 	"errors"
-	"fmt"
 	"log"
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
-	"minitwit/src/models"
+	"minitwit/src/handlers/repo_wrappers"
 	"net/http"
 	"strings"
 
@@ -15,38 +14,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Login(c echo.Context, db *sql.DB) error {
-	log.Println("User entered Login via route \"/login\"")
+func Login(c echo.Context) error {
+	log.Printf("🎺 User entered Login via route \"/login\" and HTTP method %v\n", c.Request().Method)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
 	}
-
-	var dbUser models.User
 
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-		dbUser.Username = username
 
-		err := db.QueryRow(`
-            SELECT user_id, pw_hash FROM user
-            WHERE username = ?
-        `, username).Scan(&dbUser.UserID, &dbUser.PwHash)
+		user, err := repo_wrappers.GetUserByUsername(context.Background(), username)
 
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
-			fmt.Printf("Db.QueryRow returned error: %v\n", err)
+			log.Printf("Db.QueryRow returned error: %v\n", err)
 			return err
 		} else {
-			if !checkPasswordHash(dbUser.PwHash, password) {
+			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
 			} else {
 				helpers.AddFlash(c, "You were logged in")
-				helpers.SetSessionUserID(c, dbUser.UserID)
+				helpers.SetSessionUserID(c, user.UserID)
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
@@ -61,8 +54,8 @@ func Login(c echo.Context, db *sql.DB) error {
 	return c.Render(http.StatusOK, "login.html", data)
 }
 
-func Register(c echo.Context, db *sql.DB) error {
-	log.Printf("User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
+func Register(c echo.Context) error {
+	log.Printf("🎺 User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -70,7 +63,7 @@ func Register(c echo.Context, db *sql.DB) error {
 
 	err := helpers.UpdateLatest(c)
 	if err != nil {
-		fmt.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
@@ -78,6 +71,9 @@ func Register(c echo.Context, db *sql.DB) error {
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
+		if err != nil {
+			log.Printf("Register: ExtractJson returned error: %v\n", err)
+		}
 
 		var username string
 		var email string
@@ -85,7 +81,7 @@ func Register(c echo.Context, db *sql.DB) error {
 		var password string
 		var password2 string
 
-		if err == nil {
+		if payload != nil {
 			username = helpers.GetStringValue(payload, "username")
 			email = helpers.GetStringValue(payload, "email")
 			pwd = helpers.GetStringValue(payload, "pwd")
@@ -114,23 +110,18 @@ func Register(c echo.Context, db *sql.DB) error {
 		case password != password2:
 			errorMessage = "The two passwords do not match"
 		default:
-			existingID, _ := datalayer.GetUserId(username, db)
-			if existingID != 0 {
+			existingUser, _ := repo_wrappers.GetUserByUsername(context.Background(), username)
+			if existingUser != nil {
 				errorMessage = "The username is already taken"
 			} else {
 				hash, err := generatePasswordHash(password)
 				if err != nil {
-					fmt.Printf("generatePasswordHash returned error: %v\n", err)
+					log.Printf("generatePasswordHash returned error: %v\n", err)
 					return err
 				}
-				_, err = db.Exec(`
-                    INSERT INTO user (username, email, pw_hash)
-                    VALUES (?, ?, ?)
-                `, username, email, hash)
-				if err != nil {
-					fmt.Printf("Db.Exec returned error: %v\n", err)
-					return err
-				}
+				
+				_ = repo_wrappers.CreateUser(username, email, hash)
+				
 
 				if pwd == "" {
 					helpers.AddFlash(c, "You were successfully registered and can login now")
@@ -159,6 +150,7 @@ func Register(c echo.Context, db *sql.DB) error {
 }
 
 func Logout(c echo.Context) error {
+	log.Println("🎺 User entered Logout via route \"/logout\"")
 	helpers.ClearSessionUserID(c)
 	helpers.AddFlash(c, "You were logged out")
 	return c.Redirect(http.StatusFound, "/public")
