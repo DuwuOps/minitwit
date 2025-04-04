@@ -85,16 +85,28 @@
             chmod 600 ~/.ssh/id_do_test_env_rsa
           env:
             TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-  
+
         - name: Deploy to Digital Ocean droplet via SSH action
           env:
+            DB_USER: ${{ vars.DB_USER }}
+            DB_PASSWORD: ${{ secrets.TEST_ENV_DB_PASSWORD }}
+            DB_HOST: ${{ vars.TEST_ENV_DB_HOST }}
+            DB_PORT: ${{ vars.DB_PORT }}
+            DB_NAME: ${{ vars.DB_NAME }}
             DOCKER_IMAGE: ${{ vars.DOCKER_USERNAME }}/minitwit:test
           uses: appleboy/ssh-action@master
           with:
             host: ${{ vars.TEST_ENV_SSH_HOST }}
             username: ${{ vars.SSH_USER }}
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-            envs: DOCKER_IMAGE
+            envs:
+              DOCKER_IMAGE,
+              DB_USER,
+              DB_PASSWORD,
+              DB_HOST,
+              DB_PORT,
+              DB_NAME,
+              DOCKER_IMAGE
             script: |
               docker rm $(docker stop $(docker ps -a --filter ancestor=$DOCKER_IMAGE --format="{{.ID}}"))
               docker image pull $DOCKER_IMAGE
