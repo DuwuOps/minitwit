@@ -56,11 +56,6 @@ jobs:
       run: |
         docker compose down -v --rmi local
 
-
-    - name: Destroy Docker artifacts after tests
-      run: |
-        docker compose down -v --rmi local
-
   push:
     name: Build & Push
     runs-on: ubuntu-latest
