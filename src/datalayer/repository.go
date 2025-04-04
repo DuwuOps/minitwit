@@ -231,7 +231,7 @@ func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[strin
 
 func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...any) (*T, error) {
     
-    query := fmt.Sprintf("SELECT * FROM %s WHERE %s = #1", r.tableName, field)
+    query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1", r.tableName, field)
     log.Printf("📝 Executing Query: %s | Values: %v", query, values)
 
 	row := r.db.QueryRowContext(ctx, query, values...)
