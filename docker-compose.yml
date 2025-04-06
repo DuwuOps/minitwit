@@ -17,6 +17,8 @@ services:
     depends_on:
       - grafana
       - prometheus
+      - alloy
+      - loki
 
 
   prometheus:
@@ -30,6 +32,30 @@ services:
     networks:
       - main
 
+  alloy:
+    build: 
+      dockerfile: ./Dockerfile
+      context: ./.infrastructure/alloy
+    image: alloy_image
+    container_name: alloy
+    ports: "12345:12345"
+    volumes:
+      - ./alloy-config.alloy:/etc/alloy/config.alloy
+      - ./logs:/tmp/app-logs/
+    networks:
+      - main
+  
+  loki:
+    build: 
+      dockerfile: ./Dockerfile
+      context: ./.infrastructure/loki
+    image: loki_image
+    container_name: loki
+    ports: "3100:3100"
+    networks:
+      - main  
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml
 
   grafana:
     build: 
