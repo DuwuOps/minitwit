@@ -9,6 +9,7 @@ import (
 func InitializeMessageMetricies() {
 	metrics := []prometheus.Collector{
 		MessagesPosts,
+		MessagesTotal,
 	}
 
 	for _, metric := range metrics {
@@ -25,3 +26,12 @@ var MessagesPosts = prometheus.NewCounterVec(
 	},
 	[]string{"hour", "weekday"},
 )
+
+// Snapshots
+var MessagesTotal = prometheus.NewGauge(
+	prometheus.GaugeOpts{
+		Name: "minitwit_messages_total",
+		Help: "Number of messages posted, labeled by authorID.",
+	},
+)
+
