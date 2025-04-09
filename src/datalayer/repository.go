@@ -92,6 +92,23 @@ func (r *Repository[T]) GetByID(ctx context.Context, id int) (*T, error) {
     return r.queryRow(ctx, primaryKey, id)
 }
 
+func (r *Repository[T]) CountAll(ctx context.Context) (int, error) {
+    query := fmt.Sprintf(`
+        SELECT COUNT(*)
+        FROM %s
+    `, r.tableName)
+    
+    row := r.db.QueryRowContext(ctx, query)
+    var count int
+    if err := row.Scan(&count); err != nil {
+        return 0, err
+    }
+
+    log.Printf("📝 Executed Query: %s | Values: %v", query, count)
+    
+    return count, nil
+}
+
 func detectPrimaryKey(tableName string) string {
 	switch tableName {
 	case "user":
