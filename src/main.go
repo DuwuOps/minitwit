@@ -14,6 +14,7 @@ import (
 	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/metrics"
 	"minitwit/src/routes"
+	"minitwit/src/snapshots"
 	"minitwit/src/template_rendering"
 )
 
@@ -51,6 +52,8 @@ func main() {
 	helpers.CreateLatestFile()
 
 	routes.SetupRoutes(app)
+
+	snapshots.RecordSnapshots()
 
 	app.Logger.Fatal(app.Start(":8000"))
 }
