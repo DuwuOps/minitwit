@@ -9,6 +9,7 @@ import (
 func InitializeUserMetricies() {
 	metrics := []prometheus.Collector{
 		NewUsers,
+		TotalUsers,
 	}
 
 	for _, metric := range metrics{
@@ -24,3 +25,9 @@ var NewUsers = prometheus.NewCounter(
     },
 )
 
+var TotalUsers = prometheus.NewGauge(
+    prometheus.GaugeOpts{
+        Name: "minitwit_users_created_total",
+        Help: "Total number of current users created.",
+    },
+)
