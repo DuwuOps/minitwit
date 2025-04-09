@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/metrics"
 	"minitwit/src/models"
 
 	"github.com/labstack/echo/v4"
@@ -64,6 +65,7 @@ func CreateUser(username string, email string, hash string) error {
 		log.Printf("userRepo.Create returned error: %v\n", err)
 		return err
 	}
+	metrics.NewUsers.Inc()
 	return nil
 }
 
