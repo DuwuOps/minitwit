@@ -69,6 +69,15 @@ func CreateUser(username string, email string, hash string) error {
 	return nil
 }
 
+func CountAllUsers(c context.Context) (int, error) {
+	user, err := userRepo.CountAll(c)
+	if err != nil {
+		log.Printf("❌ Repository Error: CountAllUsers returned error: %v\n", err)
+		return 0, err
+	}
+	return user, nil
+}
+
 func GetUserMap(c echo.Context, userIDs []int) map[string]*models.User {
 	return nil
 }
