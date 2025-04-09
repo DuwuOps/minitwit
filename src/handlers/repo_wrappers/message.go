@@ -3,7 +3,9 @@ package repo_wrappers
 import (
 	"log"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/metrics"
 	"minitwit/src/models"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,6 +17,12 @@ func CreateMessage(c echo.Context, authorID int, text string) error {
 		log.Printf("messageRepo.Create returned error: %v\n", err)
 		return err
 	}
+
+	pubTime := utils.GetTimeFromInt(newMessage.PubDate)
+	metrics.MessagesPosts.WithLabelValues(
+		utils.GetHourAsString(pubTime), 
+		utils.GetWeekdayAsString(pubTime),
+		).Inc()
 	return nil
 }
 
