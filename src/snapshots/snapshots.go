@@ -23,4 +23,5 @@ func RecordSnapshots() {
 	ticker := time.NewTicker(time.Duration(snapshotInterval) * time.Second)
 
 	RunUserSnapshotsAsync(ticker)
+	RunFollowerSnapshotsAsync(ticker)
 }
