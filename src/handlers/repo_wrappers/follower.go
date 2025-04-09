@@ -40,3 +40,12 @@ func GetFollowerFiltered(c echo.Context, conditions map[string]any, noFollowers 
 	}
 	return followers, nil
 }
+
+func CountFieldInRange(c context.Context, field string, lower, upper int) (int, error) {
+    count, err := followerRepo.CountRowsWhenGroupedByFieldInRange(c, field, lower, upper)
+	if err != nil {
+		log.Printf("❌ Repository Error: CountFieldInRange returned err %v", err)
+		return 0, err
+	}
+	return count, nil
+}
