@@ -184,6 +184,24 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
     return results, nil
 }
 
+func (r *Repository[T]) CountRowsWhenGroupedByFieldInRange(ctx context.Context, field string, lower, upper int) (int, error) {
+    query := fmt.Sprintf(`
+        SELECT COUNT(*)
+        FROM (
+            SELECT %s, COUNT(*) AS amount
+            FROM %s
+            GROUP BY %s
+        ) sub
+        WHERE amount BETWEEN ? AND ?;
+    `, field, r.tableName, field)
+    
+    row := r.db.QueryRowContext(ctx, query, lower, upper)
+    var count int
+    if err := row.Scan(&count); err != nil {
+        return 0, err
+    }
+    return count, nil
+}
 
 func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[string]any) error {
     var whereClauses []string
