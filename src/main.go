@@ -44,9 +44,7 @@ func main() {
 	// Setup middleware for Prometheus
 	app.Use(echoprometheus.NewMiddleware("minitwit"))
 
-	if err := metrics.Initialize(); err != nil {
-		log.Fatal(err)
-	}
+	metrics.Initialize()
 
 	app.Use(metrics.PrometheusMiddleware()) // For metrics
 
