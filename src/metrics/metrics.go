@@ -4,4 +4,5 @@ func Initialize() {
 	InitializeMemoryMetricies()
 	InitializeUserMetricies()
 	InitializeMessageMetricies()
+	InitializeFollowerMetricies()
 }
