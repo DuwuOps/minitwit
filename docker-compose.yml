@@ -16,6 +16,8 @@ services:
     depends_on:
       - grafana
       - prometheus
+    environment:
+      - SNAPSHOT_TIME_INTERVAL_SECONDS=300
 
   prometheus:
     build: 
