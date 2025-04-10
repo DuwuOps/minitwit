@@ -10,6 +10,7 @@ func InitializeMessageMetricies() {
 	metrics := []prometheus.Collector{
 		MessagesPosts,
 		MessagesTotal,
+		FlaggedMessagesTotal,
 	}
 
 	for _, metric := range metrics {
@@ -35,3 +36,9 @@ var MessagesTotal = prometheus.NewGauge(
 	},
 )
 
+var FlaggedMessagesTotal = prometheus.NewGauge(
+	prometheus.GaugeOpts{
+		Name: "minitwit_flagged_messages_total",
+		Help: "Number of flagged messages, labeled by authorID.",
+	},
+)
