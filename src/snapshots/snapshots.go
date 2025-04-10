@@ -24,4 +24,5 @@ func RecordSnapshots() {
 
 	RunUserSnapshotsAsync(ticker)
 	RunFollowerSnapshotsAsync(ticker)
+	RunMessagesSnapshotsAsync(ticker)
 }
