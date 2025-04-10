@@ -77,3 +77,12 @@ func CountAllMessages(c context.Context) (int, error) {
 	}
 	return count, nil
 }
+
+func CountFilteredMessages(c context.Context, conditions map[string]any) (int, error) {
+	msgs, err := messageRepo.GetFiltered(c, conditions, 0, "")
+	if err != nil {
+		log.Printf("❌ Repository Error: CountFilteredMessages returned error: %v\n", err)
+		return 0, err
+	}
+	return len(msgs), nil
+}
