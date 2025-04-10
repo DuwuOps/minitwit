@@ -7,3 +7,10 @@ datasources:
     url: http://${PROMETHEUS_HOST}
     isDefault: true
     editable: false
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: 'http://${LOKI_HOST}'
+    limits_config:
+      volume-enabled: true
