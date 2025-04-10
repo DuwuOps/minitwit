@@ -1,6 +1,7 @@
 package repo_wrappers
 
 import (
+	"context"
 	"log"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/metrics"
@@ -66,4 +67,13 @@ func EnhanceMessages(c echo.Context, msgs []models.Message, isAPI bool) ([]map[s
 		enrichedMsgs = append(enrichedMsgs, enrichedMsg)
 	}
 	return enrichedMsgs
+}
+
+func CountAllMessages(c context.Context) (int, error) {
+	count, err := messageRepo.CountAll(c)
+	if err != nil {
+		log.Printf("❌ Repository Error: CountAllMessages returned error: %v\n", err)
+		return 0, err
+	}
+	return count, nil
 }
