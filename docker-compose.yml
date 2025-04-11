@@ -34,8 +34,6 @@ services:
       context: ./.infrastructure/alloy
     image: alloy_image
     container_name: alloy 
-    ports: 
-      - 12345:12345
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -47,8 +45,6 @@ services:
       context: ./.infrastructure/loki
     image: loki_image
     container_name: loki
-    ports: 
-      - "3100:3100"
     networks:
       - main  
 
