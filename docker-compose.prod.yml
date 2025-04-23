@@ -7,8 +7,13 @@ services:
     volumes:
       - sqliteDB:/minitwit/tmp
 
-
   prometheus:
+    build: !reset null
+
+  alloy:
+    build: !reset null
+
+  loki:
     build: !reset null
 
   grafana:

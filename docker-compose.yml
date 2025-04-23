@@ -1,6 +1,5 @@
 networks:
-  main:
-    name: minitwit-network
+  main:    
 
 services:
   app:
@@ -18,7 +17,6 @@ services:
       - grafana
       - prometheus
 
-
   prometheus:
     build: 
       dockerfile: ./Dockerfile
@@ -30,6 +28,25 @@ services:
     networks:
       - main
 
+  alloy:
+    build: 
+      dockerfile: ./Dockerfile
+      context: ./.infrastructure/alloy
+    image: alloy_image
+    container_name: alloy 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - main
+  
+  loki:
+    build: 
+      dockerfile: ./Dockerfile
+      context: ./.infrastructure/loki
+    image: loki_image
+    container_name: loki
+    networks:
+      - main  
 
   grafana:
     build: 
@@ -41,11 +58,11 @@ services:
       - "3000:3000"  
     environment:
       - PROMETHEUS_HOST=prometheus:9090
+      - LOKI_HOST=loki:3100
     networks:
       - main
     volumes:
       - grafana-storage:/var/lib/grafana
-
 
 volumes:
   sqliteDB:

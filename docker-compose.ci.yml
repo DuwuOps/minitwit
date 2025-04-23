@@ -7,3 +7,9 @@ services:
 
   grafana:
     image: ${DOCKER_USERNAME}/grafana:latest
+
+  loki:
+    image: ${DOCKER_USERNAME}/loki:latest
+
+  alloy:
+    image: ${DOCKER_USERNAME}/alloy:latest
