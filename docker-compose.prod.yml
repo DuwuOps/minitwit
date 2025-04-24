@@ -22,8 +22,9 @@ services:
       - "0.0.0.0:3000:3000"  
     volumes:
       - grafana-storage:/var/lib/grafana
+    
+  database: null # Ignore database during deployment
 
 
 volumes:
   grafana-storage: {}
-  sqliteDB: {}
