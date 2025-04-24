@@ -20,15 +20,15 @@ execute_all() {
     echo "Executing the $file_amount files in $dir_path"
     for  (( i=0; i < $file_amount; ++i ))
     do
-        # The split command does not simply split the files into 0,1,2,3... Instead it has a weird naming scheme were it goes 9001 after 89 and 901 after 99..?
+        # The split command does not simply split the files into 0,1,2,3... Instead it has a weird naming scheme were it goes 9001 after 89
         if [ $((i<10)) -eq 1 ] 
         then
             file_name=0${i}.sql
-        elif [ $((99<i)) -eq 1 ] 
+        elif [ $((99<i)) -eq 1 ] # If i-90 >= 10
         then
             new_i="$(($i-90))"
             file_name=90$new_i.sql
-        elif [ $((89<i)) -eq 1 ] 
+        elif [ $((89<i)) -eq 1 ] # If i-90 < 10
         then
             new_i="$(($i-90))"
             file_name=900$new_i.sql
