@@ -62,3 +62,21 @@ dump_table_data() {
 dump_table_data "user"
 dump_table_data "message"
 dump_table_data "follower"
+
+
+# Remove previously added items
+filter() {
+    table_name=$1
+    NEWEST_TIMESTAMP_DIR=$(ls "../../" | sed "/$TIMESTAMP/d" | grep -o "[0-9]\+" | tail -1)
+
+    echo "Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
+    #grep -vxF -f /../$NEWEST_TIMESTAMP_DIR/data.$table_name.sql data.$table_name.sql > filtered_data.$table_name.sql
+    grep -vxF -f "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" "data.$table_name.sql" > filtered_data.$table_name.sql
+
+    line_amount=$(wc -l < filtered_data.$table_name.sql)
+    echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
+}
+
+filter "users"
+filter "message"
+filter "follower"
