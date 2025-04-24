@@ -37,7 +37,7 @@ resource "digitalocean_ssh_key" "default" {
 
 #From https://medium.com/@lilnya79/getting-started-with-digitalocean-terraform-and-docker-a-step-by-step-guide-ef43b0513f51
 resource "digitalocean_droplet" "minitwit_droplet" {
-  name      = "minitwit-droplet"
+  name      = "test-web"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
   image     = "ubuntu-24-10-x64"
