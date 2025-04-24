@@ -80,3 +80,26 @@ filter() {
 filter "users"
 filter "message"
 filter "follower"
+
+
+# Split sql-query-files into files of maximum 20000 lines each
+
+SPLIT_DIR="split"
+mkdir $SPLIT_DIR
+cd $SPLIT_DIR
+
+
+split_dump() {
+    table_name=$1
+    OUTPUT_DIR="queries/split"
+    mkdir $table_name
+    split -dl 20000 --additional-suffix=.sql ../filtered_data.$table_name.sql $table_name/
+    echo "filtered_data.$table_name.sql has been split into $(find $table_name -type f | wc -l) files"
+}
+
+
+split_dump "users"
+split_dump "follower"
+split_dump "message"
+
+
