@@ -23,3 +23,42 @@ DATABASE_FILE=minitwit.db
 echo "Copying $DATABASE_FILE to $ENV_DIR/$TIMESTAMP/$DATABASE_FILE"
 
 scp root@134.209.137.191:/var/lib/docker/volumes/minitwit_sqliteDB/_data//minitwit.db $DATABASE_FILE
+
+
+# Create data-dump files from local copy of database-file
+
+if [[ ! -f $DATABASE_FILE ]] ; then
+    echo "File '$DATABASE_FILE' is not here, aborting."
+    exit
+fi
+
+QUERIES_DIR=queries
+mkdir $QUERIES_DIR
+cd $QUERIES_DIR
+
+dump_table_data() {
+    table_name=$1
+    output_table=$table_name
+    if [ "$table_name" == "user" ]; then
+        output_table="${output_table}s"
+    fi
+    sqlite3 ../$DATABASE_FILE ".schema '$table_name'" > schema.$output_table.sql
+    sqlite3 ../$DATABASE_FILE ".dump '$table_name'" > dump.$output_table.sql
+    grep -vxF -f schema.$output_table.sql dump.$output_table.sql > data.$output_table.sql
+    rm -f schema.$output_table.sql
+    rm -f dump.$output_table.sql
+    sed -i -E '/PRAGMA foreign_keys=OFF;/d' data.$output_table.sql
+    sed -i -E '/BEGIN TRANSACTION;/d' data.$output_table.sql
+    sed -i -E '/COMMIT;/d' data.$output_table.sql
+    sed -i -E '/\/****** CORRUPTION ERROR *******\//d' data.$output_table.sql
+    if [ "$table_name" == "user" ]; then
+        sed -i -E "s/INSERT INTO $table_name VALUES/INSERT INTO $output_table VALUES/" data.$output_table.sql
+    fi
+
+    line_amount=$(wc -l < data.$output_table.sql)
+    echo "Extracted $line_amount lines from $output_table in $DATABASE_FILE"
+}
+
+dump_table_data "user"
+dump_table_data "message"
+dump_table_data "follower"
