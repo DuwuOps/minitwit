@@ -68,13 +68,17 @@ dump_table_data "follower"
 filter() {
     table_name=$1
     NEWEST_TIMESTAMP_DIR=$(ls "../../" | sed "/$TIMESTAMP/d" | grep -o "[0-9]\+" | tail -1)
+    if [ "$NEWEST_TIMESTAMP_DIR" == "" ]; then
+        echo "No previous timestamped folders found for filtering."
+        cat data.$table_name.sql > filtered_data.$table_name.sql
+    else
+        echo "Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
+        #grep -vxF -f /../$NEWEST_TIMESTAMP_DIR/data.$table_name.sql data.$table_name.sql > filtered_data.$table_name.sql
+        grep -vxF -f "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" "data.$table_name.sql" > filtered_data.$table_name.sql
 
-    echo "Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
-    #grep -vxF -f /../$NEWEST_TIMESTAMP_DIR/data.$table_name.sql data.$table_name.sql > filtered_data.$table_name.sql
-    grep -vxF -f "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" "data.$table_name.sql" > filtered_data.$table_name.sql
-
-    line_amount=$(wc -l < filtered_data.$table_name.sql)
-    echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
+        line_amount=$(wc -l < filtered_data.$table_name.sql)
+        echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
+    fi
 }
 
 filter "users"
