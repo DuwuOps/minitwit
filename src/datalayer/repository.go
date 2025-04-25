@@ -240,10 +240,11 @@ func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...an
 
 	err := row.Scan(fields...)
 	if err != nil {
-        log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
 		if errors.Is(err, sql.ErrNoRows) {
+			log.Printf("⚠️ Warning: Query: %s | Values: %v | Err: %v", query, values, err)
 			return nil, ErrRecordNotFound
 		}
+		log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
 		return nil, err
 	}
 	return &entity, nil
