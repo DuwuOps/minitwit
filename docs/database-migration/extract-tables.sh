@@ -105,5 +105,3 @@ split_dump() {
 split_dump "users"
 split_dump "follower"
 split_dump "message"
-
-
