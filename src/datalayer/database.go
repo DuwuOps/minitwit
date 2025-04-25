@@ -19,8 +19,8 @@ const (
 
 func connectDB() (*sql.DB, error) {
 	DbUserName := helpers.GetEnvVar("DB_USER", "admin")
-	DbPass := helpers.GetEnvVar("DB_PASSWORD", "localhost")
-	DbHost := helpers.GetEnvVar("DB_HOST", "database")
+	DbPass := helpers.GetEnvVar("DB_PASSWORD", "postgres")
+	DbHost := helpers.GetEnvVar("DB_HOST", "localhost")
 	DbPort := helpers.GetEnvVar("DB_PORT", "5433")
 	DbName := helpers.GetEnvVar("DB_NAME", "minitwit")
 	SSLMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
