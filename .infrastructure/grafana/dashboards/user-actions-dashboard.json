@@ -36,8 +36,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -72,7 +71,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -137,8 +136,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -169,7 +167,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "datasource": {
@@ -207,8 +205,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -250,7 +247,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -315,7 +312,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -348,8 +345,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -384,7 +380,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -416,8 +412,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -452,7 +447,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "datasource": {
@@ -521,8 +516,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -553,7 +547,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -586,8 +580,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -629,7 +622,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "datasource": {
@@ -638,7 +631,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "minitwit_followees_total{range=\"1-20\"}",
+          "expr": "minitwit_follower_total{range=\"1-20\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -655,7 +648,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "minitwit_followees_total{range=\"21-50\"}",
+          "expr": "minitwit_follower_total{range=\"21-50\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -672,7 +665,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "minitwit_followees_total{range=\"51-100\"}",
+          "expr": "minitwit_follower_total{range=\"51-100\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -689,7 +682,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "minitwit_followees_total{range=\"101-500\"}",
+          "expr": "minitwit_follower_total{range=\"101-500\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -838,8 +831,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -881,7 +873,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "11.6.1",
       "targets": [
         {
           "datasource": {
@@ -1077,7 +1069,7 @@
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 40,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": []
@@ -1090,6 +1082,5 @@
   "timezone": "browser",
   "title": "User Actions",
   "uid": "dei6zq9g5pp1ce",
-  "version": 29,
-  "weekStart": ""
+  "version": 1
 }
