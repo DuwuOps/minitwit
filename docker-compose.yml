@@ -74,6 +74,7 @@ services:
   # Database
   database:
     image: postgres:latest
+    container_name: database
     ports:
       - 5433:5432
     environment:
@@ -82,6 +83,8 @@ services:
       - POSTGRES_DB=${DB_NAME:-minitwit}
     volumes:
       - pgdata:/var/lib/postgresql/data 
+    networks:
+      - main
 
 volumes:
   grafana-storage: {}
