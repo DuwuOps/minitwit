@@ -38,3 +38,10 @@ create table if not exists message (
   pub_date integer,
   flagged integer
 );
+
+ALTER TABLE message
+ADD CONSTRAINT fk_author_id
+FOREIGN KEY (author_id)
+REFERENCES users(user_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
