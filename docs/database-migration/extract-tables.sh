@@ -73,9 +73,10 @@ filter() {
         echo "No previous timestamped folders found for filtering."
         cat data.$table_name.sql > filtered_data.$table_name.sql
     else
-        echo "Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
-        #grep -vxF -f /../$NEWEST_TIMESTAMP_DIR/data.$table_name.sql data.$table_name.sql > filtered_data.$table_name.sql
-        grep -vxF -f "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" "data.$table_name.sql" > filtered_data.$table_name.sql
+        echo "  Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
+        
+        # Sort the files
+        comm -23 "data.$table_name.sql" "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" > filtered_data.$table_name.sql # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
 
         line_amount=$(wc -l < filtered_data.$table_name.sql)
         echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
