@@ -10,11 +10,7 @@ create table if not exists follower (
   whom_id integer
 );
 
-CREATE OR REPLACE RULE ignore_duplicate_followers AS
-   ON INSERT TO follower
-   WHERE (EXISTS ( SELECT old.who_id
-           FROM follower old
-          WHERE old.who_id = new.who_id and old.whom_id = new.whom_id)) DO INSTEAD NOTHING;
+ALTER TABLE follower ADD PRIMARY KEY (who_id, whom_id);
 
 ALTER TABLE follower
 ADD CONSTRAINT fk_who_id
