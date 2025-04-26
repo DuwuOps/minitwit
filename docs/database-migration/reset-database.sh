@@ -5,15 +5,35 @@
 # Date: 11/04/2025
 ##
 
-DROP_STR="DROP TABLE IF EXISTS message;\n
-DROP TABLE IF EXISTS follower;\n
-DROP TABLE IF EXISTS users;"
+drop_table() {
+    table_name=$1
+    
+    echo # New line
+    echo "Dropping table $table_name..."
 
-echo -e $DROP_STR | ssh root@164.90.227.119 "docker exec -i database psql -U admin -d minitwit"
+    # DROP
+    DROP_STR="DROP TABLE IF EXISTS $table_name;"
+    echo -e $DROP_STR | ssh root@164.90.227.119 "docker exec -i database psql -U admin -d minitwit"
+}
+
+drop_table "follower"
+drop_table "message"
+drop_table "users"
 
 
 ENV_DIR=$(dirname "$0")
-QUERIES_PATH="${ENV_DIR}/../../src/queries/schema.sql"
-echo $QUERIES_PATH
+QUERIES_DIR="${ENV_DIR}/../../src/queries"
 
-cat $QUERIES_PATH | ssh root@164.90.227.119 "docker exec -i database psql -U admin -d minitwit"
+setup_table() {
+    table_name=$1
+
+    echo # New line
+    echo "Setting up table $table_name..."
+
+    # CREATE
+    cat "$QUERIES_DIR/schema.$table_name.sql" | ssh root@164.90.227.119 "docker exec -i database psql -U admin -d minitwit"
+}
+
+setup_table "users"
+setup_table "follower"
+setup_table "message"
