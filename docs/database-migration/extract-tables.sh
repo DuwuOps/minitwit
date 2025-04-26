@@ -53,6 +53,7 @@ dump_table_data() {
     sed -i -E '/\/****** CORRUPTION ERROR *******\//d' data.$output_table.sql
     if [ "$table_name" == "user" ]; then
         sed -i -E "s/INSERT INTO $table_name VALUES/INSERT INTO $output_table VALUES/" data.$output_table.sql
+        sed -i "1s/^/INSERT INTO users VALUES(0,'Uknown','unknown@unknown.com','\$2a\$10\$r1BVr0BDJVQd0f7NoN.p97jSBzyv67V97LrlbX9pRo.5mrYFFJG7T');\n/" data.$output_table.sql # To not lose messages and followings which use the user with user-id 0
     fi
 
     line_amount=$(wc -l < data.$output_table.sql)
