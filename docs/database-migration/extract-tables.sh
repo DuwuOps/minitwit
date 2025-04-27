@@ -101,10 +101,10 @@ mkdir split && cd "$_"
 
 split_dump() {
     table_name=$1
-    OUTPUT_DIR="queries/split"
+    file_name=filtered_data.$table_name.sql
     mkdir $table_name
-    split -dl 20000 --additional-suffix=.sql ../filtered_data.$table_name.sql $table_name/
-    echo "filtered_data.$table_name.sql has been split into $(find $table_name -type f | wc -l) files"
+    split -dl 20000 --additional-suffix=.sql ../$file_name $table_name/
+    echo "$file_name has been split into $(find $table_name -type f | wc -l) files"
 }
 
 
