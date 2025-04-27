@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	QueriesFile = "queries/schema.sql"
+	QueriesDirectory = "queries/"
 	MaxRetries  = 10
 	RetryDelay  = 2 * time.Second
 )
@@ -51,7 +51,30 @@ func connectDB() (*sql.DB, error) {
 
 // Creates the database tables from query in {QueriesFile}
 func createTablesIfNotExists(db *sql.DB) error {
+	// Create table "users"
+	err := createTableIfNotExists(db, "users")
+	if err != nil {
+		return err
+	}
+
+	// Create table "message"
+	err = createTableIfNotExists(db, "message")
+	if err != nil {
+		return err
+	}
+
+	// Create table "follower"
+	err = createTableIfNotExists(db, "follower")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createTableIfNotExists(db *sql.DB, tableName string) error {
 	// Read queries-file
+	QueriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
 	sqlFile, err := os.ReadFile(QueriesFile)
 	if err != nil {
 		log.Printf("os.ReadFile returned error: %v\n", err)
