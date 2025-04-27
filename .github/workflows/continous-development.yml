@@ -194,10 +194,4 @@ jobs:
               -f docker-compose.yml \
               -f docker-compose.ci.yml \
               -f docker-compose.prod.yml \
-              -e DB_USER=$DB_USER \
-              -e DB_PASSWORD=$DB_PASSWORD \
-              -e DB_HOST=$DB_HOST \
-              -e DB_PORT=$DB_PORT \
-              -e DB_NAME=$DB_NAME \
-              -e DB_SSL_MODE=disable \
               up -d --pull always
