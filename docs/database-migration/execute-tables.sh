@@ -8,8 +8,6 @@
 ENV_DIR=$(dirname "$0")
 NEWEST_TIMESTAMP_DIR=$(ls $ENV_DIR |  grep -o "[0-9]\+" | tail -1)
 cd $ENV_DIR/$NEWEST_TIMESTAMP_DIR
-OUTPUT_DIR="queries/split"
-
 echo "Executing queries in newest timestamped folder: '$NEWEST_TIMESTAMP_DIR'"
 
 execute_all() {
