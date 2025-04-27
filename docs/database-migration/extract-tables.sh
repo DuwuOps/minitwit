@@ -12,8 +12,7 @@ ENV_DIR=$(dirname "$0")
 cd $ENV_DIR
 
 TIMESTAMP=$(date +"%s")
-mkdir $TIMESTAMP
-cd $TIMESTAMP
+mkdir $TIMESTAMP && cd "$_"
 
 # Copy database-file from prod-web-server
 
@@ -32,9 +31,8 @@ if [[ ! -f $DATABASE_FILE ]] ; then
     exit
 fi
 
-QUERIES_DIR=queries
-mkdir $QUERIES_DIR
-cd $QUERIES_DIR
+# Create data-dump files from local copy of database-file
+mkdir queries && cd "$_"
 
 dump_table_data() {
     table_name=$1
@@ -89,10 +87,7 @@ filter "follower"
 
 
 # Split sql-query-files into files of maximum 20000 lines each
-
-SPLIT_DIR="split"
-mkdir $SPLIT_DIR
-cd $SPLIT_DIR
+mkdir split && cd "$_"
 
 
 split_dump() {
