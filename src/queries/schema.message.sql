@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS message (
   flagged INTEGER
 );
 
+
+ALTER TABLE message DROP CONSTRAINT IF EXISTS fk_author_id;
+
 ALTER TABLE message
 ADD CONSTRAINT fk_author_id
 FOREIGN KEY (author_id)
