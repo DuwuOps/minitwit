@@ -21,7 +21,13 @@ HEADERS = {'Connection': 'close',
 def init_db():
     """Creates the database tables."""
     with closing(sqlite3.connect(DATABASE)) as db:
-        with open("queries/schema.sql") as fp:
+        with open("queries/schema.users.sql") as fp:
+            db.cursor().executescript(fp.read())
+        db.commit()
+        with open("queries/schema.message.sql") as fp:
+            db.cursor().executescript(fp.read())
+        db.commit()
+        with open("queries/schema.follower.sql") as fp:
             db.cursor().executescript(fp.read())
         db.commit()
 

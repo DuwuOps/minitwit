@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS follower (
+  who_id INTEGER,
+  whom_id INTEGER
+);
+
+ALTER TABLE follower ADD PRIMARY KEY (who_id, whom_id);
+
+ALTER TABLE follower
+ADD CONSTRAINT fk_who_id
+FOREIGN KEY (who_id)
+REFERENCES users(user_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
+
+ALTER TABLE follower
+ADD CONSTRAINT fk_whom_id
+FOREIGN KEY (whom_id)
+REFERENCES users(user_id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
