@@ -21,7 +21,7 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
     
-  database: null # Ignore database during deployment
+  database: !reset null
 
 
 volumes:
