@@ -23,9 +23,6 @@ echo "Copying $DATABASE_FILE to $ENV_DIR/$TIMESTAMP/$DATABASE_FILE"
 
 scp root@134.209.137.191:/var/lib/docker/volumes/minitwit_sqliteDB/_data//minitwit.db $DATABASE_FILE
 
-
-# Create data-dump files from local copy of database-file
-
 if [[ ! -f $DATABASE_FILE ]] ; then
     echo "File '$DATABASE_FILE' is not here, aborting."
     exit
