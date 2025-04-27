@@ -77,8 +77,8 @@ filter() {
         echo "  Filtering $dump_file from $NEWEST_QUERIES_PATH/$dump_file"
         
         # Sort the files
-        sort "$dump_file" > $dump_file.new
-        sort "$NEWEST_QUERIES_PATH/$dump_file" > $dump_file.old
+        sort -u "$dump_file" > $dump_file.new
+        sort -u "$NEWEST_QUERIES_PATH/$dump_file" > $dump_file.old
 
         filtered_file=filtered_$dump_file
         comm -23 $dump_file.new $dump_file.old > $filtered_file # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
@@ -129,8 +129,8 @@ else
     echo "  Finding deleted followers..."
     
     # Sort the files
-    sort "$followers_file" > new.$followers_file
-    sort "$NEWEST_QUERIES_PATH/$followers_file" > old.$followers_file
+    sort -u "$followers_file" > new.$followers_file
+    sort -u "$NEWEST_QUERIES_PATH/$followers_file" > old.$followers_file
     comm -23 old.$followers_file new.$followers_file > $removed_followers_file # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
     rm new.$followers_file
     rm old.$followers_file
