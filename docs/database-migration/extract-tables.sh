@@ -64,19 +64,22 @@ dump_table_data "follower"
 
 
 # Remove previously added items
+NEWEST_TIMESTAMP_DIR=$(ls "../../" | sed "/$TIMESTAMP/d" | grep -o "[0-9]\+" | tail -1)
+NEWEST_QUERIES_PATH="../../$NEWEST_TIMESTAMP_DIR/queries"
+
 filter() {
     table_name=$1
-    NEWEST_TIMESTAMP_DIR=$(ls "../../" | sed "/$TIMESTAMP/d" | grep -o "[0-9]\+" | tail -1)
+    dump_file=data.$table_name.sql
     if [ "$NEWEST_TIMESTAMP_DIR" == "" ]; then
         echo "No previous timestamped folders found for filtering."
-        cat data.$table_name.sql > filtered_data.$table_name.sql
+        cat $dump_file > filtered_$dump_file
     else
-        echo "  Filtering data.$table_name.sql from ../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql"
+        echo "  Filtering $dump_file from $NEWEST_QUERIES_PATH/$dump_file"
         
         # Sort the files
         comm -23 "data.$table_name.sql" "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" > filtered_data.$table_name.sql # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
 
-        line_amount=$(wc -l < filtered_data.$table_name.sql)
+        line_amount=$(wc -l < $filted_file)
         echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
     fi
 }
