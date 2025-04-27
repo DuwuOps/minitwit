@@ -111,3 +111,37 @@ split_dump() {
 split_dump "users"
 split_dump "follower"
 split_dump "message"
+
+
+
+# Find removed followers
+cd ..
+
+
+# Find previously deleted items
+followers_file=data.follower.sql
+removed_followers_file=removed_$followers_file
+
+if [ "$NEWEST_TIMESTAMP_DIR" == "" ]; then
+    echo "No previous timestamped folders found for filtering."
+    touch $removed_followers_file
+else
+    echo "  Finding deleted followers..."
+    
+    # Sort the files
+    sort "$followers_file" > new.$followers_file
+    sort "$NEWEST_QUERIES_PATH/$followers_file" > old.$followers_file
+    comm -23 old.$followers_file new.$followers_file > $removed_followers_file # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
+    rm new.$followers_file
+    rm old.$followers_file
+
+    line_amount=$(wc -l < $removed_followers_file)
+    echo "$line_amount lines occoured in $NEWEST_TIMESTAMP_DIR/$followers_file that did not in $TIMESTAMP/$followers_file"
+
+    sed -i -E "s/INSERT INTO follower VALUES\(([0-9]+),([0-9]+)\);/DELETE FROM follower WHERE \(who_id,whom_id\) = \(\1,\2\);/" $removed_followers_file
+fi
+
+
+mkdir deletes
+split -dl 20000 --additional-suffix=.sql $removed_followers_file deletes/
+echo "$removed_followers_file has been split into $(find deletes -type f | wc -l) files"
