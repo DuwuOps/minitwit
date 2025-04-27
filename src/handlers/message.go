@@ -220,12 +220,12 @@ func Timeline(c echo.Context) error {
 
 	sessionUserId, _ := helpers.GetSessionUserID(c)
 
-	conditions := map[string]any{"who_id": sessionUserId}
+	conditions := map[string]any{"follower_id": sessionUserId}
 	followings, _ := repo_wrappers.GetFollowerFiltered(c, conditions, -1)
 
 	followedUserIDs := []int{sessionUserId} 
 	for _, f := range followings {
-		followedUserIDs = append(followedUserIDs, f.WhomID)
+		followedUserIDs = append(followedUserIDs, f.FollowingID)
 	}
 
 	conditions = map[string]any{

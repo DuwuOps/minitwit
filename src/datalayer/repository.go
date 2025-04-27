@@ -54,7 +54,7 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
             continue
         }
 
-        // Special handling for `author_id`, `who_id`, `whom_id`
+        // Special handling for `author_id`, `follower_id`, `following_id`
         if fieldName == "id" || strings.Contains(fieldName, "_id") {
             if val.Field(i).IsZero() {
                 log.Printf("⚠️ Skipping %s (auto-generated or missing)", fieldName)
@@ -118,7 +118,7 @@ func detectPrimaryKey(tableName string) string {
 	case "message":
 		return "message_id"
 	case "follower":
-		return "who_id" // Follower table has `who_id` and `whom_id`, adjust logic as needed.
+		return "follower_id" // Follower table has `follower_id` and `following_id`, adjust logic as needed.
 	default:
 		return "id" // Default to `id`, but this should never happen.
 	}

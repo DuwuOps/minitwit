@@ -1,6 +1,6 @@
 package models
 
 type Follower struct {
-	WhoID  int `db:"who_id"`  
-	WhomID int `db:"whom_id"` 
+	FollowerID  int `db:"follower_id"`  
+	FollowingID int `db:"following_id"` 
 }
