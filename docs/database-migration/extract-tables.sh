@@ -77,9 +77,15 @@ filter() {
         echo "  Filtering $dump_file from $NEWEST_QUERIES_PATH/$dump_file"
         
         # Sort the files
-        comm -23 "data.$table_name.sql" "../../$NEWEST_TIMESTAMP_DIR/queries/data.$table_name.sql" > filtered_data.$table_name.sql # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
+        sort "$dump_file" > $dump_file.new
+        sort "$NEWEST_QUERIES_PATH/$dump_file" > $dump_file.old
 
-        line_amount=$(wc -l < $filted_file)
+        filtered_file=filtered_$dump_file
+        comm -23 $dump_file.new $dump_file.old > $filtered_file # comm -23 means compare file 1 and 2 and only show lines unique to file 1.
+        rm $dump_file.new
+        rm $dump_file.old
+
+        line_amount=$(wc -l < $filtered_file)
         echo "$line_amount lines occoured in $TIMESTAMP/data.$table_name.sql that did not in $NEWEST_TIMESTAMP_DIR/data.$table_name.sql"
     fi
 }
