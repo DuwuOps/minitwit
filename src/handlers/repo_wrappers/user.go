@@ -35,8 +35,8 @@ func IsFollowingUser(c echo.Context, profileUserID int) bool {
 	}
 
 	conditions := map[string]any{
-		"who_id":  sessionUserID,
-		"whom_id": profileUserID,
+		"follower_id":  sessionUserID,
+		"following_id": profileUserID,
 	}
 	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, 1, "")
 

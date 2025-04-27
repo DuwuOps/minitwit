@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CreateFollower(c echo.Context, whoID int, whomID int) error {
-	newFollower := helpers.NewFollower(whoID, whomID)
+func CreateFollower(c echo.Context, followerID int, followingID int) error {
+	newFollower := helpers.NewFollower(followerID, followingID)
 	err := followerRepo.Create(context.Background(), newFollower)
 	if err != nil {
 		log.Printf("followerRepo.Create returned error: %v\n", err)
@@ -19,10 +19,10 @@ func CreateFollower(c echo.Context, whoID int, whomID int) error {
 	return nil
 }
 
-func DeleteFollower(c echo.Context, whoID int, whomID int) error {
+func DeleteFollower(c echo.Context, followerID int, followingID int) error {
 	conditions := map[string]any{
-		"who_id": whoID,
-		"WHOM_ID": whomID,
+		"follower_id": followerID,
+		"following_id": followingID,
 	}
 	err := followerRepo.DeleteByFields(c.Request().Context(), conditions)
 	if err != nil {

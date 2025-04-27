@@ -78,7 +78,7 @@ func Follow(c echo.Context) error {
 		noFollowers := GetNumber(c)
 
 		conditions := map[string]any{
-			"who_id": user.UserID,
+			"follower_id": user.UserID,
 		}
 		
 		followers, err := repo_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
@@ -90,7 +90,7 @@ func Follow(c echo.Context) error {
 
 		var followList []string
 		for _, follower := range followers {
-			targetUser, err := repo_wrappers.GetUserByID(c, follower.WhomID)
+			targetUser, err := repo_wrappers.GetUserByID(c, follower.FollowingID)
 			if err == nil {
 				followList = append(followList, targetUser.Username)
 			}

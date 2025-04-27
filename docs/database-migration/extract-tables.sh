@@ -135,7 +135,7 @@ else
     line_amount=$(wc -l < $removed_followers_file)
     echo "$line_amount lines occoured in $NEWEST_TIMESTAMP_DIR/$followers_file that did not in $TIMESTAMP/$followers_file"
 
-    sed -i -E "s/INSERT INTO follower VALUES\(([0-9]+),([0-9]+)\);/DELETE FROM follower WHERE \(who_id,whom_id\) = \(\1,\2\);/" $removed_followers_file
+    sed -i -E "s/INSERT INTO follower VALUES\(([0-9]+),([0-9]+)\);/DELETE FROM follower WHERE \(follower_id,following_id\) = \(\1,\2\);/" $removed_followers_file
 fi
 
 

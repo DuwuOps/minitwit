@@ -22,9 +22,9 @@ func NewUser(username string, email string, hash string) *models.User {
 	}
 }
 
-func NewFollower(whoID int, whomID int) *models.Follower {
+func NewFollower(followerID int, followingID int) *models.Follower {
 	return &models.Follower{
-		WhoID: whoID,
-		WhomID: whomID,
+		FollowerID: followerID,
+		FollowingID: followingID,
 	}
 }
