@@ -53,3 +53,30 @@ Run docker compose in detached mode:
 ```
 docker compose up -d
 ```
+
+# Use Golang linter locally
+You will need to do set up according to your prefrences and eitor. See documentation here: [golangci-lint](https://golangci-lint.run/welcome/integrations/)
+
+## For VSCode
+- Install the Go extension (you might need to switch to pre-release version)
+- in VSCode `ctrl+shift+p` and enter open user settings (JSON)
+- In this insert: 
+```JSON
+"go.lintTool": "golangci-lint-v2",
+"go.lintFlags": [
+  "--path-mode=abs",
+  "--fast-only"
+],
+"go.formatTool": "custom",
+"go.alternateTools": {
+  "customFormatter": "golangci-lint-v2"
+},
+"go.formatFlags": [
+  "fmt",
+  "--stdin"
+]
+```
+- Follow one of the many ways to install golangci-lint according to your system. [install](https://golangci-lint.run/welcome/install/)
+    - I used `go install github.com/golangci/golangci-lint/cmd/golangci-lint@lates` but it is not recomended as mistakes tend to happen.
+- Now you should be able to run `golangci-lint run` and see all the things it has found that should be cleaned. 
+    - If this doesn't work, but you do have golangci-lint in your go path try: `~/go/bin/golangci-lint run` 
