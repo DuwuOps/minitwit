@@ -58,7 +58,7 @@
             host: ${{ vars.TEST_ENV_SSH_HOST }}
             username: ${{ vars.SSH_USER }}
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-            source: "docker-compose.yml,docker-compose.ci.yml"
+            source: "docker-compose.yml,docker-compose.ci.test.yml,docker-compose.prod.yml"
             target: "~/.deploy/${{ github.event.repository.name }}/"
 
         - name: Login to Docker Hub
@@ -79,7 +79,7 @@
             push: true
             files: |
               docker-compose.yml
-              docker-compose.ci.yml
+              docker-compose.ci.test.yml
             set: |
               *.cache-to=type=gha,mode=max
               *.cache-from=type=gha
@@ -122,7 +122,8 @@
               cd ~/.deploy/${{ github.event.repository.name }}
               DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
                 -f docker-compose.yml \
-                -f docker-compose.ci.yml \
+                -f docker-compose.ci.test.yml \
+                -f docker-compose.prod.yml \
                 up -d --pull always
 
         - name: Check running Docker containers
