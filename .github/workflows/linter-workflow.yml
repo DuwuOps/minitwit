@@ -1,8 +1,5 @@
-name: golangci-lint
-on:
-  push:
-    branches:
-      - 93-golang-linter
+name: linter
+on: push
 
 permissions:
   contents: read
