@@ -196,7 +196,7 @@ func (r *Repository[T]) CountRowsWhenGroupedByFieldInRange(ctx context.Context, 
             FROM %s
             GROUP BY %s
         ) sub
-        WHERE amount BETWEEN ? AND ?;
+        WHERE amount BETWEEN $1 AND $2;
     `, field, r.tableName, field)
     
     row := r.db.QueryRowContext(ctx, query, lower, upper)
