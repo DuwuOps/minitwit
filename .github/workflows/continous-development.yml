@@ -74,7 +74,6 @@ jobs:
           push: true
           files: |
             docker-compose.yml
-            docker-compose.ci.yml
           set: |
             *.cache-to=type=gha,mode=max                                                                                
             *.cache-from=type=gha
@@ -167,7 +166,7 @@ jobs:
           host: ${{ vars.SSH_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "./docker-compose.yml,./docker-compose.ci.yml,./docker-compose.prod.yml"
+          source: "./docker-compose.yml,./docker-compose.prod.yml"
           target: "~/.deploy/${{ github.event.repository.name }}/"
 
       - name: Deploy to Digital Ocean droplet via SSH action
@@ -192,6 +191,5 @@ jobs:
             cd ~/.deploy/${{ github.event.repository.name }}
             DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
               -f docker-compose.yml \
-              -f docker-compose.ci.yml \
               -f docker-compose.prod.yml \
               up -d --pull always
