@@ -227,6 +227,24 @@ func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[strin
     return err
 }
 
+func (r *Repository[T]) SetAllFields(ctx context.Context, updates map[string]any) error {
+    var update_fields []string
+    var update_values []any
+
+    for update_field, update_value := range updates {
+        update_fields = append(update_fields, fmt.Sprintf("%s = ?", update_field))
+        update_values = append(update_values, update_value)
+    }
+
+    query := fmt.Sprintf("UPDATE %s SET %s", r.tableName, strings.Join(update_fields, ", "))
+    rowsAffected, err := r.executeQuery(ctx, query, update_values...)
+    if err == nil {
+        log.Printf("✅ Updated %d row(s) in %s with %s", rowsAffected, r.tableName, updates)
+    }
+    
+    return err
+}
+
 // Query Utils
 
 func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...any) (*T, error) {
