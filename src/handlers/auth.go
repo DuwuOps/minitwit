@@ -61,12 +61,11 @@ func Register(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/")
 	}
 
-	err := helpers.UpdateLatest(c)
+	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
 		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
-
 
 	var errorMessage string
 	if c.Request().Method == http.MethodPost {

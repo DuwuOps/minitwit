@@ -15,9 +15,9 @@ func Follow(c echo.Context) error {
 	username := c.Param("username")
 	log.Printf("🎺 User entered Follow via route \"/fllws/:username\" as \"/%v\"\n", username)
 
-	err := helpers.UpdateLatest(c)
+	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("repo_wrappers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 

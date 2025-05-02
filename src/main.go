@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"minitwit/src/datalayer"
-	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/metrics"
 	"minitwit/src/routes"
@@ -48,8 +47,6 @@ func main() {
 	metrics.Initialize()
 
 	app.Use(metrics.PrometheusMiddleware()) // For metrics
-
-	helpers.CreateLatestFile()
 
 	routes.SetupRoutes(app)
 

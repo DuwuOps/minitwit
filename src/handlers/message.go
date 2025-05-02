@@ -39,9 +39,9 @@ func AddMessage(c echo.Context) error {
 func Messages(c echo.Context) error {
 	log.Println("🎺 User entered Messages via route \"/msgs\"")
 
-	err := helpers.UpdateLatest(c)
+	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("repo_wrappers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
@@ -75,9 +75,9 @@ func MessagesPerUser(c echo.Context) error {
 	username := c.Param("username")
 	log.Printf("🎺 User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\" and HTTP method %v\n", username, c.Request().Method)
 
-	err := helpers.UpdateLatest(c)
+	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		log.Printf("repo_wrappers.UpdateLatest returned error: %v\n", err)
 		return err
 	}
 
