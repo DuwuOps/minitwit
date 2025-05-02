@@ -18,7 +18,7 @@ func GetLatest(c echo.Context) error {
 		return err
 	}
 
-	latestProcessedCommandId := 0
+	latestProcessedCommandId := int64(0)
 
 	if len(latestProcessedCommandStr) == 0 {
 		log.Printf("latestProcessedCommandId not found.\n")
