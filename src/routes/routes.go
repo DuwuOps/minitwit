@@ -2,7 +2,6 @@ package routes
 
 import (
 	"minitwit/src/handlers"
-	"minitwit/src/handlers/helpers"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
@@ -33,7 +32,7 @@ func SetupRoutes(app *echo.Echo) {
 	app.POST("/register", func(c echo.Context) error { return handlers.Register(c) })
 	app.GET("/logout", func(c echo.Context) error { return handlers.Logout(c) })
 
-	app.GET("/latest", func(c echo.Context) error { return helpers.GetLatest(c) })
+	app.GET("/latest", func(c echo.Context) error { return handlers.GetLatest(c) })
 	app.Static("/static", "static")
 
 	//Prometheus metrics route
