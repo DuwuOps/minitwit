@@ -58,7 +58,7 @@
             host: ${{ vars.TEST_ENV_SSH_HOST }}
             username: ${{ vars.SSH_USER }}
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-            source: "docker-compose.yml,docker-compose.prod.yml"
+            source: "docker-compose.yml,docker-compose.deploy.yml"
             target: "~/.deploy/${{ github.event.repository.name }}/"
 
         - name: Login to Docker Hub
@@ -120,7 +120,7 @@
               cd ~/.deploy/${{ github.event.repository.name }}
               DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
                 -f docker-compose.yml \
-                -f docker-compose.prod.yml \
+                -f docker-compose.deploy.yml \
                 up -d --pull always
 
         - name: Check running Docker containers
