@@ -19,7 +19,7 @@ drop_table() {
 drop_table "follower"
 drop_table "message"
 drop_table "users"
-
+drop_table "latest_processed"
 
 ENV_DIR=$(dirname "$0")
 QUERIES_DIR="${ENV_DIR}/../../src/queries"
@@ -37,3 +37,4 @@ setup_table() {
 setup_table "users"
 setup_table "follower"
 setup_table "message"
+setup_table "latest_processed"
