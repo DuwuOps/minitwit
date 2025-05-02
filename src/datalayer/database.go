@@ -69,6 +69,12 @@ func createTablesIfNotExists(db *sql.DB) error {
 		return err
 	}
 
+	// Create table "latest_processed"
+	err = createTableIfNotExists(db, "latest_processed")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

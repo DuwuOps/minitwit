@@ -30,6 +30,9 @@ def init_db():
         with open("queries/schema.follower.sql") as fp:
             db.cursor().executescript(fp.read())
         db.commit()
+        with open("queries/schema.latest_processed.sql") as fp:
+            db.cursor().executescript(fp.read())
+        db.commit()
 
 
 # Empty the database and initialize the schema again

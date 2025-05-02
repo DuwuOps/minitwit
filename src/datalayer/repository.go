@@ -119,6 +119,8 @@ func detectPrimaryKey(tableName string) string {
 		return "message_id"
 	case "follower":
 		return "follower_id" // Follower table has `follower_id` and `following_id`, adjust logic as needed.
+    case "latest_processed":
+        return "latest_processed_id"
 	default:
 		return "id" // Default to `id`, but this should never happen.
 	}
