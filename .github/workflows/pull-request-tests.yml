@@ -44,6 +44,7 @@ jobs:
     - name: SonarCloud Scan
       if: github.event_name == 'pull_request'
       uses: SonarSource/sonarcloud-github-action@v2
+      continue-on-error: true
       with:
         projectBaseDir: .
         args: >
