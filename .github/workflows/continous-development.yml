@@ -177,7 +177,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
-            docker compose \
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
               -f docker-compose.yml \
               -f docker-compose.deploy.yml \
               up -d --pull always

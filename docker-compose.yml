@@ -5,7 +5,7 @@ services:
   app:
     build: 
       dockerfile: ./Dockerfile
-    image: ${DOCKER_USERNAME:-duwuops}/minitwit:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}minitwit:${DOCKER_TAG:-local}
     container_name: app
     volumes:
       - sqliteDB:/minitwit/tmp
@@ -24,7 +24,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/prometheus
-    image: ${DOCKER_USERNAME:-duwuops}/prometheus:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}prometheus:${DOCKER_TAG:-local}
     container_name: prometheus
     ports:
       - "9090:9090"
@@ -35,7 +35,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/alloy
-    image: ${DOCKER_USERNAME:-duwuops}/alloy:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}alloy:${DOCKER_TAG:-local}
     container_name: alloy 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -46,7 +46,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/loki
-    image: ${DOCKER_USERNAME:-duwuops}/loki:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}loki:${DOCKER_TAG:-local}
     container_name: loki
     networks:
       - main  
@@ -55,7 +55,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/grafana
-    image: ${DOCKER_USERNAME:-duwuops}/grafana:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}grafana:${DOCKER_TAG:-local}
     container_name: grafana
     ports:
       - "3000:3000"  
