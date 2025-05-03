@@ -116,8 +116,7 @@
               DB_PASSWORD,
               DB_HOST,
               DB_PORT,
-              DB_NAME,
-              DOCKER_IMAGE
+              DB_NAME
             script: |
               cd ~/.deploy/${{ github.event.repository.name }}
               DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
