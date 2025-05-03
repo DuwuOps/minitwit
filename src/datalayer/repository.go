@@ -54,8 +54,8 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
             continue
         }
 
-        // Special handling for `author_id`, `follower_id`, `following_id`
-        if fieldName == "id" || strings.Contains(fieldName, "_id") {
+        // Special handling for "message_id" and "user_id"
+        if fieldName == "message_id" || fieldName == "user_id" {
             if val.Field(i).IsZero() {
                 log.Printf("⚠️ Skipping %s (auto-generated or missing)", fieldName)
                 continue
