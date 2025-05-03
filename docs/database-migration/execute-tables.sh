@@ -82,4 +82,3 @@ execute_all() {
 execute_all "users"
 execute_all "message"
 execute_all "follower"
-execute_all "latest_processed"

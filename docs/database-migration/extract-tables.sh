@@ -58,7 +58,6 @@ dump_table_data() {
 dump_table_data "user"
 dump_table_data "message"
 dump_table_data "follower"
-dump_table_data "latest_processed"
 
 
 # Remove previously added items
@@ -91,7 +90,6 @@ filter() {
 filter "users"
 filter "message"
 filter "follower"
-filter "latest_processed"
 
 
 # Split sql-query-files into files of maximum 20000 lines each
@@ -110,7 +108,7 @@ split_dump() {
 split_dump "users"
 split_dump "follower"
 split_dump "message"
-split_dump "latest_processed"
+
 
 
 # Find removed followers
