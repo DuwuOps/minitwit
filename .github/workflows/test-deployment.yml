@@ -106,7 +106,7 @@
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
             script: |
               cd ~/.deploy/${{ github.event.repository.name }}
-              DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
+              docker compose \
                 -f docker-compose.yml \
                 -f docker-compose.deploy.yml \
                 up -d --pull always
