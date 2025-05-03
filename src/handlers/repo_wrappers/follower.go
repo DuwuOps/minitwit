@@ -2,6 +2,7 @@ package repo_wrappers
 
 import (
 	"context"
+	"errors"
 	"log"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/models"
@@ -10,6 +11,11 @@ import (
 )
 
 func CreateFollower(c echo.Context, followerID int, followingID int) error {
+	if followerID == 0 || followingID == 0 {
+		err := errors.New("followerID and followingID must be set")
+        log.Printf("CreateFollower returned error: %v\n", err)
+		return err
+    }
 	newFollower := helpers.NewFollower(followerID, followingID)
 	err := followerRepo.Create(context.Background(), newFollower)
 	if err != nil {
