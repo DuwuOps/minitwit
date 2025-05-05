@@ -147,7 +147,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
         }
     }
 
-    query := fmt.Sprintf("SELECT DISTINCT * FROM %s", r.tableName)
+    query := fmt.Sprintf("SELECT * FROM %s", r.tableName)
     if len(whereClauses) > 0 {
         query += " WHERE " + strings.Join(whereClauses, " AND ")
     }
