@@ -16,18 +16,18 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout
+      uses: actions/checkout@main
 
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action
+      uses: docker/setup-buildx-action@master
 
     - name: Build Docker Container
       run: |
         docker compose up -d
 
     - name: Set up Python
-      uses: actions/setup-python
+      uses: actions/setup-python@main
       with:
         python-version: '3.x'
 
@@ -54,19 +54,19 @@ jobs:
     needs: tests
     steps:
       - name: Checkout
-        uses: actions/checkout
+        uses: actions/checkout@main
 
       - name: Login to Docker Hub
-        uses: docker/login-action
+        uses: docker/login-action@master
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action
+        uses: docker/setup-buildx-action@master
 
       - name: Build and push images
-        uses: docker/bake-action
+        uses: docker/bake-action@master
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
         with:
@@ -87,7 +87,7 @@ jobs:
     needs: tests
 
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@main
         with:
           fetch-depth: 0 # Get all tags and history 
 
@@ -151,7 +151,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout
+        uses: actions/checkout@main
 
       - name: Configure SSH
         run: |
@@ -162,7 +162,7 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
 
       - name: copy files to target server via scp
-        uses: appleboy/scp-action
+        uses: appleboy/scp-action@master
         with:
           host: ${{ vars.SSH_HOST }}
           username: ${{ vars.SSH_USER }}
@@ -177,7 +177,7 @@ jobs:
           DB_HOST: ${{ vars.DB_HOST }}
           DB_PORT: ${{ vars.DB_PORT }}
           DB_NAME: ${{ vars.DB_NAME }}
-        uses: appleboy/ssh-action
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.SSH_HOST }}
           username: ${{ vars.SSH_USER }}
