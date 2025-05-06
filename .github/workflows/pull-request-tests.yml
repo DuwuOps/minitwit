@@ -12,7 +12,6 @@ on:
       - main
 
   workflow_dispatch:
-    manual: true
 
 jobs:
   tests:
