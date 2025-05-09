@@ -77,6 +77,6 @@ You will need to do set up according to your prefrences and eitor. See documenta
 ]
 ```
 - Follow one of the many ways to install golangci-lint according to your system. [install](https://golangci-lint.run/welcome/install/)
-    - I used `go install github.com/golangci/golangci-lint/cmd/golangci-lint@lates` but it is not recomended as mistakes tend to happen.
+    - I used `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest` but it is not recomended as mistakes tend to happen.
 - Now you should be able to run `golangci-lint run` and see all the things it has found that should be cleaned. 
     - If this doesn't work, but you do have golangci-lint in your go path try: `~/go/bin/golangci-lint-v2 run` 
