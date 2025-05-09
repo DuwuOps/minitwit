@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS latest_processed (
-  latest_processed_id INTEGER PRIMARY KEY,
+  latest_processed_id INTEGER,
   date_updated INTEGER
 );
 
