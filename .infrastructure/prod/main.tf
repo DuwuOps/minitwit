@@ -52,8 +52,20 @@ resource "digitalocean_droplet" "minitwit_droplet" {
     host        = self.ipv4_address
   }
 
+  provisioner "file" {
+    source      = "../../docker-compose.yml"
+    destination = "~/.deploy/docker-compose.yml"
+  }
+
+
+  provisioner "file" {
+    source      = "../../docker-compose.deploy.yml"
+    destination = "~/.deploy/docker-compose.deploy.yml"
+  }
+
   provisioner "remote-exec" {
     inline = [
+        ### Install Docker on Droplet ###
         # Add Docker's official GPG key:
         "sudo apt update",
         "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
@@ -65,7 +77,26 @@ resource "digitalocean_droplet" "minitwit_droplet" {
         "sudo apt install -y docker-ce",
         "sudo systemctl start docker",
         "sudo systemctl enable docker",
-        "sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp tingariussorensen/minitwit:latest"
+        # Install Docker Compose
+        "sudo apt install -y docker-compose-plugin",
+
+        ### Start Minitwit Application ###
+        "cd ~/.deploy/",
+        "export DB_USER=${DB_USER}",
+        "export DB_PASSWORD=${DB_PASSWORD}",
+        "export DB_HOST=${DB_HOST}",
+        "export DB_PORT=${DB_PORT}",
+        "export DB_NAME=${DB_NAME}",
+        "export DB_NAME=${DB_NAME}",
+        "export DOCKER_USERNAME=${DOCKER_USERNAME}",
+        "docker compose -f docker-compose.yml -f docker-compose.deploy.yml up -d --pull always",
+        "unset DB_USER",
+        "unset DB_PASSWORD",
+        "unset DB_HOST",
+        "unset DB_PORT",
+        "unset DB_NAME",
+        "unset DB_NAME",
+        "unset DOCKER_USERNAME"
     ]
   }
 }
