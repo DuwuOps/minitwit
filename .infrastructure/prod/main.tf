@@ -17,10 +17,16 @@ provider "digitalocean" {
   token = var.do_token
 }
 
-# Create a new SSH key
+
+# SSH key
+variable "ssh_key_location" {
+  description = "DigitalOcean SSH-publickey"
+  type        = string
+}
+
 resource "digitalocean_ssh_key" "default" {
-  name       = "Terraform_Minitwit_Key"
-  public_key = file("~/.ssh/id_do_rsa.pub")
+  name       = "Terraform_Prod_Env_Key"
+  public_key = file("${var.ssh_key_location}.pub")
 }
 
 #From https://medium.com/@lilnya79/getting-started-with-digitalocean-terraform-and-docker-a-step-by-step-guide-ef43b0513f51
@@ -36,7 +42,7 @@ resource "digitalocean_droplet" "minitwit_droplet" {
   connection {
     type        = "ssh"
     user        = "root"
-    private_key = file("~/.ssh/id_do_rsa")
+    private_key = file(var.ssh_key_location)
     host        = self.ipv4_address
   }
 
