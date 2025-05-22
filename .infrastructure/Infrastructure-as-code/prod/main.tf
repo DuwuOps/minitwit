@@ -75,6 +75,7 @@ resource "digitalocean_droplet" "minitwit_droplet" {
 
   provisioner "remote-exec" {
     inline = [
+        ### Install Docker ###
         # Add Docker's official GPG key:
         "sudo apt update",
         "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
