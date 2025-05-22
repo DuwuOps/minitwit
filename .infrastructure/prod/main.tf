@@ -7,14 +7,14 @@ terraform {
   }
 }
 
-#From https://medium.com/@lilnya79/getting-started-with-digitalocean-terraform-and-docker-a-step-by-step-guide-ef43b0513f51 
-variable "do_token" {
+# Access token
+variable "digitalocean_token" {
   description = "DigitalOcean API token"
   type        = string
 }
 
 provider "digitalocean" {
-  token = var.do_token
+  token = var.digitalocean_token
 }
 
 
