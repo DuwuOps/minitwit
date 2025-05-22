@@ -1,0 +1,12 @@
+# Rename this file to terraform.tfvars
+digitalocean_token="" # DigitalOcean Access Key
+ssh_key_location=""
+
+docker_vars = {
+    db_user=""
+    db_password="" # The admin user's password
+    db_host="" # The ipv4 adress of the related database droplet
+    db_port="5433"
+    db_name=""
+    docker_username=""
+}
