@@ -29,7 +29,19 @@ resource "digitalocean_ssh_key" "default" {
   public_key = file("${var.ssh_key_location}.pub")
 }
 
-#From https://medium.com/@lilnya79/getting-started-with-digitalocean-terraform-and-docker-a-step-by-step-guide-ef43b0513f51
+# Setup Doplet via SSH
+variable "docker_vars" {
+ description = "This is a variable of type object"
+  type = object({
+    db_user         = string
+    db_password     = string
+    db_host         = string
+    db_port         = string
+    db_name         = string
+    docker_username = string
+  })
+}
+
 resource "digitalocean_droplet" "minitwit_droplet" {
   name      = "test-web"
   region    = "ams3"
@@ -46,6 +58,16 @@ resource "digitalocean_droplet" "minitwit_droplet" {
     host        = self.ipv4_address
   }
 
+  provisioner "file" {
+    source      = "../../docker-compose.yml"
+    destination = "docker-compose.yml"
+  }
+
+  provisioner "file" {
+    source      = "../../docker-compose.deploy.yml"
+    destination = "docker-compose.deploy.yml"
+  }
+
   provisioner "remote-exec" {
     inline = [
         # Add Docker's official GPG key:
@@ -59,7 +81,22 @@ resource "digitalocean_droplet" "minitwit_droplet" {
         "sudo apt install -y docker-ce",
         "sudo systemctl start docker",
         "sudo systemctl enable docker",
-        "sudo docker run -d -p 0.0.0.0:80:8000 --restart=always -v /var/minitwit:/app/tmp tingariussorensen/minitwit:latest"
+
+        ### Start Minitwit Application ###
+        "DB_USER=${var.docker_vars.db_user} \\",
+        "DB_PASSWORD=${var.docker_vars.db_password} \\",
+        "DB_HOST=${var.docker_vars.db_host} \\",
+        "DB_PORT=${var.docker_vars.db_port} \\",
+        "DB_NAME=${var.docker_vars.db_name} \\",
+        "DOCKER_USERNAME=${var.docker_vars.docker_username} \\",
+        "docker compose \\",
+        "  -f docker-compose.yml \\",
+        "  -f docker-compose.deploy.yml \\",
+        "  up -d --pull always",
+
+        "mkdir ~/.deploy/",
+        "mv -f docker-compose.yml ~/.deploy/docker-compose.yml",
+        "mv -f docker-compose.deploy.yml ~/.deploy/docker-compose.deploy.yml"
     ]
   }
 }
