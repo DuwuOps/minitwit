@@ -189,3 +189,6 @@ pyrightconfig.json
 *.db
 docs/database-migration/[0-9]*/**
 !docs/database-migration/*[^0-9]*/**
+
+## Terraform env. variables
+*.tfvars
