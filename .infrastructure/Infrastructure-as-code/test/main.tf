@@ -25,7 +25,7 @@ variable "ssh_key_location" {
 }
 
 resource "digitalocean_ssh_key" "default" {
-  name       = "Terraform_Prod_Env_Key"
+  name       = "Terraform_Test_Env_Key"
   public_key = file("${var.ssh_key_location}.pub")
 }
 
@@ -43,7 +43,7 @@ variable "docker_vars" {
 }
 
 resource "digitalocean_droplet" "minitwit_droplet" {
-  name      = "prod-web"
+  name      = "test-web"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
   image     = "ubuntu-24-10-x64"
@@ -53,7 +53,7 @@ resource "digitalocean_droplet" "minitwit_droplet" {
   tags = [
     "minitwit",
     "app",
-    "prod"
+    "test"
   ]
 
   connection {
@@ -64,12 +64,12 @@ resource "digitalocean_droplet" "minitwit_droplet" {
   }
 
   provisioner "file" {
-    source      = "../../docker-compose.yml"
+    source      = "../../../docker-compose.yml"
     destination = "docker-compose.yml"
   }
 
   provisioner "file" {
-    source      = "../../docker-compose.deploy.yml"
+    source      = "../../../docker-compose.deploy.yml"
     destination = "docker-compose.deploy.yml"
   }
 
