@@ -49,7 +49,12 @@ resource "digitalocean_droplet" "minitwit_droplet" {
   image     = "ubuntu-24-10-x64"
   ssh_keys  = [
     digitalocean_ssh_key.default.fingerprint
-  ] 
+  ]
+  tags = [
+    "minitwit",
+    "app",
+    "test"
+  ]
 
   connection {
     type        = "ssh"
