@@ -63,42 +63,11 @@ resource "digitalocean_droplet" "database_droplet" {
   }
 
   provisioner "remote-exec" {
+    inline = local.docker_install_script
+  }
+
+  provisioner "remote-exec" {
     inline = [
-      # Note: -o DPkg::Lock::Timeout=20 is a flag for apt and apt-get that makes apt/apt-get wait till dpkg is unlocked by earlier/other commands. (https://unix.stackexchange.com/a/277255)
-      # Add Docker's official GPG key (https://docs.docker.com/engine/install/ubuntu/):
-      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
-      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 ca-certificates curl",
-
-      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
-      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
-      "  echo \"/var/lib/apt/lists/lock is locked..\"",
-      "  sleep 1",
-      "done",
-
-      "sudo install -m 0755 -d /etc/apt/keyrings",
-      "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
-      "sudo chmod a+r /etc/apt/keyrings/docker.asc",
-
-      # Add the repository to Apt sources (https://docs.docker.com/engine/install/ubuntu/):
-      "echo \\",
-      "  \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \\",
-      "  $(lsb_release -cs) stable\" | \\",
-      "  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
-
-      # Install the latest versions of Docker packages
-      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
-
-      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
-      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
-      "  echo \"/var/lib/apt/lists/lock is locked..\"",
-      "  sleep 1",
-      "done",
-
-      # Start docker
-      "sudo systemctl start docker",
-      "sudo systemctl enable docker",
-
       # Install PostgreSQL (using Docker instead of system package)
       "sudo docker run -d --name database \\",
       " -e POSTGRES_PASSWORD=${var.docker_vars.db_password} \\",
@@ -143,42 +112,11 @@ resource "digitalocean_droplet" "web_droplet" {
   }
 
   provisioner "remote-exec" {
+    inline = local.docker_install_script
+  }
+
+  provisioner "remote-exec" {
     inline = [
-      # Note: -o DPkg::Lock::Timeout=20 is a flag for apt and apt-get that makes apt/apt-get wait till dpkg is unlocked by earlier/other commands. (https://unix.stackexchange.com/a/277255)
-      # Add Docker's official GPG key (https://docs.docker.com/engine/install/ubuntu/):
-      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
-      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 ca-certificates curl",
-
-      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
-      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
-      "  echo \"/var/lib/apt/lists/lock is locked..\"",
-      "  sleep 1",
-      "done",
-
-      "sudo install -m 0755 -d /etc/apt/keyrings",
-      "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
-      "sudo chmod a+r /etc/apt/keyrings/docker.asc",
-
-      # Add the repository to Apt sources (https://docs.docker.com/engine/install/ubuntu/):
-      "echo \\",
-      "  \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \\",
-      "  $(lsb_release -cs) stable\" | \\",
-      "  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
-
-      # Install the latest versions of Docker packages
-      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
-
-      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
-      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
-      "  echo \"/var/lib/apt/lists/lock is locked..\"",
-      "  sleep 1",
-      "done",
-
-      # Start docker
-      "sudo systemctl start docker",
-      "sudo systemctl enable docker",
-
       ### Start Minitwit Application ###
       "DB_USER=${var.docker_vars.db_user} \\",
       "DB_PASSWORD=${var.docker_vars.db_password} \\",
