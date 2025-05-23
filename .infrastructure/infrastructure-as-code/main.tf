@@ -185,7 +185,7 @@ resource "digitalocean_droplet" "web_droplet" {
       "DB_HOST=${digitalocean_droplet.database_droplet.ipv4_address} \\",
       "DB_PORT=${var.docker_vars.db_port} \\",
       "DB_NAME=${var.docker_vars.db_name} \\",
-      "DOCKER_USERNAME=${var.docker_vars.docker_username} \\",
+      "DOCKER_USERNAME=${var.docker_vars.dockerhub_username} \\",
       "docker compose \\",
       "  -f docker-compose.yml \\",
       "  -f docker-compose.deploy.yml \\",

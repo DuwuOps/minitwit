@@ -28,6 +28,6 @@ variable "docker_vars" {
     db_password     = string
     db_port         = string
     db_name         = string
-    docker_username = string
+    dockerhub_username = string
   })
 }
