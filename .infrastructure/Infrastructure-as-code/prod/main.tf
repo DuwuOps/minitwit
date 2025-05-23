@@ -54,7 +54,7 @@ resource "local_file" "public_key" {
 }
 
 resource "digitalocean_ssh_key" "default" {
-  name       = "Terraform_Prod_Env_Key"
+  name       = "${var.ssh_vars.username}-prod-key"
   public_key = local.ssh_key_exists ? file("${var.ssh_vars.secret_key_path}.pub") : tls_private_key.ssh_key[0].public_key_openssh
 }
 
