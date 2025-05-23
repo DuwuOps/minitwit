@@ -199,5 +199,5 @@ resource "digitalocean_droplet" "web_droplet" {
 }
 
 output "droplet_public_ip" {
-  value = digitalocean_droplet.web_droplet.ipv4_address
+  value = "http://${digitalocean_droplet.web_droplet.ipv4_address}/"
 }
