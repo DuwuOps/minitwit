@@ -1,4 +1,5 @@
 # Rename this file to terraform.tfvars
+env_type           = "" # e.g. "prod" or "test"
 digitalocean_token = "" # DigitalOcean Access Key
 
 ssh_vars = {

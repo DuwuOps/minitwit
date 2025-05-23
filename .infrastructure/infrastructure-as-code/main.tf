@@ -7,6 +7,11 @@ terraform {
   }
 }
 
+variable "env_type" {
+  description = "Deployment environment name (e.g. 'prod' or 'test')"
+  type        = string
+}
+
 # Access token
 variable "digitalocean_token" {
   description = "DigitalOcean API token"
@@ -54,7 +59,7 @@ resource "local_file" "public_key" {
 }
 
 resource "digitalocean_ssh_key" "default" {
-  name       = "${var.ssh_vars.username}-test-key"
+  name       = "${var.ssh_vars.username}-${var.env_type}-key"
   public_key = local.ssh_key_exists ? file("${var.ssh_vars.secret_key_path}.pub") : tls_private_key.ssh_key[0].public_key_openssh
 }
 
@@ -71,7 +76,7 @@ variable "docker_vars" {
 }
 
 resource "digitalocean_droplet" "database_droplet" {
-  name      = "test-database"
+  name      = "${var.env_type}-database"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
   image     = "ubuntu-24-10-x64"
@@ -81,7 +86,7 @@ resource "digitalocean_droplet" "database_droplet" {
   tags = [
     "minitwit",
     "database",
-    "test"
+    var.env_type
   ]
 
   connection {
@@ -126,7 +131,7 @@ resource "digitalocean_droplet" "database_droplet" {
 }
 
 resource "digitalocean_droplet" "web_droplet" {
-  name      = "test-web"
+  name      = "${var.env_type}-web"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
   image     = "ubuntu-24-10-x64"
@@ -136,7 +141,7 @@ resource "digitalocean_droplet" "web_droplet" {
   tags = [
     "minitwit",
     "app",
-    "test"
+    var.env_type
   ]
 
   connection {
@@ -147,12 +152,12 @@ resource "digitalocean_droplet" "web_droplet" {
   }
 
   provisioner "file" {
-    source      = "../../../docker-compose.yml"
+    source      = "../../docker-compose.yml"
     destination = "docker-compose.yml"
   }
 
   provisioner "file" {
-    source      = "../../../docker-compose.deploy.yml"
+    source      = "../../docker-compose.deploy.yml"
     destination = "docker-compose.deploy.yml"
   }
 
