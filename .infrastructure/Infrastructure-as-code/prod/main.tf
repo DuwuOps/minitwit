@@ -96,7 +96,7 @@ resource "digitalocean_droplet" "database_droplet" {
   }
 }
 
-resource "digitalocean_droplet" "minitwit_droplet" {
+resource "digitalocean_droplet" "web_droplet" {
   name      = "prod-web"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
@@ -129,38 +129,46 @@ resource "digitalocean_droplet" "minitwit_droplet" {
 
   provisioner "remote-exec" {
     inline = [
-        ### Install Docker ###
-        # Add Docker's official GPG key:
-        "sudo apt update",
-        "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
-        "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-        "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable\" -y",
-        "apt-cache policy docker-ce",
-        # Add the repository to Apt sources:
-        "sudo apt update",
-        "sudo apt install -y docker-ce",
-        "sudo systemctl start docker",
-        "sudo systemctl enable docker",
+      # Note: -o DPkg::Lock::Timeout=20 is a flag for apt and apt-get that makes apt/apt-get wait till dpkg is unlocked by earlier/other commands. (https://unix.stackexchange.com/a/277255)
+      # Add Docker's official GPG key (https://docs.docker.com/engine/install/ubuntu/):
+      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
+      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 ca-certificates curl",
+      "sudo install -m 0755 -d /etc/apt/keyrings",
+      "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
+      "sudo chmod a+r +/etc/apt/keyrings/docker.asc",
 
-        ### Start Minitwit Application ###
-        "DB_USER=${var.docker_vars.db_user} \\",
-        "DB_PASSWORD=${var.docker_vars.db_password} \\",
-        "DB_HOST=${digitalocean_droplet.database_droplet.ipv4_address} \\",
-        "DB_PORT=${var.docker_vars.db_port} \\",
-        "DB_NAME=${var.docker_vars.db_name} \\",
-        "DOCKER_USERNAME=${var.docker_vars.docker_username} \\",
-        "docker compose \\",
-        "  -f docker-compose.yml \\",
-        "  -f docker-compose.deploy.yml \\",
-        "  up -d --pull always",
+      # Add the repository to Apt sources (https://docs.docker.com/engine/install/ubuntu/):
+      "echo \\",
+      "  \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \\",
+      "  $(lsb_release -cs) stable\" | \\",
+      "  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+      "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
 
-        "mkdir ~/.deploy/",
-        "mv -f docker-compose.yml ~/.deploy/docker-compose.yml",
-        "mv -f docker-compose.deploy.yml ~/.deploy/docker-compose.deploy.yml"
+      "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+
+      # Start docker
+      "sudo systemctl start docker",
+      "sudo systemctl enable docker",
+
+      ### Start Minitwit Application ###
+      "DB_USER=${var.docker_vars.db_user} \\",
+      "DB_PASSWORD=${var.docker_vars.db_password} \\",
+      "DB_HOST=${digitalocean_droplet.database_droplet.ipv4_address} \\",
+      "DB_PORT=${var.docker_vars.db_port} \\",
+      "DB_NAME=${var.docker_vars.db_name} \\",
+      "DOCKER_USERNAME=${var.docker_vars.docker_username} \\",
+      "docker compose \\",
+      "  -f docker-compose.yml \\",
+      "  -f docker-compose.deploy.yml \\",
+      "  up -d --pull always",
+
+      "mkdir ~/.deploy/",
+      "mv -f docker-compose.yml ~/.deploy/docker-compose.yml",
+      "mv -f docker-compose.deploy.yml ~/.deploy/docker-compose.deploy.yml"
     ]
   }
 }
 
 output "droplet_public_ip" {
-  value = digitalocean_droplet.minitwit_droplet.ipv4_address
+  value = digitalocean_droplet.web_droplet.ipv4_address
 }
