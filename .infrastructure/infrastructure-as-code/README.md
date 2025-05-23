@@ -32,3 +32,32 @@ Finally, execute all Terraform actions in the working directory. You can remove 
 ```
 terraform apply --auto-approve
 ```
+
+## Destroy Droplets and SSH-keys via CLI
+
+If you have not, install the DigitalOcean CLI tool (https://docs.digitalocean.com/reference/doctl/how-to/install/).
+
+If you have not, authenticate yourself via the DigitalOcean CLI tool:
+
+```
+doctl auth init
+```
+
+Delete droplets (replace ENV's value with the used env_type-value)
+
+```
+ENV=""
+doctl compute droplet delete --force $ENV-web
+doctl compute droplet delete --force $ENV-database
+```
+
+Get your SSH-key's ID
+```
+doctl compute ssh-key list
+```
+
+Delete your SSH-key (replace KEYID's value with your SSH-key's ID)
+```
+KEYID=""
+doctl compute ssh-key delete --force $KEYID
+```
