@@ -20,7 +20,7 @@ provider "digitalocean" {
 
 # SSH key
 variable "ssh_vars" {
-  description = "Variables for SSH Key Pair for DigitalOcean SSH-publickey"
+  description = "Variables for SSH Key Pair for DigitalOcean"
   type = object({
     secret_key_path = string
     username        = string
