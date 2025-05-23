@@ -7,35 +7,12 @@ terraform {
   }
 }
 
-variable "env_type" {
-  description = "Deployment environment name (e.g. 'prod' or 'test')"
-  type        = string
-}
-
-# Access token
-variable "digitalocean_token" {
-  description = "DigitalOcean API token"
-  type        = string
-}
-
+########## Access token ##########
 provider "digitalocean" {
   token = var.digitalocean_token
 }
 
-
-# SSH key
-variable "ssh_vars" {
-  description = "Variables for SSH Key Pair for DigitalOcean"
-  type = object({
-    secret_key_path = string
-    username        = string
-  })
-}
-
-locals {
-  ssh_key_exists = fileexists(var.ssh_vars.secret_key_path)
-}
-
+########## SSH key ##########
 # Only create the key if it doesn't exist on disk
 resource "tls_private_key" "ssh_key" {
   count     = local.ssh_key_exists ? 0 : 1
@@ -63,18 +40,7 @@ resource "digitalocean_ssh_key" "default" {
   public_key = local.ssh_key_exists ? file("${var.ssh_vars.secret_key_path}.pub") : tls_private_key.ssh_key[0].public_key_openssh
 }
 
-# Setup Doplet via SSH
-variable "docker_vars" {
-  description = "All variables used by Docker run & compose"
-  type = object({
-    db_user         = string
-    db_password     = string
-    db_port         = string
-    db_name         = string
-    docker_username = string
-  })
-}
-
+########## Setup Doplet via SSH ##########
 resource "digitalocean_droplet" "database_droplet" {
   name      = "${var.env_type}-database"
   region    = "ams3"
