@@ -40,7 +40,7 @@ resource "digitalocean_ssh_key" "default" {
   public_key = local.ssh_key_exists ? file("${var.ssh_vars.secret_key_path}.pub") : tls_private_key.ssh_key[0].public_key_openssh
 }
 
-########## Setup Doplet via SSH ##########
+########## Setup Database-Droplet via SSH ##########
 resource "digitalocean_droplet" "database_droplet" {
   name      = "${var.env_type}-database"
   region    = "ams3"
@@ -79,6 +79,7 @@ resource "digitalocean_droplet" "database_droplet" {
       "  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
       "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
 
+      # Install the latest versions of Docker packages
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
 
       # Start docker
@@ -96,6 +97,7 @@ resource "digitalocean_droplet" "database_droplet" {
   }
 }
 
+########## Setup Web-Droplet via SSH ##########
 resource "digitalocean_droplet" "web_droplet" {
   name      = "${var.env_type}-web"
   region    = "ams3"
@@ -144,6 +146,7 @@ resource "digitalocean_droplet" "web_droplet" {
       "  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
       "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
 
+      # Install the latest versions of Docker packages
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
 
       # Start docker
