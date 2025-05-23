@@ -1,16 +1,16 @@
-# Rename this file to terraform.tfvars
+# Copy and rename this file to terraform.tfvars
 env_type           = "" # e.g. "prod" or "test"
 digitalocean_token = "" # DigitalOcean Access Key
 
 ssh_vars = {
-    secret_key_path = ""
-    username        = ""
+    secret_key_path = "" # Insert path to existing, unused secret key or insert new path, such as "~/.ssh/id_rsa_do"
+    username        = "" # Your username (for name of ssh-key on DigitalOcean)
 }
 
 docker_vars = {
-    db_user         = ""
-    db_password     = "" # The admin user's password
-    db_port         = "5433"
-    db_name         = ""
-    docker_username = ""
+    db_user         = ""     # Admin's username for Postgres Database
+    db_password     = ""     # The admin user's password
+    db_port         = "5433" # External port for Postgres database
+    db_name         = ""     # Name of the database in the Postgres Container
+    docker_username = ""     # Username on DockerHub
 }
