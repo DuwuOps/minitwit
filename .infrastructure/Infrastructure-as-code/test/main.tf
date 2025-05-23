@@ -19,14 +19,43 @@ provider "digitalocean" {
 
 
 # SSH key
-variable "ssh_key_location" {
-  description = "DigitalOcean SSH-publickey"
-  type        = string
+variable "ssh_vars" {
+  description = "Variables for SSH Key Pair for DigitalOcean SSH-publickey"
+  type = object({
+    secret_key_path = string
+    username        = string
+  })
+}
+
+locals {
+  ssh_key_exists = fileexists(var.ssh_vars.secret_key_path)
+}
+
+# Only create the key if it doesn't exist on disk
+resource "tls_private_key" "ssh_key" {
+  count     = local.ssh_key_exists ? 0 : 1
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# Save the generated key to disk (if created)
+resource "local_file" "private_key" {
+  count           = local.ssh_key_exists ? 0 : 1
+  content         = tls_private_key.ssh_key[0].private_key_pem
+  filename        = var.ssh_vars.secret_key_path
+  file_permission = "0600"
+}
+
+resource "local_file" "public_key" {
+  count           = local.ssh_key_exists ? 0 : 1
+  content         = tls_private_key.ssh_key[0].public_key_openssh
+  filename        = "${var.ssh_vars.secret_key_path}.pub"
+  file_permission = "0644"
 }
 
 resource "digitalocean_ssh_key" "default" {
   name       = "Terraform_Test_Env_Key"
-  public_key = file("${var.ssh_key_location}.pub")
+  public_key = local.ssh_key_exists ? file("${var.ssh_vars.secret_key_path}.pub") : tls_private_key.ssh_key[0].public_key_openssh
 }
 
 # Setup Doplet via SSH
@@ -113,7 +142,7 @@ resource "digitalocean_droplet" "web_droplet" {
   connection {
     type        = "ssh"
     user        = "root"
-    private_key = file(var.ssh_key_location)
+    private_key = file(var.ssh_vars.secret_key_path)
     host        = self.ipv4_address
   }
 
