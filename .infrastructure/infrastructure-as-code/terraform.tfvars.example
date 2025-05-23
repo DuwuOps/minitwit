@@ -8,9 +8,9 @@ ssh_vars = {
 }
 
 docker_vars = {
-    db_user         = ""     # Admin's username for Postgres Database
-    db_password     = ""     # The admin user's password
-    db_port         = "5433" # External port for Postgres database
-    db_name         = ""     # Name of the database in the Postgres Container
-    docker_username = ""     # Username on DockerHub
+    db_user             = ""     # Admin's username for Postgres Database
+    db_password         = ""     # The admin user's password
+    db_port             = "5433" # External port for Postgres database
+    db_name             = ""     # Name of the database in the Postgres Container
+    dockerhub_username  = ""     # Username on DockerHub
 }
