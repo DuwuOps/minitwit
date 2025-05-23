@@ -60,7 +60,7 @@ resource "digitalocean_ssh_key" "default" {
 
 # Setup Doplet via SSH
 variable "docker_vars" {
- description = "This is a variable of type object"
+  description = "All variables used by Docker run & compose"
   type = object({
     db_user         = string
     db_password     = string
