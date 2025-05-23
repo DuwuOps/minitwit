@@ -68,6 +68,13 @@ resource "digitalocean_droplet" "database_droplet" {
       # Add Docker's official GPG key (https://docs.docker.com/engine/install/ubuntu/):
       "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 ca-certificates curl",
+
+      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
+      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
+      "  echo \"/var/lib/apt/lists/lock is locked..\"",
+      "  sleep 1",
+      "done",
+
       "sudo install -m 0755 -d /etc/apt/keyrings",
       "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
       "sudo chmod a+r /etc/apt/keyrings/docker.asc",
@@ -81,6 +88,12 @@ resource "digitalocean_droplet" "database_droplet" {
 
       # Install the latest versions of Docker packages
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+
+      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
+      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
+      "  echo \"/var/lib/apt/lists/lock is locked..\"",
+      "  sleep 1",
+      "done",
 
       # Start docker
       "sudo systemctl start docker",
@@ -135,6 +148,13 @@ resource "digitalocean_droplet" "web_droplet" {
       # Add Docker's official GPG key (https://docs.docker.com/engine/install/ubuntu/):
       "sudo apt-get update -y -o DPkg::Lock::Timeout=20",
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 ca-certificates curl",
+
+      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
+      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
+      "  echo \"/var/lib/apt/lists/lock is locked..\"",
+      "  sleep 1",
+      "done",
+
       "sudo install -m 0755 -d /etc/apt/keyrings",
       "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc",
       "sudo chmod a+r /etc/apt/keyrings/docker.asc",
@@ -148,6 +168,12 @@ resource "digitalocean_droplet" "web_droplet" {
 
       # Install the latest versions of Docker packages
       "sudo apt-get install -y -o DPkg::Lock::Timeout=20 docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin",
+
+      # Wait till /var/lib/apt/lists/lock is unlocked (taken from https://askubuntu.com/a/1451841)
+      "while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do",
+      "  echo \"/var/lib/apt/lists/lock is locked..\"",
+      "  sleep 1",
+      "done",
 
       # Start docker
       "sudo systemctl start docker",
