@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -14,7 +14,7 @@ func InitializeUserMetricies() {
 
 	for _, metric := range metrics{
 		if err := prometheus.Register(metric); err != nil {
-			log.Printf("❌ Error: Unable to register prometheus metric %T: %v", metric, err)
+			slog.Error("Unable to register prometheus metric", slog.Any("error", err), slog.Any("metric", metric))
 		}
 	}
 }
