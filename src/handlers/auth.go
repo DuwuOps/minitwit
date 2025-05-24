@@ -42,10 +42,7 @@ func Login(c echo.Context) error {
 				if err != nil {
 					utils.LogError("addFlash returned an error", err)
 				}
-				err = helpers.SetSessionUserID(c, user.UserID)
-				if err != nil {
-					utils.LogErrorEchoContext(c, "SetSessionUserID returned an error", err)
-				}
+				helpers.SetSessionUserID(c, user.UserID)
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
@@ -159,8 +156,11 @@ func Register(c echo.Context) error {
 
 func Logout(c echo.Context) error {
 	utils.LogRouteStart(c, "Logout", "/logout")
-	helpers.ClearSessionUserID(c)
-	err := helpers.AddFlash(c, "You were logged out")
+	err := helpers.ClearSessionUserID(c)
+	if err != nil {
+		utils.LogErrorEchoContext(c, "ClearSessionUserID returned an error", err)
+	}
+	err = helpers.AddFlash(c, "You were logged out")
 	if err != nil {
 		utils.LogError("helpers.addFlash returned an error", err)
 	}
