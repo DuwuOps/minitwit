@@ -173,6 +173,12 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 		utils.LogErrorContext(ctx, "Query failed", err)
 		return nil, err
 	}
+
+	err = rows.Err()
+	if err != nil {
+		utils.LogErrorContext(ctx, "Error was encountered during iteration", err)
+		return nil, err
+	}
 	defer rows.Close()
 
 	var results []T
