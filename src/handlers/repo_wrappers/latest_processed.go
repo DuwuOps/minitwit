@@ -9,7 +9,6 @@ import (
 )
 
 func GetLatest(c echo.Context) ([]models.LatestProcessed, error) {
-
 	latestProcessed, err := latestProcessedRepo.GetFiltered(c.Request().Context(), nil, 0, "")
 	if err != nil {
 		utils.LogErrorEchoContext(c, "could not read latest_processed from database", err)
@@ -20,11 +19,9 @@ func GetLatest(c echo.Context) ([]models.LatestProcessed, error) {
 }
 
 func UpdateLatest(c echo.Context) error {
-
 	parsedCommandId := c.FormValue("latest")
 
 	if parsedCommandId != "" {
-
 		parsedCommandId, err := strconv.Atoi(parsedCommandId)
 		if err != nil {
 			utils.LogErrorEchoContext(c, "parsedCommandId is not an int", err)
@@ -40,7 +37,6 @@ func UpdateLatest(c echo.Context) error {
 			utils.LogErrorEchoContext(c, "could not update latest_processed_id in database", err)
 		}
 		return err
-
 	} else {
 		return nil
 	}

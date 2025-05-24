@@ -264,7 +264,6 @@ func (r *Repository[T]) SetAllFields(ctx context.Context, values map[string]any)
 // Query Utils
 
 func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...any) (*T, error) {
-
 	query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1", r.tableName, field)
 	slog.InfoContext(ctx, "📝 Executing Query", slog.Any("query", query),
 		slog.Any("values", values))

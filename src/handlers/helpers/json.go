@@ -10,7 +10,6 @@ import (
 )
 
 func ExtractJson(c echo.Context) (map[string]any, error) {
-
 	jsonBody := make(map[string]any)
 	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
 	if err != nil {

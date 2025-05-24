@@ -20,7 +20,6 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data any, c echo.Con
 
 // Create and return a new instance of a TemplateRenderer
 func NewTemplateRenderer() *TemplateRenderer {
-
 	funcMap := template.FuncMap{
 		"gravatar":       gravatarUrl,
 		"datetimeformat": formatDatetime,
