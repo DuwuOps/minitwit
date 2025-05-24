@@ -23,11 +23,11 @@ func ParseFollowerBuckets(envVarName string) ([][2]uint32, error) {
         }
         low, err := strconv.ParseUint(rng[0], 10, 32)
         if err != nil {
-            return nil, fmt.Errorf("failed to parse lower bound %s: %v", rng[0], err)
+            return nil, fmt.Errorf("failed to parse lower bound %s: %w", rng[0], err)
         }
         high, err := strconv.ParseUint(rng[1], 10, 32)
         if err != nil {
-            return nil, fmt.Errorf("failed to parse upper bound %s: %v", rng[1], err)
+            return nil, fmt.Errorf("failed to parse upper bound %s: %w", rng[1], err)
         }
 
         buckets = append(buckets, [2]uint32{uint32(low), uint32(high)})
