@@ -28,7 +28,7 @@ var MessagesPosts = prometheus.NewCounterVec(
 	[]string{"hour", "weekday"},
 )
 
-// Snapshots
+// Snapshots.
 var MessagesTotal = prometheus.NewGauge(
 	prometheus.GaugeOpts{
 		Name: "minitwit_messages_total",

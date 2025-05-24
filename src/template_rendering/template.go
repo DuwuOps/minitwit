@@ -18,7 +18,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data any, c echo.Con
 	return tmpl.ExecuteTemplate(w, name, data)
 }
 
-// Create and return a new instance of a TemplateRenderer
+// Create and return a new instance of a TemplateRenderer.
 func NewTemplateRenderer() *TemplateRenderer {
 	funcMap := template.FuncMap{
 		"gravatar":       gravatarUrl,

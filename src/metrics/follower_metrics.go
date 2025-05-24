@@ -19,7 +19,7 @@ func InitializeFollowerMetricies() {
 	}
 }
 
-// Snapshots
+// Snapshots.
 var FollowerTotal = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "minitwit_follower_total",
