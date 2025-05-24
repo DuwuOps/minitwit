@@ -20,3 +20,8 @@ func LogFatal(msg string, err error) {
 	LogError(msg, err)
 	os.Exit(1)
 }
+
+
+func LogErrorContext(ctx context.Context, msg string, err error) {
+	slog.ErrorContext(ctx, msg, slog.Any("error", err))
+}

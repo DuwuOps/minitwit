@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
+	"minitwit/src/utils"
 	"reflect"
 	"strings"
 )
@@ -57,7 +58,8 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
         // Special handling for "message_id" and "user_id"
         if fieldName == "message_id" || fieldName == "user_id" {
             if val.Field(i).IsZero() {
-                log.Printf("⚠️ Skipping %s (auto-generated or missing)", fieldName)
+                errMsg := fmt.Sprintf("⚠️ Skipping %s (auto-generated or missing)", fieldName)
+                slog.WarnContext(ctx, errMsg)
                 continue
             }
         }
@@ -76,9 +78,12 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
 
     rowsAffected, err := r.executeQuery(ctx, query, values...)
     if err == nil {
-        log.Printf("✅ Inserted %d row(s) into %s", rowsAffected, r.tableName)
+        logMsg := fmt.Sprintf("✅ Inserted %d row(s) into %s", rowsAffected, r.tableName)
+        slog.InfoContext(ctx, logMsg)
     } else {
-        log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
+        slog.ErrorContext(ctx, "❌ SQL ERROR",  slog.Any("query", query), 
+                                                slog.Any("values", values),
+                                                slog.Any("error", err))
     }
 
     return err
@@ -99,15 +104,16 @@ func (r *Repository[T]) CountAll(ctx context.Context) (int, error) {
         SELECT COUNT(*)
         FROM %s
     `, r.tableName)
+
+    slog.InfoContext(ctx, "📝 Executing Query",  slog.Any("query", query))
     
     row := r.db.QueryRowContext(ctx, query)
     var count int
     if err := row.Scan(&count); err != nil {
         return 0, err
     }
-
-    log.Printf("📝 Executed Query: %s | Values: %v", query, count)
     
+    slog.InfoContext(ctx, "📝 Executed Query", slog.Any("query", query), slog.Any("result", count))
     return count, nil
 }
 
@@ -164,7 +170,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 
     rows, err := r.db.QueryContext(ctx, query, values...)
     if err != nil {
-        log.Printf("Query failed: %v", err)
+        utils.LogErrorContext(ctx, "Query failed", err)
         return nil, err
     }
     defer rows.Close()
@@ -180,7 +186,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
         }
 
         if err := rows.Scan(fields...); err != nil {
-            log.Printf("Error scanning row: %v", err)
+            utils.LogErrorContext(ctx, "Error scanning row", err)
             continue
         }
 
@@ -223,7 +229,9 @@ func (r *Repository[T]) DeleteByFields(ctx context.Context, conditions map[strin
     query := fmt.Sprintf("DELETE FROM %s WHERE %s", r.tableName, strings.Join(whereClauses, " AND "))
     rowsAffected, err := r.executeQuery(ctx, query, values...)
     if err == nil {
-        log.Printf("✅ Deleted %d rows from %s where %v", rowsAffected, r.tableName, conditions)
+        slog.InfoContext(ctx, "✅ Updated fields",  slog.Any("rowsAffected", rowsAffected), 
+                                                    slog.Any("tableName", r.tableName),
+                                                    slog.Any("conditions", conditions))
     }
     
     return err
@@ -239,7 +247,9 @@ func (r *Repository[T]) SetAllFields(ctx context.Context, values map[string]any)
     query := fmt.Sprintf("UPDATE %s SET %s", r.tableName, strings.Join(updates, ", "))
     rowsAffected, err := r.executeQuery(ctx, query)
     if err == nil {
-        log.Printf("✅ Updated %d row(s) in %s with %s", rowsAffected, r.tableName, updates)
+        slog.InfoContext(ctx, "✅ Updated fields",  slog.Any("rowsAffected", rowsAffected), 
+                                                    slog.Any("tableName", r.tableName),
+                                                    slog.Any("updates", updates))
     }
     
     return err
@@ -250,7 +260,8 @@ func (r *Repository[T]) SetAllFields(ctx context.Context, values map[string]any)
 func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...any) (*T, error) {
     
     query := fmt.Sprintf("SELECT * FROM %s WHERE %s = $1", r.tableName, field)
-    log.Printf("📝 Executing Query: %s | Values: %v", query, values)
+    slog.InfoContext(ctx, "📝 Executing Query",  slog.Any("query", query), 
+                                                slog.Any("values", values))
 
 	row := r.db.QueryRowContext(ctx, query, values...)
 
@@ -265,21 +276,28 @@ func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...an
 	err := row.Scan(fields...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			log.Printf("⚠️ Warning: Query: %s | Values: %v | Err: %v", query, values, err)
+            slog.WarnContext(ctx, "⚠️ Query returned no rows",  slog.Any("query", query), 
+                                                                slog.Any("values", values),
+                                                                slog.Any("error", err))
 			return nil, ErrRecordNotFound
 		}
-		log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
+        slog.ErrorContext(ctx, "❌ SQL ERROR",  slog.Any("query", query), 
+                                                slog.Any("values", values),
+                                                slog.Any("error", err))
 		return nil, err
 	}
 	return &entity, nil
 }
 
 func (r *Repository[T]) executeQuery(ctx context.Context, query string, values ...any) (int64, error) {
-    log.Printf("📝 Executing Query: %s | Values: %v", query, values)
+    slog.InfoContext(ctx, "📝 Executing Query",  slog.Any("query", query), 
+                                                slog.Any("values", values))
 
     result, err := r.db.ExecContext(ctx, query, values...)
     if err != nil {
-        log.Printf("❌ SQL ERROR: Query: %s | Values: %v | Err: %v", query, values, err)
+        slog.ErrorContext(ctx, "❌ SQL ERROR",  slog.Any("query", query), 
+                                                slog.Any("values", values),
+                                                slog.Any("error", err))
         return 0, err
     }
     
