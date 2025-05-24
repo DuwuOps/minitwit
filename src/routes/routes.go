@@ -35,6 +35,6 @@ func SetupRoutes(app *echo.Echo) {
 	app.GET("/latest", func(c echo.Context) error { return handlers.GetLatest(c) })
 	app.Static("/static", "static")
 
-	//Prometheus metrics route
+	// Prometheus metrics route
 	app.GET("/metrics", echoprometheus.NewHandler())
 }

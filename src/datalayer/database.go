@@ -26,7 +26,7 @@ func connectDB() (*sql.DB, error) {
 	dbName := helpers.GetEnvVar("DB_NAME", "minitwit")
 	sslMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
 
-	//Returns a new connection to the database.
+	// Returns a new connection to the database.
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", dbUserName, dbPass, dbHost, dbPort, dbName, sslMode)
 
 	db, err := sql.Open("postgres", connStr)
