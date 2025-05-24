@@ -17,7 +17,10 @@ func AddMessage(c echo.Context) error {
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		err := c.String(http.StatusUnauthorized, "Unauthorized")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
@@ -136,7 +139,10 @@ func UserTimeline(c echo.Context) error {
 	requestedUser, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		utils.LogError("getUserByUsername returned an error", err)
-		c.String(http.StatusNotFound, "Not found")
+		err := c.String(http.StatusNotFound, "Not found")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 
 	followed := false

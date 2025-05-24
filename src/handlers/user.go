@@ -115,13 +115,19 @@ func FollowUser(c echo.Context) error {
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		err := c.String(http.StatusUnauthorized, "Unauthorized")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 
 	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		utils.LogErrorContext(c.Request().Context(), "FollowUser: getUserByUsername returned an error", err)
-		c.String(http.StatusNotFound, "Not found")
+		err := c.String(http.StatusNotFound, "Not found")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 
 	sessionUserId, err := helpers.GetSessionUserID(c)
@@ -146,13 +152,19 @@ func UnfollowUser(c echo.Context) error {
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
-		c.String(http.StatusUnauthorized, "Unauthorized")
+		err := c.String(http.StatusUnauthorized, "Unauthorized")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 
 	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		utils.LogError("row.Scan returned an error", err)
-		c.String(http.StatusNotFound, "Not found")
+		err := c.String(http.StatusNotFound, "Not found")
+		if err != nil {
+			utils.LogErrorEchoContext(c, "echo.Context.String returned an error", err)
+		}
 	}
 
 	sessionUserId, err := helpers.GetSessionUserID(c)
