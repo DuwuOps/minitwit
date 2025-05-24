@@ -38,13 +38,13 @@ func updateFollowerMetrics(ctx context.Context, bounds [][2]uint32) {
 		followerCount, err := repo_wrappers.CountFieldInRange(ctx, "following_id", low, high)
 		if err != nil {
 			rangeStr := fmt.Sprintf("%d-%d", low, high)
-			slog.Error("❌ Snapshot Error: counting followers in given range", slog.Any("error", err), slog.Any("range", rangeStr))
+			slog.ErrorContext(ctx, "❌ Snapshot Error: counting followers in given range", slog.Any("error", err), slog.Any("range", rangeStr))
 		}
 
 		followeesCount, err := repo_wrappers.CountFieldInRange(ctx, "follower_id", low, high)
 		if err != nil {
 			rangeStr := fmt.Sprintf("%d-%d", low, high)
-			slog.Error("❌ Snapshot Error: counting followers in given range", slog.Any("error", err), slog.Any("range", rangeStr))
+			slog.ErrorContext(ctx, "❌ Snapshot Error: counting followers in given range", slog.Any("error", err), slog.Any("range", rangeStr))
 		}
 
 		metrics.FollowerTotal.WithLabelValues(fmt.Sprintf("%d-%d", low, high)).Set(float64(followerCount))
