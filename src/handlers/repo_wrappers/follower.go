@@ -3,9 +3,9 @@ package repo_wrappers
 import (
 	"context"
 	"errors"
-	"log"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/models"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,13 +13,13 @@ import (
 func CreateFollower(c echo.Context, followerID int, followingID int) error {
 	if followerID == 0 || followingID == 0 {
 		err := errors.New("followerID and followingID must be set")
-        log.Printf("CreateFollower returned error: %v\n", err)
+        utils.LogErrorEchoContext(c, "CreateFollower returned an error", err)
 		return err
     }
 	newFollower := helpers.NewFollower(followerID, followingID)
 	err := followerRepo.Create(context.Background(), newFollower)
 	if err != nil {
-		log.Printf("followerRepo.Create returned error: %v\n", err)
+		utils.LogErrorEchoContext(c, "followerRepo.Create returned an error", err)
 		return err
 	}
 	return nil
@@ -32,7 +32,7 @@ func DeleteFollower(c echo.Context, followerID int, followingID int) error {
 	}
 	err := followerRepo.DeleteByFields(c.Request().Context(), conditions)
 	if err != nil {
-		log.Printf("followerRepo.DeleteByFields returned error: %v\n", err)
+		utils.LogErrorEchoContext(c, "followerRepo.DeleteByFields returned an error", err)
 		return err
 	}
 	return nil
@@ -41,7 +41,7 @@ func DeleteFollower(c echo.Context, followerID int, followingID int) error {
 func GetFollowerFiltered(c echo.Context, conditions map[string]any, noFollowers int) ([]models.Follower, error) {
 	followers, err := followerRepo.GetFiltered(c.Request().Context(), conditions, noFollowers, "")
 	if err != nil {
-		log.Printf("GetFollowerFiltered: followerRepo.GetFiltered returned err %v", err)
+		utils.LogErrorEchoContext(c, "GetFollowerFiltered: followerRepo.GetFiltered returned an error", err)
 		return nil, err
 	}
 	return followers, nil
@@ -50,7 +50,7 @@ func GetFollowerFiltered(c echo.Context, conditions map[string]any, noFollowers 
 func CountFieldInRange(c context.Context, field string, lower, upper int) (int, error) {
     count, err := followerRepo.CountRowsWhenGroupedByFieldInRange(c, field, lower, upper)
 	if err != nil {
-		log.Printf("❌ Repository Error: CountFieldInRange returned err %v", err)
+		utils.LogErrorContext(c, "❌ Repository Error: CountFieldInRange returned an error", err)
 		return 0, err
 	}
 	return count, nil

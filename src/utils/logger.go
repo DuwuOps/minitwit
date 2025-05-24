@@ -29,6 +29,13 @@ func LogErrorContext(ctx context.Context, msg string, err error) {
 	slog.ErrorContext(ctx, msg, slog.Any("error", err))
 }
 
+
+func LogErrorEchoContext(echoCtx echo.Context, msg string, err error) {
+	ctx:= echoCtx.Request().Context()
+	LogErrorContext(ctx, msg, err)
+}
+
+
 func InfoEchoContext(echoCtx echo.Context, logMsg string) {
 	ctx:= echoCtx.Request().Context()
 	slog.InfoContext(ctx, logMsg)
