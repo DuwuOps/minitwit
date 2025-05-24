@@ -85,7 +85,12 @@ func createTableIfNotExists(db *sql.DB, tableName string) error {
 	sqlFile, err := os.ReadFile(queriesFile)
 	if err != nil {
 		utils.LogError("os.ReadFile returned an error", err)
-		db.Close()
+
+		err = db.Close()
+		if err != nil {
+			utils.LogError("db.Close returned an error", err)
+		}
+
 		return fmt.Errorf("failed to read schema file: %w", err)
 	}
 
@@ -93,7 +98,12 @@ func createTableIfNotExists(db *sql.DB, tableName string) error {
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
 		slog.Error("db.Exec returned an error", slog.Any("error", err), slog.Any("SQL-query", sqlFile))
-		db.Close()
+
+		err = db.Close()
+		if err != nil {
+			utils.LogError("db.Close returned an error", err)
+		}
+
 		return fmt.Errorf("failed to execute schema: %w", err)
 	}
 
