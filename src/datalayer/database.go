@@ -50,7 +50,7 @@ func connectDB() (*sql.DB, error) {
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
 }
 
-// Creates the database tables from query in {queriesFile}
+// Creates the database tables from query in {queriesFile}.
 func createTablesIfNotExists(db *sql.DB) error {
 	// Create table "users"
 	err := createTableIfNotExists(db, "users")
