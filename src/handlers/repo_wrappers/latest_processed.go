@@ -25,7 +25,7 @@ func UpdateLatest(c echo.Context) error {
 
 	if parsedCommandId != "" {
 
-		parsedCommandId, err := strconv.Atoi(string(parsedCommandId))
+		parsedCommandId, err := strconv.Atoi(parsedCommandId)
 		if err != nil {
 			utils.LogErrorEchoContext(c, "parsedCommandId is not an int", err)
 			return err
