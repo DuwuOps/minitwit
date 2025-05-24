@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repo_wrappers"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,7 +13,7 @@ import (
 var PER_PAGE = 30
 
 func AddMessage(c echo.Context) error {
-	log.Println("🎺 User entered AddMessage via route \"/add_message\"")
+	utils.LogRouteStart(c, "AddMessage", "/add_message")
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
@@ -22,7 +22,7 @@ func AddMessage(c echo.Context) error {
 	text := c.FormValue("text")
 	userId, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		log.Printf("getSessionUserID returned error: %v\n", err)
+		utils.LogError("getSessionUserID returned an error", err)
 		return err
 	}
 
@@ -30,18 +30,18 @@ func AddMessage(c echo.Context) error {
 
 	err = helpers.AddFlash(c, "Your message was recorded")
 	if err != nil {
-		log.Printf("addFlash returned error: %v\n", err)
+		utils.LogError("addFlash returned an error", err)
 	}
 
 	return c.Redirect(http.StatusFound, "/")
 }
 
 func Messages(c echo.Context) error {
-	log.Println("🎺 User entered Messages via route \"/msgs\"")
+	utils.LogRouteStart(c, "Messages", "/msgs")
 
 	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("repo_wrappers.UpdateLatest returned error: %v\n", err)
+		utils.LogError("repo_wrappers.UpdateLatest returned an error", err)
 		return err
 	}
 
@@ -59,7 +59,7 @@ func Messages(c echo.Context) error {
 
 		msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("Messages: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
+			utils.LogErrorContext(c.Request().Context(), "Messages: repo_wrappers.GetMessagesFiltered returned an error", err)
 			return err
 		}
 		
@@ -73,11 +73,11 @@ func Messages(c echo.Context) error {
 
 func MessagesPerUser(c echo.Context) error {
 	username := c.Param("username")
-	log.Printf("🎺 User entered MessagesPerUser via route \"/msgs/:username\" as \"/%v\" and HTTP method %v\n", username, c.Request().Method)
+	utils.LogRouteStart(c, "MessagesPerUser", "/msgs/:username")
 
 	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("repo_wrappers.UpdateLatest returned error: %v\n", err)
+		utils.LogError("repo_wrappers.UpdateLatest returned an error", err)
 		return err
 	}
 
@@ -101,7 +101,7 @@ func MessagesPerUser(c echo.Context) error {
 
 		msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, noMsgs)
 		if err != nil {
-			log.Printf("MessagesPerUser: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
+			utils.LogErrorContext(c.Request().Context(), "MessagesPerUser: repo_wrappers.GetMessagesFiltered returned an error", err)
 			return err
 		}
 
@@ -111,7 +111,7 @@ func MessagesPerUser(c echo.Context) error {
 	} else if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
-			log.Printf("MessagesPerUser: ExtractJson returned error: %v\n", err)
+			utils.LogErrorContext(c.Request().Context(), "MessagesPerUser: ExtractJson returned an error", err)
 		}
 
 		var requestData string
@@ -131,11 +131,11 @@ func MessagesPerUser(c echo.Context) error {
 
 func UserTimeline(c echo.Context) error {
 	username := c.Param("username")
-	log.Printf("🎺 User entered UserTimeline via route \"/:username\" as \"/%v\"\n", username)
+	utils.LogRouteStart(c, "UserTimeline", "/:username")
 
 	requestedUser, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
-		log.Printf("getUserByUsername returned error: %v\n", err)
+		utils.LogError("getUserByUsername returned an error", err)
 		c.String(http.StatusNotFound, "Not found")
 	}
 
@@ -152,7 +152,7 @@ func UserTimeline(c echo.Context) error {
 
 	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("UserTimeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		utils.LogErrorContext(c.Request().Context(), "UserTimeline: repo_wrappers.GetMessagesFiltered returned an error", err)
 		return err
 	}
 
@@ -160,12 +160,12 @@ func UserTimeline(c echo.Context) error {
 
 	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
-		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
+		utils.LogError("No user found. getCurrentUser returned an error", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		log.Printf("addFlash returned error: %v\n", err)
+		utils.LogError("addFlash returned an error", err)
 	}
 
 	data := map[string]any{
@@ -180,12 +180,12 @@ func UserTimeline(c echo.Context) error {
 }
 
 func PublicTimeline(c echo.Context) error {
-	log.Println("🎺 User entered PublicTimeline via route \"/public\"")
+	utils.LogRouteStart(c, "PublicTimeline", "/public")
 	
 	conditions := map[string]any{"flagged": 0}
 	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("PublicTimeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		utils.LogErrorContext(c.Request().Context(), "PublicTimeline: repo_wrappers.GetMessagesFiltered returned an error", err)
 		return err
 	}
 
@@ -193,12 +193,12 @@ func PublicTimeline(c echo.Context) error {
 
 	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
-		log.Printf("getCurrentUser returned error: %v\n", err)
+		utils.LogError("getCurrentUser returned an error", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		log.Printf("getFlashes returned error: %v\n", err)
+		utils.LogError("getFlashes returned an error", err)
 	}
 
 	data := map[string]any{
@@ -211,7 +211,7 @@ func PublicTimeline(c echo.Context) error {
 }
 
 func Timeline(c echo.Context) error {
-	log.Println("🎺 User entered Timeline via route \"/\"")
+	utils.LogRouteStart(c, "Timeline", "/")
 
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if !loggedIn {
@@ -234,7 +234,7 @@ func Timeline(c echo.Context) error {
 	}
 	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
-		log.Printf("Timeline: repo_wrappers.GetMessagesFiltered returned error: %v\n", err)
+		utils.LogErrorContext(c.Request().Context(), "Timeline: repo_wrappers.GetMessagesFiltered returned an error", err)
 		return err
 	}
 
@@ -242,12 +242,12 @@ func Timeline(c echo.Context) error {
 
 	user, err := repo_wrappers.GetCurrentUser(c)
 	if err != nil {
-		log.Printf("No user found. getCurrentUser returned error: %v\n", err)
+		utils.LogError("No user found. getCurrentUser returned an error", err)
 	}
 
 	flashes, err := helpers.GetFlashes(c)
 	if err != nil {
-		log.Printf("addFlash returned error: %v\n", err)
+		utils.LogError("addFlash returned an error", err)
 	}
 
 	data := map[string]any{
