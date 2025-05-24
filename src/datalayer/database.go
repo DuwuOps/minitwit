@@ -3,8 +3,9 @@ package datalayer
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/utils"
 	"os"
 	"time"
 
@@ -30,7 +31,7 @@ func connectDB() (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Printf("sql.Open returned error: %v\n", err)
+		utils.LogError("sql.Open returned an error", err)
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
@@ -83,7 +84,7 @@ func createTableIfNotExists(db *sql.DB, tableName string) error {
 	QueriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
 	sqlFile, err := os.ReadFile(QueriesFile)
 	if err != nil {
-		log.Printf("os.ReadFile returned error: %v\n", err)
+		utils.LogError("os.ReadFile returned an error", err)
 		db.Close()
 		return fmt.Errorf("failed to read schema file: %w", err)
 	}
@@ -91,9 +92,8 @@ func createTableIfNotExists(db *sql.DB, tableName string) error {
 	// Execture contents of queries-file
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
-		log.Printf("db.Exec returned error: %v\n", err)
+		slog.Error("db.Exec returned an error", slog.Any("error", err), slog.Any("SQL-query", sqlFile))
 		db.Close()
-		log.Printf("%q: %s\n", err, sqlFile)
 		return fmt.Errorf("failed to execute schema: %w", err)
 	}
 
@@ -104,7 +104,7 @@ func InitDB() (*sql.DB, error) {
 	// Establish connection to database
 	db, err := connectDB()
 	if err != nil {
-		log.Printf("connectDB returned error: %v\n", err)
+		utils.LogError("connectDB returned an error", err)
 		return nil, err
 	}
 
@@ -114,6 +114,6 @@ func InitDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Printf("Connecting to existing Minitwit Database!")
+	slog.Info("Connecting to existing Minitwit Database!")
 	return db, nil
 }
