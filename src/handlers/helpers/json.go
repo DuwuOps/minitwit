@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"minitwit/src/utils"
 
@@ -26,6 +27,14 @@ func GetStringValue(jsonBody map[string]any, key string) string {
 		slog.Info("GetStringValue: jsonBody does not contain key", slog.Any("key", key))
 		return ""
 	}
-	slog.Info("GetStringValue: succesful", slog.Any("key", key), slog.Any("result", result.(string)))
-	return result.(string)
+
+	resultStr, ok := result.(string)
+	if !ok {
+		slog.Warn("Result is not a string!", slog.Any("key", key), 
+											 slog.Any("value", result),
+											 slog.String("type", fmt.Sprintf("%T", result)))
+	}
+
+	slog.Info("GetStringValue: succesful", slog.Any("key", key), slog.Any("result", resultStr))
+	return resultStr
 }
