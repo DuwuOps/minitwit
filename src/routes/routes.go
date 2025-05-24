@@ -9,28 +9,28 @@ import (
 
 func SetupRoutes(app *echo.Echo) {
 	// Timeline Routes
-	app.GET("/", func(c echo.Context) error { return handlers.Timeline(c) })
-	app.GET("/public", func(c echo.Context) error { return handlers.PublicTimeline(c) })
-	app.GET("/:username", func(c echo.Context) error { return handlers.UserTimeline(c) })
+	app.GET("/", handlers.Timeline)
+	app.GET("/public", handlers.PublicTimeline)
+	app.GET("/:username", handlers.UserTimeline)
 
 	// User Follow Routes
-	app.GET("/:username/follow", func(c echo.Context) error { return handlers.FollowUser(c) })
-	app.GET("/:username/unfollow", func(c echo.Context) error { return handlers.UnfollowUser(c) })
-	app.GET("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c) })
-	app.POST("/fllws/:username", func(c echo.Context) error { return handlers.Follow(c) })
+	app.GET("/:username/follow", handlers.FollowUser)
+	app.GET("/:username/unfollow", handlers.UnfollowUser)
+	app.GET("/fllws/:username", handlers.Follow)
+	app.POST("/fllws/:username", handlers.Follow)
 
 	// Message Routes
-	app.POST("/add_message", func(c echo.Context) error { return handlers.AddMessage(c) })
-	app.GET("/msgs", func(c echo.Context) error { return handlers.Messages(c) })
-	app.GET("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c) })
-	app.POST("/msgs/:username", func(c echo.Context) error { return handlers.MessagesPerUser(c) })
+	app.POST("/add_message", handlers.AddMessage)
+	app.GET("/msgs", handlers.Messages)
+	app.GET("/msgs/:username", handlers.MessagesPerUser)
+	app.POST("/msgs/:username", handlers.MessagesPerUser)
 
 	// Authentication Routes
-	app.GET("/login", func(c echo.Context) error { return handlers.Login(c) })
-	app.POST("/login", func(c echo.Context) error { return handlers.Login(c) })
-	app.GET("/register", func(c echo.Context) error { return handlers.Register(c) })
-	app.POST("/register", func(c echo.Context) error { return handlers.Register(c) })
-	app.GET("/logout", func(c echo.Context) error { return handlers.Logout(c) })
+	app.GET("/login", handlers.Login)
+	app.POST("/login", handlers.Login)
+	app.GET("/register", handlers.Register)
+	app.POST("/register", handlers.Register)
+	app.GET("/logout", handlers.Logout)
 
 	app.GET("/latest", func(c echo.Context) error { return handlers.GetLatest(c) })
 	app.Static("/static", "static")
