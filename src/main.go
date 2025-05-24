@@ -22,6 +22,9 @@ import (
 var SECRET_KEY = []byte("development key")
 
 func main() {
+	// Set logging options
+	utils.SetSlogDefaults()
+
 	// Create app as an instance of Echo
 	app := echo.New()
 
