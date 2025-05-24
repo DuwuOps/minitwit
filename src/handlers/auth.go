@@ -42,7 +42,10 @@ func Login(c echo.Context) error {
 				if err != nil {
 					utils.LogError("addFlash returned an error", err)
 				}
-				helpers.SetSessionUserID(c, user.UserID)
+				err = helpers.SetSessionUserID(c, user.UserID)
+				if err != nil {
+					utils.LogErrorEchoContext(c, "SetSessionUserID returned an error", err)
+				}
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
