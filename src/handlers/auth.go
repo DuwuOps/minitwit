@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
-	"log"
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repo_wrappers"
+	"minitwit/src/utils"
 	"net/http"
 	"strings"
 
@@ -15,7 +15,7 @@ import (
 )
 
 func Login(c echo.Context) error {
-	log.Printf("🎺 User entered Login via route \"/login\" and HTTP method %v\n", c.Request().Method)
+	utils.LogRouteStart(c, "Login", "/login")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -32,7 +32,7 @@ func Login(c echo.Context) error {
 		if errors.Is(err, datalayer.ErrRecordNotFound) {
 			errorMessage = "Invalid username"
 		} else if err != nil {
-			log.Printf("Db.QueryRow returned error: %v\n", err)
+			utils.LogError("Db.QueryRow returned an error", err)
 			return err
 		} else {
 			if !checkPasswordHash(user.PwHash, password) {
@@ -55,7 +55,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	log.Printf("🎺 User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
+	utils.LogRouteStart(c, "Register", "/register")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -63,7 +63,7 @@ func Register(c echo.Context) error {
 
 	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		utils.LogError("helpers.UpdateLatest returned an error", err)
 		return err
 	}
 
@@ -71,7 +71,7 @@ func Register(c echo.Context) error {
 	if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
-			log.Printf("Register: ExtractJson returned error: %v\n", err)
+			utils.LogErrorContext(c.Request().Context(), "Register: ExtractJson returned an error", err)
 		}
 
 		var username string
@@ -115,7 +115,7 @@ func Register(c echo.Context) error {
 			} else {
 				hash, err := generatePasswordHash(password)
 				if err != nil {
-					log.Printf("generatePasswordHash returned error: %v\n", err)
+					utils.LogError("generatePasswordHash returned an error", err)
 					return err
 				}
 				
@@ -149,7 +149,7 @@ func Register(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
-	log.Println("🎺 User entered Logout via route \"/logout\"")
+	utils.LogRouteStart(c, "Logout", "/logout")
 	helpers.ClearSessionUserID(c)
 	helpers.AddFlash(c, "You were logged out")
 	return c.Redirect(http.StatusFound, "/public")

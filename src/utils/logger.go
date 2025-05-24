@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -33,6 +34,13 @@ func LogErrorContext(ctx context.Context, msg string, err error) {
 func LogErrorEchoContext(echoCtx echo.Context, msg string, err error) {
 	ctx:= echoCtx.Request().Context()
 	LogErrorContext(ctx, msg, err)
+}
+
+
+func LogRouteStart(echoCtx echo.Context, routeName string, route string) {
+	ctx:= echoCtx.Request().Context()
+	logMsg := fmt.Sprintf("🎺 User entered %s via route \"%s\"", routeName, route)
+	slog.ErrorContext(ctx, logMsg,  slog.Any("HTTP method", echoCtx.Request().Method))
 }
 
 
