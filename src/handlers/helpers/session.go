@@ -14,7 +14,10 @@ func SetSessionUserID(c echo.Context, userID int) error {
 		return err
 	}
 	sess.Values["user_id"] = userID
-	sess.Save(c.Request(), c.Response())
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		utils.LogErrorEchoContext(c, "Session.Save returned an error", err)
+	}
 	return nil
 }
 
@@ -33,7 +36,10 @@ func ClearSessionUserID(c echo.Context) error {
 		return err
 	}
 	delete(sess.Values, "user_id")
-	sess.Save(c.Request(), c.Response())
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		utils.LogErrorEchoContext(c, "Session.Save returned an error", err)
+	}
 	return nil
 }
 

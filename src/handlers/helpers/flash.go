@@ -18,7 +18,10 @@ func AddFlash(c echo.Context, message string) error {
 	}
 	flashes = append(flashes, message)
 	sess.Values["Flashes"] = flashes
-	sess.Save(c.Request(), c.Response())
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		utils.LogErrorEchoContext(c, "Session.Save returned an error", err)
+	}
 	return nil
 }
 
@@ -33,7 +36,10 @@ func GetFlashes(c echo.Context) ([]string, error) {
 		return []string{}, nil
 	}
 	sess.Values["Flashes"] = []string{}
-	sess.Save(c.Request(), c.Response())
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		utils.LogErrorEchoContext(c, "Session.Save returned an error", err)
+	}
 	slog.InfoContext(c.Request().Context(), "Flashes found", slog.Any("flashed_found", len(flashes)), slog.Any("flashes", flashes))
 	return flashes, nil
 }
