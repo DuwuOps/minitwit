@@ -95,6 +95,7 @@ linters:
     - reassign # checks that package variables are not reassigned
     - recvcheck # checks for receiver type consistency
     - rowserrcheck # checks whether Err of rows is checked successfully
+    - sloglint # ensure consistent code style when using log/slog
     - spancheck # checks for mistakes with OpenTelemetry/Census spans
     - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed
     - testableexamples # checks if examples are testable (have an expected output)
@@ -334,7 +335,7 @@ linters:
       # - "default": report only the default slog logger
       # https://github.com/go-simpler/sloglint?tab=readme-ov-file#no-global
       # Default: ""
-      no-global: all
+      no-global: 
       # Enforce using methods that accept a context.
       # Values:
       # - "": disabled
