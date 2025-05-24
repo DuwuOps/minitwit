@@ -26,9 +26,7 @@ func Login(c echo.Context) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-
 		user, err := repo_wrappers.GetUserByUsername(context.Background(), username)
-
 
 		if err != nil {
 			if errors.Is(err, datalayer.ErrRecordNotFound) {
@@ -36,7 +34,7 @@ func Login(c echo.Context) error {
 			} else {
 				utils.LogError("Db.QueryRow returned an error", err)
 				return err
-			}	
+			}
 		} else {
 			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
@@ -127,9 +125,8 @@ func Register(c echo.Context) error {
 					utils.LogError("generatePasswordHash returned an error", err)
 					return err
 				}
-				
+
 				_ = repo_wrappers.CreateUser(username, email, hash)
-				
 
 				if pwd == "" {
 					err = helpers.AddFlash(c, "You were successfully registered and can login now")

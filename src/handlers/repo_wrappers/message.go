@@ -21,9 +21,9 @@ func CreateMessage(c echo.Context, authorID int, text string) error {
 
 	pubTime := utils.GetTimeFromInt(newMessage.PubDate)
 	metrics.MessagesPosts.WithLabelValues(
-		utils.GetHourAsString(pubTime), 
+		utils.GetHourAsString(pubTime),
 		utils.GetWeekdayAsString(pubTime),
-		).Inc()
+	).Inc()
 	return nil
 }
 
@@ -36,7 +36,7 @@ func GetMessagesFiltered(c echo.Context, conditions map[string]any, noMsgs int) 
 	return msgs, nil
 }
 
-func EnhanceMessages(c echo.Context, msgs []models.Message, isAPI bool) ([]map[string]any) {
+func EnhanceMessages(c echo.Context, msgs []models.Message, isAPI bool) []map[string]any {
 	var enrichedMsgs []map[string]any
 	for _, msg := range msgs {
 		enrichedMsg := map[string]any{
@@ -44,7 +44,7 @@ func EnhanceMessages(c echo.Context, msgs []models.Message, isAPI bool) ([]map[s
 		}
 
 		author, _ := GetUserByID(c, msg.AuthorID)
-		
+
 		var username, email string
 		if author != nil {
 			username = author.Username

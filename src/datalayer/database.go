@@ -14,8 +14,8 @@ import (
 
 const (
 	QueriesDirectory = "queries/"
-	MaxRetries  = 10
-	RetryDelay  = 2 * time.Second
+	MaxRetries       = 10
+	RetryDelay       = 2 * time.Second
 )
 
 func connectDB() (*sql.DB, error) {

@@ -36,9 +36,9 @@ func main() {
 		utils.LogFatal("Failed to initialize database", err)
 	}
 	defer db.Close()
-	
+
 	repo_wrappers.InitRepos(db)
-	
+
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{

@@ -9,9 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 func GetLatest(c echo.Context) error {
-	
+
 	utils.LogRouteStart(c, "GetLatest", "/latest")
 
 	latestProcessedCommandStr, err := repo_wrappers.GetLatest(c)

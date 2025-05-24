@@ -22,7 +22,7 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data any, c echo.Con
 func NewTemplateRenderer() *TemplateRenderer {
 
 	funcMap := template.FuncMap{
-		"gravatar": gravatarUrl,
+		"gravatar":       gravatarUrl,
 		"datetimeformat": formatDatetime,
 	}
 

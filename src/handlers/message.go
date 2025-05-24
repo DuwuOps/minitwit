@@ -65,8 +65,7 @@ func Messages(c echo.Context) error {
 			utils.LogErrorContext(c.Request().Context(), "Messages: repo_wrappers.GetMessagesFiltered returned an error", err)
 			return err
 		}
-		
-		
+
 		enrichedMsgs := repo_wrappers.EnhanceMessages(c, msgs, true)
 
 		return c.JSON(http.StatusOK, enrichedMsgs)
@@ -90,7 +89,7 @@ func MessagesPerUser(c echo.Context) error {
 	}
 
 	noMsgs := GetNumber(c)
-	
+
 	user, err := repo_wrappers.GetUserByUsername(c.Request().Context(), username)
 	if err != nil {
 		return err
@@ -98,7 +97,7 @@ func MessagesPerUser(c echo.Context) error {
 
 	if c.Request().Method == http.MethodGet {
 		conditions := map[string]any{
-			"flagged": 0,
+			"flagged":   0,
 			"author_id": user.UserID,
 		}
 
@@ -154,7 +153,6 @@ func UserTimeline(c echo.Context) error {
 		followed = repo_wrappers.IsFollowingUser(c, requestedUser.UserID)
 	}
 
-
 	conditions := map[string]any{
 		"author_id": requestedUser.UserID,
 	}
@@ -190,7 +188,7 @@ func UserTimeline(c echo.Context) error {
 
 func PublicTimeline(c echo.Context) error {
 	utils.LogRouteStart(c, "PublicTimeline", "/public")
-	
+
 	conditions := map[string]any{"flagged": 0}
 	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)
 	if err != nil {
@@ -232,13 +230,13 @@ func Timeline(c echo.Context) error {
 	conditions := map[string]any{"follower_id": sessionUserId}
 	followings, _ := repo_wrappers.GetFollowerFiltered(c, conditions, -1)
 
-	followedUserIDs := []int{sessionUserId} 
+	followedUserIDs := []int{sessionUserId}
 	for _, f := range followings {
 		followedUserIDs = append(followedUserIDs, f.FollowingID)
 	}
 
 	conditions = map[string]any{
-		"flagged": 0,
+		"flagged":   0,
 		"author_id": followedUserIDs,
 	}
 	msgs, err := repo_wrappers.GetMessagesFiltered(c, conditions, PER_PAGE)

@@ -26,7 +26,7 @@ var (
 
 func PrometheusMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {			
+		return func(c echo.Context) error {
 			err := next(c)
 
 			vm, _ := mem.VirtualMemory()
@@ -34,7 +34,7 @@ func PrometheusMiddleware() echo.MiddlewareFunc {
 			MemoryUsage.WithLabelValues("Used").Set(float64(vm.Used))
 			MemoryUsage.WithLabelValues("Available").Set(float64(vm.Available))
 			MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
-			
+
 			return err
 		}
 	}

@@ -13,9 +13,9 @@ import (
 func CreateFollower(c echo.Context, followerID int, followingID int) error {
 	if followerID == 0 || followingID == 0 {
 		err := errors.New("followerID and followingID must be set")
-        utils.LogErrorEchoContext(c, "CreateFollower returned an error", err)
+		utils.LogErrorEchoContext(c, "CreateFollower returned an error", err)
 		return err
-    }
+	}
 	newFollower := helpers.NewFollower(followerID, followingID)
 	err := followerRepo.Create(context.Background(), newFollower)
 	if err != nil {
@@ -27,7 +27,7 @@ func CreateFollower(c echo.Context, followerID int, followingID int) error {
 
 func DeleteFollower(c echo.Context, followerID int, followingID int) error {
 	conditions := map[string]any{
-		"follower_id": followerID,
+		"follower_id":  followerID,
 		"following_id": followingID,
 	}
 	err := followerRepo.DeleteByFields(c.Request().Context(), conditions)
@@ -48,7 +48,7 @@ func GetFollowerFiltered(c echo.Context, conditions map[string]any, noFollowers 
 }
 
 func CountFieldInRange(c context.Context, field string, lower, upper int) (int, error) {
-    count, err := followerRepo.CountRowsWhenGroupedByFieldInRange(c, field, lower, upper)
+	count, err := followerRepo.CountRowsWhenGroupedByFieldInRange(c, field, lower, upper)
 	if err != nil {
 		utils.LogErrorContext(c, "❌ Repository Error: CountFieldInRange returned an error", err)
 		return 0, err

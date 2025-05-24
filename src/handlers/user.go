@@ -38,7 +38,6 @@ func Follow(c echo.Context) error {
 	if err != nil {
 		utils.LogErrorContext(c.Request().Context(), "Follow: ExtractJson returned an error", err)
 	}
-	
 
 	var followsUsername string
 	var unfollowsUsername string
@@ -52,58 +51,58 @@ func Follow(c echo.Context) error {
 	}
 
 	switch {
-		case c.Request().Method == http.MethodPost && followsUsername != "" :
-			slog.InfoContext(c.Request().Context(), "User has requested to follow", slog.Any("username", username), slog.Any("followsUsername", followsUsername))
-			follow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), followsUsername)
-			if err != nil {
-				utils.LogErrorContext(c.Request().Context(), "getUserId returned an error", err)
-				return err
+	case c.Request().Method == http.MethodPost && followsUsername != "":
+		slog.InfoContext(c.Request().Context(), "User has requested to follow", slog.Any("username", username), slog.Any("followsUsername", followsUsername))
+		follow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), followsUsername)
+		if err != nil {
+			utils.LogErrorContext(c.Request().Context(), "getUserId returned an error", err)
+			return err
+		}
+
+		_ = repo_wrappers.CreateFollower(c, user.UserID, follow.UserID)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	case c.Request().Method == http.MethodPost && unfollowsUsername != "":
+		slog.InfoContext(c.Request().Context(), "User has requested to unfollow", slog.Any("username", username), slog.Any("followsUsername", unfollowsUsername))
+		unfollow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), unfollowsUsername)
+		if err != nil {
+			utils.LogError("getUserId returned an error", err)
+			return err
+		}
+
+		_ = repo_wrappers.DeleteFollower(c, user.UserID, unfollow.UserID)
+
+		return c.JSON(http.StatusNoContent, nil)
+
+	case c.Request().Method == http.MethodGet:
+		noFollowers := GetNumber(c)
+
+		conditions := map[string]any{
+			"follower_id": user.UserID,
+		}
+
+		followers, err := repo_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
+
+		if err != nil {
+			slog.ErrorContext(c.Request().Context(), "Follow: Error retrieving followers for userID", slog.Any("userID", user.UserID), slog.Any("error", err))
+			return err
+		}
+
+		var followList []string
+		for _, follower := range followers {
+			targetUser, err := repo_wrappers.GetUserByID(c, follower.FollowingID)
+			if err == nil {
+				followList = append(followList, targetUser.Username)
 			}
+		}
 
-			_ = repo_wrappers.CreateFollower(c, user.UserID, follow.UserID)
+		data := map[string]any{
+			"follows": followList,
+		}
+		slog.InfoContext(c.Request().Context(), "", slog.Any("data", data))
 
-			return c.JSON(http.StatusNoContent, nil)
-
-		case c.Request().Method == http.MethodPost && unfollowsUsername != "" :
-			slog.InfoContext(c.Request().Context(), "User has requested to unfollow", slog.Any("username", username), slog.Any("followsUsername", unfollowsUsername))
-			unfollow, err := repo_wrappers.GetUserByUsername(c.Request().Context(), unfollowsUsername)
-			if err != nil {
-				utils.LogError("getUserId returned an error", err)
-				return err
-			}
-
-			_ = repo_wrappers.DeleteFollower(c, user.UserID, unfollow.UserID)
-
-			return c.JSON(http.StatusNoContent, nil)
-
-		case c.Request().Method == http.MethodGet :
-			noFollowers := GetNumber(c)
-
-			conditions := map[string]any{
-				"follower_id": user.UserID,
-			}
-			
-			followers, err := repo_wrappers.GetFollowerFiltered(c, conditions, noFollowers)
-		
-			if err != nil {
-				slog.ErrorContext(c.Request().Context(), "Follow: Error retrieving followers for userID", slog.Any("userID", user.UserID), slog.Any("error", err))
-				return err
-			}
-
-			var followList []string
-			for _, follower := range followers {
-				targetUser, err := repo_wrappers.GetUserByID(c, follower.FollowingID)
-				if err == nil {
-					followList = append(followList, targetUser.Username)
-				}
-			}
-
-			data := map[string]any{
-				"follows": followList,
-			}
-			slog.InfoContext(c.Request().Context(), "", slog.Any("data", data))
-
-			return c.JSON(http.StatusOK, data)
+		return c.JSON(http.StatusOK, data)
 	}
 
 	slog.Error("\"/fllws/:username\" was entered wrongly!")
@@ -136,7 +135,7 @@ func FollowUser(c echo.Context) error {
 		utils.LogError("getSessionUserID returned an error", err)
 		return err
 	}
-	
+
 	_ = repo_wrappers.CreateFollower(c, sessionUserId, user.UserID)
 
 	err = helpers.AddFlash(c, fmt.Sprintf("You are now following \"%s\"", username))
