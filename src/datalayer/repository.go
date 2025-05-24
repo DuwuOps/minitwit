@@ -43,7 +43,7 @@ func (r *Repository[T]) Create(ctx context.Context, entity *T) error {
 	var values []interface{}
 	paramCount := 0
 
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		field := typeOfEntity.Field(i)
 		fieldName := field.Tag.Get("db")
 		if fieldName == "" {
@@ -181,7 +181,7 @@ func (r *Repository[T]) GetFiltered(ctx context.Context, conditions map[string]a
 		val := reflect.ValueOf(&entity).Elem()
 
 		fields := make([]any, val.NumField())
-		for i := 0; i < val.NumField(); i++ {
+		for i := range val.NumField() {
 			fields[i] = val.Field(i).Addr().Interface()
 		}
 
@@ -269,7 +269,7 @@ func (r *Repository[T]) queryRow(ctx context.Context, field string, values ...an
 	val := reflect.ValueOf(&entity).Elem()
 	fields := make([]any, val.NumField())
 
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		fields[i] = val.Field(i).Addr().Interface()
 	}
 
