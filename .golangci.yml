@@ -90,6 +90,7 @@ linters:
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
+    - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
     - reassign # checks that package variables are not reassigned
     - recvcheck # checks for receiver type consistency
@@ -302,6 +303,15 @@ linters:
       # Optimizes into strings concatenation.
       # Default: true
       strconcat: false
+
+    promlinter:
+      # Please refer to https://github.com/yeya24/promlinter#usage for detailed usage.
+      # Default: []
+      disabled-linters:
+        # Counter detects issues specific to counters, as well as patterns that should only be used with counters.
+        - Counter
+        # MetricTypeInName detects when metric types are included in the metric name.
+        - MetricTypeInName
 
     reassign:
       # Patterns for global variable names that are checked for reassignment.
