@@ -50,7 +50,7 @@ func connectDB() (*sql.DB, error) {
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
 }
 
-// Creates the database tables from query in {QueriesFile}
+// Creates the database tables from query in {queriesFile}
 func createTablesIfNotExists(db *sql.DB) error {
 	// Create table "users"
 	err := createTableIfNotExists(db, "users")
@@ -81,8 +81,8 @@ func createTablesIfNotExists(db *sql.DB) error {
 
 func createTableIfNotExists(db *sql.DB, tableName string) error {
 	// Read queries-file
-	QueriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
-	sqlFile, err := os.ReadFile(QueriesFile)
+	queriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
+	sqlFile, err := os.ReadFile(queriesFile)
 	if err != nil {
 		utils.LogError("os.ReadFile returned an error", err)
 		db.Close()
