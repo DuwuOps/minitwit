@@ -1,7 +1,8 @@
 package helpers
 
 import (
-	"log"
+	"log/slog"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -28,11 +29,11 @@ func GetFlashes(c echo.Context) ([]string, error) {
 	}
 	flashes, ok := sess.Values["Flashes"].([]string)
 	if !ok {
-		log.Println("0 Flashes found")
+		utils.InfoEchoContext(c, "0 Flashes found")
 		return []string{}, nil
 	}
 	sess.Values["Flashes"] = []string{}
 	sess.Save(c.Request(), c.Response())
-	log.Printf("%v Flashes found: %v\n", len(flashes), flashes)
+	slog.InfoContext(c.Request().Context(), "Flashes found", slog.Any("flashed_found", len(flashes)), slog.Any("flashes", flashes))
 	return flashes, nil
 }
