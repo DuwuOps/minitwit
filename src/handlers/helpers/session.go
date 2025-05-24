@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"log"
+	"minitwit/src/utils"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -46,7 +46,7 @@ func IsUserLoggedIn(c echo.Context) (bool, error) {
 func GetSession(c echo.Context) (*sessions.Session, error) {
 	sess, err := session.Get("session", c)
 	if err != nil {
-		log.Printf("session.Get returned error: %v\n", err)
+		utils.LogError("session.Get returned an error", err)
 		return nil, err
 	}
 	sess.Options = &sessions.Options{
