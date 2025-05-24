@@ -32,7 +32,7 @@ func SetupRoutes(app *echo.Echo) {
 	app.POST("/register", handlers.Register)
 	app.GET("/logout", handlers.Logout)
 
-	app.GET("/latest", func(c echo.Context) error { return handlers.GetLatest(c) })
+	app.GET("/latest", handlers.GetLatest)
 	app.Static("/static", "static")
 
 	// Prometheus metrics route
