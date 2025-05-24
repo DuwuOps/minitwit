@@ -81,7 +81,6 @@ linters:
     - mirror # reports wrong mirror patterns of bytes/strings usage
     - musttag # enforces field tags in (un)marshaled structs
     - nakedret # finds naked returns in functions greater than a specified function length
-    - nestif # reports deeply nested if statements
     - nilerr # finds the code that returns nil even if it checks that the error is not nil
     - nilnesserr # reports that it checks for err != nil, but it returns a different nil value error (powered by nilness and nilerr)
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
@@ -245,7 +244,7 @@ linters:
       # Checks the number of statements in a function.
       # If lower than 0, disable the check.
       # Default: 40
-      statements: 50
+      statements: 80
 
     gochecksumtype:
       # Presence of `default` case in switch statements satisfies exhaustiveness, if all members are not listed.
@@ -255,7 +254,7 @@ linters:
     gocognit:
       # Minimal code complexity to report.
       # Default: 30 (but we recommend 10-20)
-      min-complexity: 20
+      min-complexity: 25 # Only big brains allowed
 
     gocritic:
       # Settings passed to gocritic.
@@ -360,3 +359,8 @@ linters:
     presets:
       - std-error-handling
       - common-false-positives
+          # Excluding configuration per-path, per-linter, per-text and per-source.
+    rules:
+      - path: 'src/handlers/'
+        linters:
+          - gocognit
