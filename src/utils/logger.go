@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"context"
 	"log/slog"
 	"os"
+
+	"github.com/labstack/echo/v4"
 )
 
 func SetSlogDefaults() {
