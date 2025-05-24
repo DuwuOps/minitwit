@@ -38,7 +38,10 @@ func Login(c echo.Context) error {
 			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
 			} else {
-				helpers.AddFlash(c, "You were logged in")
+				err = helpers.AddFlash(c, "You were logged in")
+				if err != nil {
+					utils.LogError("addFlash returned an error", err)
+				}
 				helpers.SetSessionUserID(c, user.UserID)
 				return c.Redirect(http.StatusFound, "/")
 			}
@@ -123,7 +126,10 @@ func Register(c echo.Context) error {
 				
 
 				if pwd == "" {
-					helpers.AddFlash(c, "You were successfully registered and can login now")
+					err = helpers.AddFlash(c, "You were successfully registered and can login now")
+					if err != nil {
+						utils.LogError("helpers.addFlash returned an error", err)
+					}
 					return c.Redirect(http.StatusFound, "/login")
 				}
 			}
@@ -151,7 +157,10 @@ func Register(c echo.Context) error {
 func Logout(c echo.Context) error {
 	utils.LogRouteStart(c, "Logout", "/logout")
 	helpers.ClearSessionUserID(c)
-	helpers.AddFlash(c, "You were logged out")
+	err := helpers.AddFlash(c, "You were logged out")
+	if err != nil {
+		utils.LogError("helpers.addFlash returned an error", err)
+	}
 	return c.Redirect(http.StatusFound, "/public")
 }
 
