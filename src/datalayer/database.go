@@ -39,11 +39,11 @@ func connectDB() (*sql.DB, error) {
 	for i := range MaxRetries {
 		err = db.Ping()
 		if err == nil {
-			fmt.Printf("Successfully connected to database on attempt %d\n", i+1)
+			slog.Info(fmt.Sprintf("Successfully connected to database on attempt %d", i+1))
 			return db, nil
 		}
 
-		fmt.Printf("Failed to connect to database (attempt %d/%d): %v\n", i+1, MaxRetries, err)
+		slog.Error("Failed to connect to database", slog.Any("error", err), slog.Any("current_attempt", i+1), slog.Any("max_attempts", MaxRetries))
 		time.Sleep(RetryDelay)
 	}
 
@@ -110,7 +110,7 @@ func InitDB() (*sql.DB, error) {
 
 	err = createTablesIfNotExists(db)
 	if err != nil {
-		fmt.Printf("InitDB : createTablesIfNotExists returned error: %v\n", err)
+		utils.LogError("InitDB : createTablesIfNotExists returned an error", err)
 		return nil, err
 	}
 
