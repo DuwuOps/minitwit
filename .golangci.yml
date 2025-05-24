@@ -88,7 +88,6 @@ linters:
     - noctx # finds sending http request without context.Context
     - nolintlint # reports ill-formed or insufficient nolint directives
     - nonamedreturns # reports all named returns
-    - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - perfsprint # checks that fmt.Sprintf can be replaced with a faster alternative
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
@@ -149,7 +148,7 @@ linters:
     #- wsl # [too strict and mostly code is not more readable] whitespace linter forces you to use empty lines
 
   # All settings can be found here https://github.com/golangci/golangci-lint/blob/HEAD/.golangci.reference.yml
-  settings:
+  settings:      
     cyclop:
       # The maximal code complexity to report.
       # Default: 10
@@ -361,17 +360,3 @@ linters:
     presets:
       - std-error-handling
       - common-false-positives
-    # Excluding configuration per-path, per-linter, per-text and per-source.
-    rules:
-      - source: 'TODO'
-        linters: [ godot ]
-      - path: '_test\.go'
-        linters:
-          - bodyclose
-          - dupl
-          - errcheck
-          - funlen
-          - goconst
-          - gosec
-          - noctx
-          - wrapcheck
