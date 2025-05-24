@@ -29,11 +29,14 @@ func Login(c echo.Context) error {
 
 		user, err := repo_wrappers.GetUserByUsername(context.Background(), username)
 
-		if errors.Is(err, datalayer.ErrRecordNotFound) {
-			errorMessage = "Invalid username"
-		} else if err != nil {
-			utils.LogError("Db.QueryRow returned an error", err)
-			return err
+
+		if err != nil {
+			if errors.Is(err, datalayer.ErrRecordNotFound) {
+				errorMessage = "Invalid username"
+			} else {
+				utils.LogError("Db.QueryRow returned an error", err)
+				return err
+			}	
 		} else {
 			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
