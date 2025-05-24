@@ -125,7 +125,10 @@ func MessagesPerUser(c echo.Context) error {
 			requestData = c.FormValue("content")
 		}
 
-		repo_wrappers.CreateMessage(c, user.UserID, requestData)
+		err = repo_wrappers.CreateMessage(c, user.UserID, requestData)
+		if err != nil {
+			utils.LogErrorContext(c.Request().Context(), "MessagesPerUser: repo_wrappers.CreateMessage returned an error", err)
+		}
 
 		return c.JSON(http.StatusNoContent, nil)
 	}
