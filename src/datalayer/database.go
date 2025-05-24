@@ -19,15 +19,15 @@ const (
 )
 
 func connectDB() (*sql.DB, error) {
-	DbUserName := helpers.GetEnvVar("DB_USER", "admin")
-	DbPass := helpers.GetEnvVar("DB_PASSWORD", "postgres")
-	DbHost := helpers.GetEnvVar("DB_HOST", "localhost")
-	DbPort := helpers.GetEnvVar("DB_PORT", "5433")
-	DbName := helpers.GetEnvVar("DB_NAME", "minitwit")
-	SSLMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
+	dbUserName := helpers.GetEnvVar("DB_USER", "admin")
+	dbPass := helpers.GetEnvVar("DB_PASSWORD", "postgres")
+	dbHost := helpers.GetEnvVar("DB_HOST", "localhost")
+	dbPort := helpers.GetEnvVar("DB_PORT", "5433")
+	dbName := helpers.GetEnvVar("DB_NAME", "minitwit")
+	sslMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
 
 	//Returns a new connection to the database.
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", DbUserName, DbPass, DbHost, DbPort, DbName, SSLMode)
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", dbUserName, dbPass, dbHost, dbPort, dbName, sslMode)
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
