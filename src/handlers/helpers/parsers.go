@@ -20,7 +20,7 @@ func ParseFollowerBuckets(envVarName string) ([][2]uint32, error) {
 		if strings.Count(pair, "-") <= 1 {
 			return nil, fmt.Errorf("invalid format in %s, expecting something like '100-200'", pair)
 		}
-		
+
 		rng := strings.Split(pair, "-")
 		low, err := strconv.ParseUint(rng[0], 10, 32)
 		if err != nil {
