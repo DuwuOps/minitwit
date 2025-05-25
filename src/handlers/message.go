@@ -265,5 +265,6 @@ func Timeline(c echo.Context) error {
 		"Endpoint": c.Path(),
 		"Flashes":  flashes,
 	}
+	data = utils.MapCSRFToContext(c, data)
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
