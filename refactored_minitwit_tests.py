@@ -48,12 +48,16 @@ def register(username, password, password2=None, email=None):
 
 def login(username, password):
     """Helper function to login"""
-    http_session = requests.Session()
-    r = http_session.post(f'{BASE_URL}/login', data={
-        'username': username,
-        'password': password
-    }, allow_redirects=True)
-    return r, http_session
+    session = requests.Session()
+    token = get_csrf_token(session, "/login")
+
+    data = {
+        "_csrf":    token,
+        "username": username,
+        "password": password,
+    }
+    r = session.post(f"{BASE_URL}/login", data=data, allow_redirects=True)
+    return r, session
 
 def register_and_login(username, password):
     """Registers and logs in in one go"""
