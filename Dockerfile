@@ -21,6 +21,7 @@ COPY ./src/routes ./src/routes
 COPY ./src/template_rendering ./src/template_rendering
 COPY ./src/snapshots ./src/snapshots
 COPY ./src/utils ./src/utils
+COPY ./src/middleware ./src/middleware
 
 RUN go build -o minitwit ./src/main.go
 
