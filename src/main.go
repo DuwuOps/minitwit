@@ -51,6 +51,9 @@ func main() {
 	app.Use(metrics.PrometheusMiddleware()) // For metrics
 
 	app.Use(middleware.BodyLimit("2M")) // drop >2 MiB payloads early
+	app.Use(middleware.RateLimiter(
+        middleware.NewRateLimiterMemoryStore(100))) // 100 req/s per IP
+	
 	routes.SetupRoutes(app)
 
 	snapshots.RecordSnapshots()
