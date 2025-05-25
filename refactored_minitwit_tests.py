@@ -17,6 +17,15 @@ import requests
 # otherwise use the database that you got previously
 BASE_URL = "http://localhost:8000"
 
+def get_csrf_token(session: requests.Session, path: str) -> str:
+    """Fetch the form at `path` and extract the CSRF token from the hidden input."""
+    r = session.get(f"{BASE_URL}{path}")
+    # look for: <input type="hidden" name="_csrf" value="...">
+    m = re.search(r'name="_csrf"\s+value="([^"]+)"', r.text)
+    if not m:
+        raise RuntimeError(f"Unable to find CSRF token on {path}")
+    return m.group(1)
+
 def register(username, password, password2=None, email=None):
     """Helper function to register a user"""
     if password2 is None:
