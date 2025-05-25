@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -15,6 +16,7 @@ import (
 	"minitwit/src/routes"
 	"minitwit/src/snapshots"
 	"minitwit/src/template_rendering"
+	"minitwit/src/utils"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -52,5 +54,15 @@ func main() {
 
 	snapshots.RecordSnapshots()
 
-	app.Logger.Fatal(app.Start(":8000"))
+	srv := &http.Server{
+        Addr:              ":8000",
+        Handler:           app,
+        ReadHeaderTimeout: utils.GetEnvDuration("READ_HEADER_TIMEOUT", "5s"),
+        ReadTimeout:       utils.GetEnvDuration("READ_TIMEOUT", "10s"),
+        WriteTimeout:      utils.GetEnvDuration("WRITE_TIMEOUT", "10s"),
+        IdleTimeout:       utils.GetEnvDuration("IDLE_TIMEOUT", "60s"),
+        MaxHeaderBytes:    utils.GetEnvInt("MAX_HEADER_BYTES", 1<<20),
+    }
+
+    app.Logger.Fatal(srv.ListenAndServe())
 }
