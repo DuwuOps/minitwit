@@ -207,31 +207,42 @@ def test_register_c():
 
 
 def test_follow_user():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
     data = {'follow': 'b'}
     params = {'latest': 7}
-    response = requests.post(url, data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
+    r = session.post(
+        url,
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     data = {'follow': 'c'}
     params = {'latest': 8}
-    response = requests.post(url, data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
+    r = session.post(
+        url,
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     query = {'no': 20, 'latest': 9}
-    response = requests.get(url, headers=HEADERS, params=query)
-    assert response.ok
+    r = session.get(url, headers=HEADERS, params=query)
+    assert r.ok
 
-    json_data = response.json()
+    json_data = r.json()
     assert "b" in json_data["follows"]
     assert "c" in json_data["follows"]
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 9
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 9
 
 
 def test_a_unfollows_b():
