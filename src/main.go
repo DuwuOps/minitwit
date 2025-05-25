@@ -16,6 +16,7 @@ import (
 	"minitwit/src/snapshots"
 	"minitwit/src/template_rendering"
 	"minitwit/src/utils"
+	miniware "minitwit/src/middleware"
 )
 
 var SECRET_KEY = []byte("development key")
@@ -40,6 +41,8 @@ func main() {
 	repo_wrappers.InitRepos(db)
 
 	app.Use(session.Middleware(sessions.NewCookieStore(SECRET_KEY)))
+
+	app.Use(miniware.Csrf())
 
 	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Root: "static", // static folder
