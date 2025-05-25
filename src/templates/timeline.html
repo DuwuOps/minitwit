@@ -30,6 +30,7 @@
       <div class="twitbox">
         <h3>What's on your mind, {{ .User.Username }}?</h3>
         <form action="/add_message" method="post">
+          <input type="hidden" name="_csrf" value="{{ .CSRFToken }}">
           <p><input type="text" name="text" size="60">
           <input type="submit" value="Share">
         </form>
