@@ -59,19 +59,25 @@ def make_auth_session() -> requests.Session:
 
 
 def test_latest():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     # post something to update LATEST
     url = f"{BASE_URL}/register"
     data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
     params = {'latest': 1337}
-    response = requests.post(url, data=json.dumps(data),
-                             params=params, headers=HEADERS)
-    assert response.ok
+    r = session.post(
+        url,
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     # verify that latest was updated
-    url = f'{BASE_URL}/latest'
-    response = requests.get(url, headers=HEADERS)
-    assert response.ok
-    assert response.json()['latest'] == 1337
+    r = session.get(f"{BASE_URL}/latest", headers=HEADERS)
+    assert r.ok
+    assert r.json()['latest'] == 1337
 
 
 def test_register():
