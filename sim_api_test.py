@@ -163,19 +163,25 @@ def test_get_latest_msgs():
 
 
 def test_register_b():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     username = 'b'
     email = 'b@b.b'
     pwd = 'b'
     data = {'username': username, 'email': email, 'pwd': pwd}
     params = {'latest': 5}
-    response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
-    # TODO: add another assertion that it is really there
+    r = session.post(
+        f'{BASE_URL}/register',
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 5
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 5
 
 
 def test_register_c():
