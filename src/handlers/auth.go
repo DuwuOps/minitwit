@@ -58,6 +58,7 @@ func Login(c echo.Context) error {
 		"Error":   errorMessage,
 		"Flashes": flashes,
 	}
+	data = utils.MapCSRFToContext(c, data)
 	return c.Render(http.StatusOK, "login.html", data)
 }
 
