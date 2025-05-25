@@ -46,6 +46,18 @@ def get_csrf_token(session: requests.Session, path: str) -> str:
     return token
 
 
+def make_auth_session() -> requests.Session:
+    """
+    Returns a Session pre-configured with BasicAuth and
+    a valid CSRF cookie (by GETting /register).
+    """
+    s = requests.Session()
+    s.auth = (USERNAME, PWD)
+    # seed the CSRF cookie (can be any GET endpoint that uses the middleware)
+    get_csrf_token(s, '/register')
+    return s
+
+
 def test_latest():
     # post something to update LATEST
     url = f"{BASE_URL}/register"
