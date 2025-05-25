@@ -215,6 +215,7 @@ func PublicTimeline(c echo.Context) error {
 		"User":     user,
 		"Flashes":  flashes,
 	}
+	data = utils.MapCSRFToContext(c, data)
 	return c.Render(http.StatusOK, "timeline.html", data)
 }
 
