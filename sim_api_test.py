@@ -185,18 +185,25 @@ def test_register_b():
 
 
 def test_register_c():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     username = 'c'
     email = 'c@c.c'
     pwd = 'c'
     data = {'username': username, 'email': email, 'pwd': pwd}
     params = {'latest': 6}
-    response = requests.post(f'{BASE_URL}/register', data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
+    r = session.post(
+        f'{BASE_URL}/register',
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 6
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 6
 
 
 def test_follow_user():
