@@ -33,9 +33,17 @@ def init_db():
         db.commit()
 
 
-# Empty the database and initialize the schema again
-#Path(DATABASE).unlink()
-#init_db()
+def get_csrf_token(session: requests.Session, path: str) -> str:
+    """
+    Issue a GET to `path` to pick up the `csrf_token` cookie,
+    then return its value.
+    """
+    r = session.get(BASE_URL + path)
+    # csrf_token is set as an HttpOnly cookie by Echo's middleware
+    token = session.cookies.get('csrf_token')
+    if not token:
+        raise RuntimeError(f"No csrf_token cookie after GET {path}")
+    return token
 
 
 def test_latest():
