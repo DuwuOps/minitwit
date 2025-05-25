@@ -103,17 +103,24 @@ def test_register():
 
 
 def test_create_msg():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     username = 'a'
     data = {'content': 'Blub!'}
     url = f'{BASE_URL}/msgs/{username}'
     params = {'latest': 2}
-    response = requests.post(url, data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
+    r = session.post(
+        url,
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 2
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 2
 
 
 def test_get_latest_user_msgs():
