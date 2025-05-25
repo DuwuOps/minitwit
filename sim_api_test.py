@@ -1,6 +1,5 @@
 import os
 import json
-import base64
 import sqlite3
 import requests
 from pathlib import Path
