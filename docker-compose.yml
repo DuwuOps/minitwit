@@ -23,6 +23,14 @@ services:
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-minitwit}
       - DB_SSL_MODE=${DB_SSL_MODE:-disable}
+      - READ_HEADER_TIMEOUT=5s
+      - READ_TIMEOUT=10s
+      - WRITE_TIMEOUT=10s
+      - IDLE_TIMEOUT=60s
+      - MAX_HEADER_BYTES=1048576
+      - DB_MAX_OPEN_CONS=25
+      - DB_MAX_IDLE_CONS=10
+      - DB_MAX_CONN_LIFETIME=60m
 
   prometheus:
     build: 
