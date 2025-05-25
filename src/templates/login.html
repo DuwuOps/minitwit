@@ -8,6 +8,7 @@
     <div class="error"><strong>Error:</strong> {{ .Error }}</div>
   {{ end }}
   <form action="/login" method="post">
+    <input type="hidden" name="_csrf" value="{{ .CSRFToken }}">
     <dl>
       <dt>Username:</dt>
       <dd><input type="text" name="username" size="30" value="{{ .Form.Username }}"></dd>
