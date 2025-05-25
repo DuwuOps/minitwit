@@ -32,12 +32,19 @@ def register(username, password, password2=None, email=None):
         password2 = password
     if email is None:
         email = username + '@example.com'
-    return requests.post(f'{BASE_URL}/register', data={
-        'username':     username,
-        'password':     password,
-        'password2':    password2,
-        'email':        email,
-    }, allow_redirects=True)
+
+    session = requests.Session()
+    token = get_csrf_token(session, "/register")
+
+    data = {
+        "_csrf":    token,
+        "username": username,
+        "password": password,
+        "password2": password2,
+        "email":     email,
+    }
+    r = session.post(f"{BASE_URL}/register", data=data, allow_redirects=True)
+    return r
 
 def login(username, password):
     """Helper function to login"""
