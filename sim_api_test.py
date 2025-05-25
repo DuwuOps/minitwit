@@ -124,23 +124,23 @@ def test_create_msg():
 
 
 def test_get_latest_user_msgs():
+    session = make_auth_session()
     username = 'a'
 
     query = {'no': 20, 'latest': 3}
     url = f'{BASE_URL}/msgs/{username}'
-    response = requests.get(url, headers=HEADERS, params=query)
-    assert response.status_code == 200
+    r = session.get(url, headers=HEADERS, params=query)
+    assert r.status_code == 200
 
-    got_it_earlier = False
-    for msg in response.json():
-        if msg['content'] == 'Blub!' and msg['user'] == username:
-            got_it_earlier = True
-
-    assert got_it_earlier
+    found = any(
+        msg['content'] == 'Blub!' and msg['user'] == username
+        for msg in r.json()
+    )
+    assert found
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 3
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 3
 
 
 def test_get_latest_msgs():
