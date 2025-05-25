@@ -155,6 +155,7 @@ func Register(c echo.Context) error {
 		"Error":   errorMessage,
 		"Flashes": flashes,
 	}
+	data = utils.MapCSRFToContext(c, data)
 	return c.Render(http.StatusOK, "register.html", data)
 }
 
