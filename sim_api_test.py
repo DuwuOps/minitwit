@@ -246,22 +246,29 @@ def test_follow_user():
 
 
 def test_a_unfollows_b():
+    session = make_auth_session()
+    csrf = session.cookies['csrf_token']
+
     username = 'a'
     url = f'{BASE_URL}/fllws/{username}'
 
     #  first send unfollow command
     data = {'unfollow': 'b'}
     params = {'latest': 10}
-    response = requests.post(url, data=json.dumps(data),
-                             headers=HEADERS, params=params)
-    assert response.ok
+    r = session.post(
+        url,
+        params=params,
+        data=json.dumps(data),
+        headers={**HEADERS, 'X-CSRF-Token': csrf}
+    )
+    assert r.ok
 
     # then verify that b is no longer in follows list
     query = {'no': 20, 'latest': 11}
-    response = requests.get(url, params=query, headers=HEADERS)
-    assert response.ok
-    assert 'b' not in response.json()['follows']
+    r = session.get(url, params=query, headers=HEADERS)
+    assert r.ok
+    assert 'b' not in r.json()['follows']
 
     # verify that latest was updated
-    response = requests.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert response.json()['latest'] == 11
+    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert r.json()['latest'] == 11
