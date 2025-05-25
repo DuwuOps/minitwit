@@ -72,6 +72,7 @@ jobs:
         uses: docker/bake-action@master
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+          DOCKER_TAG: ${{ vars.DOCKER_TAG }}
         with:
           load: true
           push: true
@@ -179,6 +180,7 @@ jobs:
           DB_HOST: ${{ vars.DB_HOST }}
           DB_PORT: ${{ vars.DB_PORT }}
           DB_NAME: ${{ vars.DB_NAME }}
+          DOCKER_TAG: ${{ vars.DOCKER_TAG }}
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.SSH_HOST }}
@@ -189,7 +191,8 @@ jobs:
             DB_PASSWORD,
             DB_HOST,
             DB_PORT,
-            DB_NAME
+            DB_NAME,
+            DOCKER_TAG
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
             DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
