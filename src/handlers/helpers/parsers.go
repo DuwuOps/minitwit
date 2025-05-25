@@ -17,10 +17,11 @@ func ParseFollowerBuckets(envVarName string) ([][2]uint32, error) {
 	buckets := make([][2]uint32, 0, len(pairs))
 
 	for _, pair := range pairs {
-		rng := strings.Split(pair, "-")
-		if len(rng) != 2 {
+		if strings.Count(pair, "-") <= 1 {
 			return nil, fmt.Errorf("invalid format in %s, expecting something like '100-200'", pair)
 		}
+		
+		rng := strings.Split(pair, "-")
 		low, err := strconv.ParseUint(rng[0], 10, 32)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse lower bound %s: %w", rng[0], err)

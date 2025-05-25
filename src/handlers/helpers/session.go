@@ -49,6 +49,8 @@ func IsUserLoggedIn(c echo.Context) (bool, error) {
 	return ok, err
 }
 
+const SecondsInAWeek = 86400 * 7
+
 func GetSession(c echo.Context) (*sessions.Session, error) {
 	sess, err := session.Get("session", c)
 	if err != nil {
@@ -57,7 +59,7 @@ func GetSession(c echo.Context) (*sessions.Session, error) {
 	}
 	sess.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 7,
+		MaxAge:   SecondsInAWeek,
 		HttpOnly: true,
 	}
 	return sess, nil
