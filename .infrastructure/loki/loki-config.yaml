@@ -7,7 +7,6 @@ server:
   grpc_server_max_concurrent_streams: 1000
 
 common:
-  instance_addr: 127.0.0.1
   path_prefix: /tmp/loki
   storage:
     filesystem:
@@ -15,6 +14,7 @@ common:
       rules_directory: /tmp/loki/rules
   replication_factor: 1
   ring:
+    instance_addr: 127.0.0.1
     kvstore:
       store: inmemory
 
@@ -47,6 +47,7 @@ ruler:
   alertmanager_url: http://localhost:9093
 
 frontend:
+  address: 0.0.0.0
   encoding: protobuf
 
 # By default, Loki will send anonymous, but uniquely-identifiable usage and configuration
