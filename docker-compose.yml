@@ -40,9 +40,8 @@ services:
     container_name: prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--web.listen-address=127.0.0.1:9090"
     ports:
-      - "127.0.0.1:9090:9090"
+      - "9090:9090"
     networks:
       - main
 
@@ -61,10 +60,9 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/loki
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}loki:${DOCKER_TAG:-local}
-    container_name: loki
+    image: ${DOCKER_USERNAME-}/loki:${DOCKER_TAG:-local}
     networks:
-      - main  
+      - main
 
   grafana:
     build: 
@@ -84,21 +82,5 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
 
-  # Database
-  database:
-    image: postgres:latest
-    container_name: database
-    ports:
-      - 5433:5432
-    environment:
-      - POSTGRES_USER=${DB_USER:-admin}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
-      - POSTGRES_DB=${DB_NAME:-minitwit}
-    volumes:
-      - pgdata:/var/lib/postgresql/data 
-    networks:
-      - main
-
 volumes:
   grafana-storage: {}
-  pgdata:

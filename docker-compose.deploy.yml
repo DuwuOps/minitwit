@@ -4,22 +4,45 @@ services:
     ports:
       - 0.0.0.0:80:8000
     restart: always
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
 
   prometheus:
     build: !reset null
+    ports:
+      - "0.0.0.0:9090:9090"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   alloy:
     build: !reset null
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   loki:
     build: !reset null
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   grafana:
     build: !reset null
     volumes:
       - grafana-storage:/var/lib/grafana
-    
-  database: !reset null
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
 
 volumes:
