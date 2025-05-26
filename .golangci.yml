@@ -276,8 +276,6 @@ linters:
       # Default: []
       excludes:
         - G201 # Look for hard coded credentials
-        - G401 # Detect the usage of MD5 or SHA1
-        - G501 # Import blocklist: crypto/md5
 
     inamedparam:
       # Skips check for interface methods with only a single parameter.
@@ -364,3 +362,6 @@ linters:
       - path: 'src/handlers/'
         linters:
           - gocognit
+      - path: 'src/template_rendering/template_helpers.go'
+        linters:
+          - gosec
