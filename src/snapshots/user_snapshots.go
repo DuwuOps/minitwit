@@ -1,10 +1,11 @@
 package snapshots
 
 import (
-	"log"
 	"context"
+	"log/slog"
 	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/metrics"
+	"minitwit/src/utils"
 	"time"
 )
 
@@ -21,10 +22,10 @@ func RunUserSnapshotsAsync(ticker *time.Ticker) {
 }
 
 func updateTotalUsers(ctx context.Context) {
-	log.Printf("📸 Info: Updating TotalUsers Snapshot")
+	slog.InfoContext(ctx, "📸 Info: Updating TotalUsers Snapshot")
 	count, err := repo_wrappers.CountAllUsers(ctx)
 	if err != nil {
-		log.Printf("❌ Snapshot Error: counting all users: %v", err)
+		utils.LogErrorContext(ctx, "❌ Snapshot Error: counting all users", err)
 	}
 	metrics.TotalUsers.Set(float64(count))
 }

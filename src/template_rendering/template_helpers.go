@@ -8,7 +8,6 @@ import (
 )
 
 func gravatarUrl(email string, size int) string {
-
 	email = strings.TrimSpace(strings.ToLower(email))
 	hash := md5.Sum([]byte(email))
 

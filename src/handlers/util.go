@@ -7,7 +7,7 @@ import (
 )
 
 func GetNumber(c echo.Context) int {
-    numStr := c.QueryParam("no")
+	numStr := c.QueryParam("no")
 	num := 100
 	if numStr != "" {
 		val, err := strconv.Atoi(numStr)
@@ -17,4 +17,3 @@ func GetNumber(c echo.Context) int {
 	}
 	return num
 }
-

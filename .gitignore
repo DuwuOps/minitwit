@@ -192,3 +192,7 @@ docs/database-migration/[0-9]*/**
 
 ## Terraform env. variables
 *.tfvars
+
+
+## Linters
+bin/*

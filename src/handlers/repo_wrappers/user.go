@@ -2,10 +2,11 @@ package repo_wrappers
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/metrics"
 	"minitwit/src/models"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,7 +14,7 @@ import (
 func GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	user, err := userRepo.GetByField(ctx, "username", username)
 	if err != nil {
-		log.Printf("User not found: %s", username)
+		slog.ErrorContext(ctx, "User not found", slog.Any("username", username))
 		return nil, err
 	}
 	return user, nil
@@ -22,7 +23,7 @@ func GetUserByUsername(ctx context.Context, username string) (*models.User, erro
 func GetUserByID(c echo.Context, id int) (*models.User, error) {
 	user, err := userRepo.GetByID(c.Request().Context(), id)
 	if err != nil {
-		log.Printf(`User not found: %d`, id)
+		slog.ErrorContext(c.Request().Context(), "User not found", slog.Any("user-id", id))
 		return nil, err
 	}
 	return user, nil
@@ -46,13 +47,13 @@ func IsFollowingUser(c echo.Context, profileUserID int) bool {
 func GetCurrentUser(c echo.Context) (*models.User, error) {
 	id, err := helpers.GetSessionUserID(c)
 	if err != nil {
-		log.Printf("GetCurrentUser: getSessionUserID returned error: %v\n", err)
+		utils.LogErrorContext(c.Request().Context(), "GetCurrentUser: getSessionUserID returned an error", err)
 		return nil, err
 	}
 
 	user, err := userRepo.GetByID(c.Request().Context(), id)
 	if err != nil {
-		log.Printf("GetCurrentUser: userRepo.GetByID returned error: %v\n", err)
+		utils.LogErrorContext(c.Request().Context(), "GetCurrentUser: userRepo.GetByID returned an error", err)
 		return nil, err
 	}
 	return user, nil
@@ -62,7 +63,7 @@ func CreateUser(username string, email string, hash string) error {
 	newUser := helpers.NewUser(username, email, hash)
 	err := userRepo.Create(context.Background(), newUser)
 	if err != nil {
-		log.Printf("userRepo.Create returned error: %v\n", err)
+		utils.LogError("userRepo.Create returned an error", err)
 		return err
 	}
 	metrics.NewUsers.Inc()
@@ -72,7 +73,7 @@ func CreateUser(username string, email string, hash string) error {
 func CountAllUsers(c context.Context) (int, error) {
 	user, err := userRepo.CountAll(c)
 	if err != nil {
-		log.Printf("❌ Repository Error: CountAllUsers returned error: %v\n", err)
+		utils.LogErrorContext(c, "❌ Repository Error: CountAllUsers returned error", err)
 		return 0, err
 	}
 	return user, nil

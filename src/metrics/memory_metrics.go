@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"log"
+	"minitwit/src/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/prometheus/client_golang/prometheus"
@@ -10,7 +10,7 @@ import (
 
 func InitializeMemoryMetricies() {
 	if err := prometheus.Register(MemoryUsage); err != nil {
-		log.Printf("❌ Error: Unable to register prometheus metric MemoryUsage: %v", err)
+		utils.LogError("Unable to register prometheus metric MemoryUsage", err)
 	}
 }
 
@@ -26,16 +26,15 @@ var (
 
 func PrometheusMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {			
+		return func(c echo.Context) error {
 			err := next(c)
 
 			vm, _ := mem.VirtualMemory()
-			log.Printf("vm.UsedPercent: %vm\n", vm.UsedPercent)
 			MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
 			MemoryUsage.WithLabelValues("Used").Set(float64(vm.Used))
 			MemoryUsage.WithLabelValues("Available").Set(float64(vm.Available))
 			MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
-			
+
 			return err
 		}
 	}

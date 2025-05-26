@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"errors"
-	"log"
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/helpers"
 	"minitwit/src/handlers/repo_wrappers"
+	"minitwit/src/utils"
 	"net/http"
 	"strings"
 
@@ -15,7 +15,7 @@ import (
 )
 
 func Login(c echo.Context) error {
-	log.Printf("🎺 User entered Login via route \"/login\" and HTTP method %v\n", c.Request().Method)
+	utils.LogRouteStart(c, "Login", "/login")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -26,20 +26,27 @@ func Login(c echo.Context) error {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
 
-
 		user, err := repo_wrappers.GetUserByUsername(context.Background(), username)
 
-		if errors.Is(err, datalayer.ErrRecordNotFound) {
-			errorMessage = "Invalid username"
-		} else if err != nil {
-			log.Printf("Db.QueryRow returned error: %v\n", err)
-			return err
+		if err != nil {
+			if errors.Is(err, datalayer.ErrRecordNotFound) {
+				errorMessage = "Invalid username"
+			} else {
+				utils.LogError("Db.QueryRow returned an error", err)
+				return err
+			}
 		} else {
 			if !checkPasswordHash(user.PwHash, password) {
 				errorMessage = "Invalid password"
 			} else {
-				helpers.AddFlash(c, "You were logged in")
-				helpers.SetSessionUserID(c, user.UserID)
+				err = helpers.AddFlash(c, "You were logged in")
+				if err != nil {
+					utils.LogError("addFlash returned an error", err)
+				}
+				err = helpers.SetSessionUserID(c, user.UserID)
+				if err != nil {
+					utils.LogErrorEchoContext(c, "SetSessionUserID returned an error", err)
+				}
 				return c.Redirect(http.StatusFound, "/")
 			}
 		}
@@ -55,7 +62,7 @@ func Login(c echo.Context) error {
 }
 
 func Register(c echo.Context) error {
-	log.Printf("🎺 User entered Register via route \"/register\" and HTTP method %v", c.Request().Method)
+	utils.LogRouteStart(c, "Register", "/register")
 	loggedIn, _ := helpers.IsUserLoggedIn(c)
 	if loggedIn {
 		return c.Redirect(http.StatusFound, "/")
@@ -63,7 +70,7 @@ func Register(c echo.Context) error {
 
 	err := repo_wrappers.UpdateLatest(c)
 	if err != nil {
-		log.Printf("helpers.UpdateLatest returned error: %v\n", err)
+		utils.LogError("helpers.UpdateLatest returned an error", err)
 		return err
 	}
 
@@ -71,7 +78,7 @@ func Register(c echo.Context) error {
 	if c.Request().Method == http.MethodPost {
 		payload, err := helpers.ExtractJson(c)
 		if err != nil {
-			log.Printf("Register: ExtractJson returned error: %v\n", err)
+			utils.LogErrorContext(c.Request().Context(), "Register: ExtractJson returned an error", err)
 		}
 
 		var username string
@@ -115,15 +122,17 @@ func Register(c echo.Context) error {
 			} else {
 				hash, err := generatePasswordHash(password)
 				if err != nil {
-					log.Printf("generatePasswordHash returned error: %v\n", err)
+					utils.LogError("generatePasswordHash returned an error", err)
 					return err
 				}
-				
+
 				_ = repo_wrappers.CreateUser(username, email, hash)
-				
 
 				if pwd == "" {
-					helpers.AddFlash(c, "You were successfully registered and can login now")
+					err = helpers.AddFlash(c, "You were successfully registered and can login now")
+					if err != nil {
+						utils.LogError("helpers.addFlash returned an error", err)
+					}
 					return c.Redirect(http.StatusFound, "/login")
 				}
 			}
@@ -149,9 +158,15 @@ func Register(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
-	log.Println("🎺 User entered Logout via route \"/logout\"")
-	helpers.ClearSessionUserID(c)
-	helpers.AddFlash(c, "You were logged out")
+	utils.LogRouteStart(c, "Logout", "/logout")
+	err := helpers.ClearSessionUserID(c)
+	if err != nil {
+		utils.LogErrorEchoContext(c, "ClearSessionUserID returned an error", err)
+	}
+	err = helpers.AddFlash(c, "You were logged out")
+	if err != nil {
+		utils.LogError("helpers.addFlash returned an error", err)
+	}
 	return c.Redirect(http.StatusFound, "/public")
 }
 

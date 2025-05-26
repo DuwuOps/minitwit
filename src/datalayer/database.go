@@ -3,8 +3,9 @@ package datalayer
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"minitwit/src/handlers/helpers"
+	"minitwit/src/utils"
 	"os"
 	"time"
 
@@ -13,24 +14,24 @@ import (
 
 const (
 	QueriesDirectory = "queries/"
-	MaxRetries  = 10
-	RetryDelay  = 2 * time.Second
+	MaxRetries       = 10
+	RetryDelay       = 2 * time.Second
 )
 
 func connectDB() (*sql.DB, error) {
-	DbUserName := helpers.GetEnvVar("DB_USER", "admin")
-	DbPass := helpers.GetEnvVar("DB_PASSWORD", "postgres")
-	DbHost := helpers.GetEnvVar("DB_HOST", "localhost")
-	DbPort := helpers.GetEnvVar("DB_PORT", "5433")
-	DbName := helpers.GetEnvVar("DB_NAME", "minitwit")
-	SSLMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
+	dbUserName := helpers.GetEnvVar("DB_USER", "admin")
+	dbPass := helpers.GetEnvVar("DB_PASSWORD", "postgres")
+	dbHost := helpers.GetEnvVar("DB_HOST", "localhost")
+	dbPort := helpers.GetEnvVar("DB_PORT", "5433")
+	dbName := helpers.GetEnvVar("DB_NAME", "minitwit")
+	sslMode := helpers.GetEnvVar("DB_SSL_MODE", "disable")
 
-	//Returns a new connection to the database.
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", DbUserName, DbPass, DbHost, DbPort, DbName, SSLMode)
+	// Returns a new connection to the database.
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", dbUserName, dbPass, dbHost, dbPort, dbName, sslMode)
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Printf("sql.Open returned error: %v\n", err)
+		utils.LogError("sql.Open returned an error", err)
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
@@ -38,18 +39,18 @@ func connectDB() (*sql.DB, error) {
 	for i := range MaxRetries {
 		err = db.Ping()
 		if err == nil {
-			fmt.Printf("Successfully connected to database on attempt %d\n", i+1)
+			slog.Info(fmt.Sprintf("Successfully connected to database on attempt %d", i+1))
 			return db, nil
 		}
 
-		fmt.Printf("Failed to connect to database (attempt %d/%d): %v\n", i+1, MaxRetries, err)
+		slog.Error("Failed to connect to database", slog.Any("error", err), slog.Any("current_attempt", i+1), slog.Any("max_attempts", MaxRetries))
 		time.Sleep(RetryDelay)
 	}
 
 	return nil, fmt.Errorf("failed to connect to database: %w", err)
 }
 
-// Creates the database tables from query in {QueriesFile}
+// Creates the database tables from query in {queriesFile}.
 func createTablesIfNotExists(db *sql.DB) error {
 	// Create table "users"
 	err := createTableIfNotExists(db, "users")
@@ -80,20 +81,29 @@ func createTablesIfNotExists(db *sql.DB) error {
 
 func createTableIfNotExists(db *sql.DB, tableName string) error {
 	// Read queries-file
-	QueriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
-	sqlFile, err := os.ReadFile(QueriesFile)
+	queriesFile := fmt.Sprintf("%sschema.%s.sql", QueriesDirectory, tableName)
+	sqlFile, err := os.ReadFile(queriesFile)
 	if err != nil {
-		log.Printf("os.ReadFile returned error: %v\n", err)
-		db.Close()
+		utils.LogError("os.ReadFile returned an error", err)
+
+		err = db.Close()
+		if err != nil {
+			utils.LogError("db.Close returned an error", err)
+		}
+
 		return fmt.Errorf("failed to read schema file: %w", err)
 	}
 
 	// Execture contents of queries-file
 	_, err = db.Exec(string(sqlFile))
 	if err != nil {
-		log.Printf("db.Exec returned error: %v\n", err)
-		db.Close()
-		log.Printf("%q: %s\n", err, sqlFile)
+		slog.Error("db.Exec returned an error", slog.Any("error", err), slog.Any("SQL-query", sqlFile))
+
+		err = db.Close()
+		if err != nil {
+			utils.LogError("db.Close returned an error", err)
+		}
+
 		return fmt.Errorf("failed to execute schema: %w", err)
 	}
 
@@ -104,16 +114,16 @@ func InitDB() (*sql.DB, error) {
 	// Establish connection to database
 	db, err := connectDB()
 	if err != nil {
-		log.Printf("connectDB returned error: %v\n", err)
+		utils.LogError("connectDB returned an error", err)
 		return nil, err
 	}
 
 	err = createTablesIfNotExists(db)
 	if err != nil {
-		fmt.Printf("InitDB : createTablesIfNotExists returned error: %v\n", err)
+		utils.LogError("InitDB : createTablesIfNotExists returned an error", err)
 		return nil, err
 	}
 
-	log.Printf("Connecting to existing Minitwit Database!")
+	slog.Info("Connecting to existing Minitwit Database!")
 	return db, nil
 }

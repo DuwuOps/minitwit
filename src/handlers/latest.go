@@ -1,17 +1,16 @@
 package handlers
 
 import (
-	"log"
+	"log/slog"
 	"minitwit/src/handlers/repo_wrappers"
+	"minitwit/src/utils"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-
 func GetLatest(c echo.Context) error {
-	
-	log.Println("🎺 User entered GetLatest via route \"/latest\"")
+	utils.LogRouteStart(c, "GetLatest", "/latest")
 
 	latestProcessedCommandStr, err := repo_wrappers.GetLatest(c)
 	if err != nil {
@@ -21,7 +20,7 @@ func GetLatest(c echo.Context) error {
 	latestProcessedCommandId := int64(0)
 
 	if len(latestProcessedCommandStr) == 0 {
-		log.Printf("latestProcessedCommandId not found.\n")
+		slog.InfoContext(c.Request().Context(), "latestProcessedCommandId not found.")
 	} else {
 		latestProcessedCommandId = latestProcessedCommandStr[0].LatestProcessedID
 	}

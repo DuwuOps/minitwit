@@ -1,7 +1,8 @@
 package snapshots
 
 import (
-	"log"
+	"log/slog"
+	"minitwit/src/utils"
 	"os"
 	"strconv"
 	"time"
@@ -10,13 +11,13 @@ import (
 func RecordSnapshots() {
 	intervalStr := os.Getenv("SNAPSHOT_TIME_INTERVAL_SECONDS")
 	if intervalStr == "" {
-		log.Printf("ℹ️ Info: unable to get SNAPSHOT_TIME_INTERVAL_SECONDS, using default.")
+		slog.Info("ℹ️ Info: unable to get SNAPSHOT_TIME_INTERVAL_SECONDS, using default.")
 		intervalStr = "300"
 	}
 
 	snapshotInterval, err := strconv.Atoi(intervalStr)
 	if err != nil {
-		log.Printf("❌ Error: Invalid SNAPSHOT_TIME_INTERVAL_SECONDS: %v", err)
+		utils.LogError("❌ Error: Invalid SNAPSHOT_TIME_INTERVAL_SECONDS", err)
 		return
 	}
 

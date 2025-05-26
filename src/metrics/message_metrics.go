@@ -1,7 +1,7 @@
 package metrics
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -15,7 +15,7 @@ func InitializeMessageMetricies() {
 
 	for _, metric := range metrics {
 		if err := prometheus.Register(metric); err != nil {
-			log.Printf("❌ Error: Unable to register prometheus metric %T: %v", metric, err)
+			slog.Error("Unable to register prometheus metric", slog.Any("error", err), slog.Any("metric", metric))
 		}
 	}
 }
@@ -28,7 +28,7 @@ var MessagesPosts = prometheus.NewCounterVec(
 	[]string{"hour", "weekday"},
 )
 
-// Snapshots
+// Snapshots.
 var MessagesTotal = prometheus.NewGauge(
 	prometheus.GaugeOpts{
 		Name: "minitwit_messages_total",
