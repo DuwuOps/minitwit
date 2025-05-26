@@ -18,6 +18,9 @@ common:
     kvstore:
       store: inmemory
 
+frontend:
+    address: 0.0.0.0
+
 query_range:
   results_cache:
     cache:
@@ -41,10 +44,10 @@ schema_config:
 pattern_ingester:
   enabled: true
   metric_aggregation:
-    loki_address: localhost:3100
+    loki_address: 0.0.0.0:3100
 
 ruler:
-  alertmanager_url: http://localhost:9093
+  alertmanager_url: http://0.0.0.0:9093
 
 frontend:
   encoding: protobuf

@@ -5,8 +5,7 @@ services:
   app:
     build: 
       dockerfile: ./Dockerfile
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}minitwit:${DOCKER_TAG:-local}
-    container_name: app
+    image: ${DOCKER_USERNAME-}/minitwit:${DOCKER_TAG:-local}
     ports:
       - 8000:8000
     networks:
@@ -36,8 +35,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/prometheus
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}prometheus:${DOCKER_TAG:-local}
-    container_name: prometheus
+    image: ${DOCKER_USERNAME-}/prometheus:${DOCKER_TAG:-local}
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
@@ -49,8 +47,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/alloy
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}alloy:${DOCKER_TAG:-local}
-    container_name: alloy 
+    image: ${DOCKER_USERNAME-}/alloy:${DOCKER_TAG:-local}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -68,8 +65,7 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/grafana
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}grafana:${DOCKER_TAG:-local}
-    container_name: grafana
+    image: ${DOCKER_USERNAME-}/grafana:${DOCKER_TAG:-local}
     ports:
       - "127.0.0.1:3000:3000"
     environment:

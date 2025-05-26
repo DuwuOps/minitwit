@@ -30,6 +30,8 @@ services:
 
   loki:
     build: !reset null
+    ports:
+      - "3100:3100"
     deploy:
       placement:
         constraints:
