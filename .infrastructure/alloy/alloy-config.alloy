@@ -21,7 +21,7 @@ discovery.relabel "minitwit_alloy" {
 // This component is responsible for collecting logs from the discovered containers
 loki.source.docker "minitwit_alloy" {
 	host             = "unix:///var/run/docker.sock"
-	targets          = discovery.dockerswarm.minitwit_alloy.targets
+	targets          = discovery.docker.minitwit_alloy.targets
 	forward_to       = [loki.process.minitwit_alloy.receiver]
 	relabel_rules    = discovery.relabel.minitwit_alloy.rules
 	refresh_interval = "5s"
