@@ -12,11 +12,11 @@ import (
 	"minitwit/src/datalayer"
 	"minitwit/src/handlers/repo_wrappers"
 	"minitwit/src/metrics"
+	miniware "minitwit/src/middleware"
 	"minitwit/src/routes"
 	"minitwit/src/snapshots"
 	"minitwit/src/template_rendering"
 	"minitwit/src/utils"
-	miniware "minitwit/src/middleware"
 )
 
 var SECRET_KEY = []byte("development key")
