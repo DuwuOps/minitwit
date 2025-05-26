@@ -1,0 +1,25 @@
+ersion: 2
+updates:
+  # Go modules
+  - package-ecosystem: "gomod"
+    directory: "/" 
+    schedule:
+      interval: "daily"
+
+  # Dockerfiles (base images, FROM lines)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Docker Compose image tags in docker-compose.yml
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Terraform modules and providers
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "weekly"
