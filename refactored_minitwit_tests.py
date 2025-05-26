@@ -20,9 +20,9 @@ BASE_URL = "http://localhost:8000"
 
 def get_csrf_token(session: requests.Session, path: str) -> str:
     """Fetch the form at `path` and extract the CSRF token from the hidden input."""
-    r = session.get(f"{BASE_URL}{path}")
+    response = session.get(f"{BASE_URL}{path}")
     # look for: <input type="hidden" name="_csrf" value="...">
-    m = re.search(r'name="_csrf"\s+value="([^"]+)"', r.text)
+    m = re.search(r'name="_csrf"\s+value="([^"]+)"', response.text)
     if not m:
         raise RuntimeError(f"Unable to find CSRF token on {path}")
     return m.group(1)
@@ -44,8 +44,8 @@ def register(username, password, password2=None, email=None):
         "password2": password2,
         "email":     email,
     }
-    r = session.post(f"{BASE_URL}/register", data=data, allow_redirects=True)
-    return r
+    response = session.post(f"{BASE_URL}/register", data=data, allow_redirects=True)
+    return response
 
 def login(username, password):
     """Helper function to login"""
@@ -57,8 +57,8 @@ def login(username, password):
         "username": username,
         "password": password,
     }
-    r = session.post(f"{BASE_URL}/login", data=data, allow_redirects=True)
-    return r, session
+    response = session.post(f"{BASE_URL}/login", data=data, allow_redirects=True)
+    return response, session
 
 def register_and_login(username, password):
     """Registers and logs in in one go"""
@@ -76,48 +76,48 @@ def add_message(http_session, text):
         "_csrf": token,
         "text":  text,
     }
-    r = http_session.post(f"{BASE_URL}/add_message", data=data, allow_redirects=True)
+    response = http_session.post(f"{BASE_URL}/add_message", data=data, allow_redirects=True)
     if text:
-        assert "Your message was recorded" in r.text
-    return r
+        assert "Your message was recorded" in response.text
+    return response
 
 # testing functions
 
 def test_register():
     """Make sure registering works"""
-    r = register('user1', 'default')
+    response = register('user1', 'default')
     assert 'You were successfully registered ' \
-           'and can login now' in r.text
-    r = register('user1', 'default')
-    assert 'The username is already taken' in r.text
-    r = register('', 'default')
-    assert 'You have to enter a username' in r.text
-    r = register('meh', '')
-    assert 'You have to enter a password' in r.text
-    r = register('meh', 'x', 'y')
-    assert 'The two passwords do not match' in r.text
-    r = register('meh', 'foo', email='broken')
-    assert 'You have to enter a valid email address' in r.text
+           'and can login now' in response.text
+    response = register('user1', 'default')
+    assert 'The username is already taken' in response.text
+    response = register('', 'default')
+    assert 'You have to enter a username' in response.text
+    response = register('meh', '')
+    assert 'You have to enter a password' in response.text
+    response = register('meh', 'x', 'y')
+    assert 'The two passwords do not match' in response.text
+    response = register('meh', 'foo', email='broken')
+    assert 'You have to enter a valid email address' in response.text
 
 def test_login_logout():
     """Make sure logging in and logging out works"""
-    r, http_session = register_and_login('user1', 'default')
-    assert 'You were logged in' in r.text
-    r = logout(http_session)
-    assert 'You were logged out' in r.text
-    r, _ = login('user1', 'wrongpassword')
-    assert 'Invalid password' in r.text
-    r, _ = login('user2', 'wrongpassword')
-    assert 'Invalid username' in r.text
+    response, http_session = register_and_login('user1', 'default')
+    assert 'You were logged in' in response.text
+    response = logout(http_session)
+    assert 'You were logged out' in response.text
+    response, _ = login('user1', 'wrongpassword')
+    assert 'Invalid password' in response.text
+    response, _ = login('user2', 'wrongpassword')
+    assert 'Invalid username' in response.text
 
 def test_message_recording():
     """Check if adding messages works"""
     _, http_session = register_and_login('foo', 'default')
     add_message(http_session, 'test message 1')
     add_message(http_session, '<test message 2>')
-    r = requests.get(f'{BASE_URL}/')
-    assert 'test message 1' in r.text
-    assert '&lt;test message 2&gt;' in r.text
+    response = requests.get(f'{BASE_URL}/')
+    assert 'test message 1' in response.text
+    assert '&lt;test message 2&gt;' in response.text
 
 def test_timelines():
     """Make sure that timelines work"""
@@ -126,35 +126,35 @@ def test_timelines():
     logout(http_session)
     _, http_session = register_and_login('bar', 'default')
     add_message(http_session, 'the message by bar')
-    r = http_session.get(f'{BASE_URL}/public')
-    assert 'the message by foo' in r.text
-    assert 'the message by bar' in r.text
+    response = http_session.get(f'{BASE_URL}/public')
+    assert 'the message by foo' in response.text
+    assert 'the message by bar' in response.text
 
     # bar's timeline should just show bar's message
-    r = http_session.get(f'{BASE_URL}/')
-    assert 'the message by foo' not in r.text
-    assert 'the message by bar' in r.text
+    response = http_session.get(f'{BASE_URL}/')
+    assert 'the message by foo' not in response.text
+    assert 'the message by bar' in response.text
 
     # now let's follow foo
-    r = http_session.get(f'{BASE_URL}/foo/follow', allow_redirects=True)
-    assert 'You are now following &#34;foo&#34;' in r.text
+    response = http_session.get(f'{BASE_URL}/foo/follow', allow_redirects=True)
+    assert 'You are now following &#34;foo&#34;' in response.text
 
     # we should now see foo's message
-    r = http_session.get(f'{BASE_URL}/')
-    assert 'the message by foo' in r.text
-    assert 'the message by bar' in r.text
+    response = http_session.get(f'{BASE_URL}/')
+    assert 'the message by foo' in response.text
+    assert 'the message by bar' in response.text
 
     # but on the user's page we only want the user's message
-    r = http_session.get(f'{BASE_URL}/bar')
-    assert 'the message by foo' not in r.text
-    assert 'the message by bar' in r.text
-    r = http_session.get(f'{BASE_URL}/foo')
-    assert 'the message by foo' in r.text
-    assert 'the message by bar' not in r.text
+    response = http_session.get(f'{BASE_URL}/bar')
+    assert 'the message by foo' not in response.text
+    assert 'the message by bar' in response.text
+    response = http_session.get(f'{BASE_URL}/foo')
+    assert 'the message by foo' in response.text
+    assert 'the message by bar' not in response.text
 
     # now unfollow and check if that worked
-    r = http_session.get(f'{BASE_URL}/foo/unfollow', allow_redirects=True)
-    assert 'You are no longer following &#34;foo&#34;' in r.text
-    r = http_session.get(f'{BASE_URL}/')
-    assert 'the message by foo' not in r.text
-    assert 'the message by bar' in r.text
+    response = http_session.get(f'{BASE_URL}/foo/unfollow', allow_redirects=True)
+    assert 'You are no longer following &#34;foo&#34;' in response.text
+    response = http_session.get(f'{BASE_URL}/')
+    assert 'the message by foo' not in response.text
+    assert 'the message by bar' in response.text

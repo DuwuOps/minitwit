@@ -37,7 +37,7 @@ def get_csrf_token(session: requests.Session, path: str) -> str:
     Issue a GET to `path` to pick up the `csrf_token` cookie,
     then return its value.
     """
-    r = session.get(BASE_URL + path)
+    _ = session.get(BASE_URL + path)
     # csrf_token is set as an HttpOnly cookie by Echo's middleware
     token = session.cookies.get('csrf_token')
     if not token:
@@ -65,18 +65,18 @@ def test_latest():
     url = f"{BASE_URL}/register"
     data = {'username': 'test', 'email': 'test@test', 'pwd': 'foo'}
     params = {'latest': 1337}
-    r = session.post(
+    response = session.post(
         url,
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # verify that latest was updated
-    r = session.get(f"{BASE_URL}/latest", headers=HEADERS)
-    assert r.ok
-    assert r.json()['latest'] == 1337
+    response = session.get(f"{BASE_URL}/latest", headers=HEADERS)
+    assert response.ok
+    assert response.json()['latest'] == 1337
 
 
 def test_register():
@@ -88,17 +88,17 @@ def test_register():
     pwd = 'a'
     data = {'username': username, 'email': email, 'pwd': pwd}
     params = {'latest': 1}
-    r = session.post(
+    response = session.post(
         f'{BASE_URL}/register',
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 1
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 1
 
 
 def test_create_msg():
@@ -109,17 +109,17 @@ def test_create_msg():
     data = {'content': 'Blub!'}
     url = f'{BASE_URL}/msgs/{username}'
     params = {'latest': 2}
-    r = session.post(
+    response = session.post(
         url,
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 2
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 2
 
 
 def test_get_latest_user_msgs():
@@ -128,18 +128,18 @@ def test_get_latest_user_msgs():
 
     query = {'no': 20, 'latest': 3}
     url = f'{BASE_URL}/msgs/{username}'
-    r = session.get(url, headers=HEADERS, params=query)
-    assert r.status_code == 200
+    response = session.get(url, headers=HEADERS, params=query)
+    assert response.status_code == 200
 
     found = any(
         msg['content'] == 'Blub!' and msg['user'] == username
-        for msg in r.json()
+        for msg in response.json()
     )
     assert found
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 3
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 3
 
 
 def test_get_latest_msgs():
@@ -147,18 +147,18 @@ def test_get_latest_msgs():
     username = 'a'
     query = {'no': 20, 'latest': 4}
     url = f'{BASE_URL}/msgs'
-    r = session.get(url, headers=HEADERS, params=query)
-    assert r.status_code == 200
+    response = session.get(url, headers=HEADERS, params=query)
+    assert response.status_code == 200
 
     found = any(
         msg['content'] == 'Blub!' and msg['user'] == username
-        for msg in r.json()
+        for msg in response.json()
     )
     assert found
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 4
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 4
 
 
 def test_register_b():
@@ -170,17 +170,17 @@ def test_register_b():
     pwd = 'b'
     data = {'username': username, 'email': email, 'pwd': pwd}
     params = {'latest': 5}
-    r = session.post(
+    response = session.post(
         f'{BASE_URL}/register',
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 5
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 5
 
 
 def test_register_c():
@@ -192,17 +192,17 @@ def test_register_c():
     pwd = 'c'
     data = {'username': username, 'email': email, 'pwd': pwd}
     params = {'latest': 6}
-    r = session.post(
+    response = session.post(
         f'{BASE_URL}/register',
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 6
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 6
 
 
 def test_follow_user():
@@ -213,35 +213,35 @@ def test_follow_user():
     url = f'{BASE_URL}/fllws/{username}'
     data = {'follow': 'b'}
     params = {'latest': 7}
-    r = session.post(
+    response = session.post(
         url,
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     data = {'follow': 'c'}
     params = {'latest': 8}
-    r = session.post(
+    response = session.post(
         url,
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     query = {'no': 20, 'latest': 9}
-    r = session.get(url, headers=HEADERS, params=query)
-    assert r.ok
+    response = session.get(url, headers=HEADERS, params=query)
+    assert response.ok
 
-    json_data = r.json()
+    json_data = response.json()
     assert "b" in json_data["follows"]
     assert "c" in json_data["follows"]
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 9
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 9
 
 
 def test_a_unfollows_b():
@@ -254,20 +254,20 @@ def test_a_unfollows_b():
     #  first send unfollow command
     data = {'unfollow': 'b'}
     params = {'latest': 10}
-    r = session.post(
+    response = session.post(
         url,
         params=params,
         data=json.dumps(data),
         headers={**HEADERS, 'X-CSRF-Token': csrf}
     )
-    assert r.ok
+    assert response.ok
 
     # then verify that b is no longer in follows list
     query = {'no': 20, 'latest': 11}
-    r = session.get(url, params=query, headers=HEADERS)
-    assert r.ok
-    assert 'b' not in r.json()['follows']
+    response = session.get(url, params=query, headers=HEADERS)
+    assert response.ok
+    assert 'b' not in response.json()['follows']
 
     # verify that latest was updated
-    r = session.get(f'{BASE_URL}/latest', headers=HEADERS)
-    assert r.json()['latest'] == 11
+    response = session.get(f'{BASE_URL}/latest', headers=HEADERS)
+    assert response.json()['latest'] == 11
