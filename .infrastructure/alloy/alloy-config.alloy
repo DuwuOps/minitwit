@@ -1,40 +1,69 @@
 // From https://github.com/grafana/loki-fundamentals
 
-// This component is responsible for disovering new containers within the docker environment
-discovery.dockerswarm "minitwit_alloy" {
+discovery.docker "minitwit_alloy" {
 	host = "unix:///var/run/docker.sock"
 	refresh_interval = "5s"
-	role = "nodes"
 }
 
 // This component is responsible for relabeling the discovered containers
 discovery.relabel "minitwit_alloy" {
-	targets = []
+	targets = discovery.docker.minitwit_alloy.targets
 
+	// Extract container name
 	rule {
 		source_labels = ["__meta_docker_container_name"]
 		regex         = "/(.*)"
 		target_label  = "container"
 	}
+
+	// Extract service name from container labels (Docker Swarm adds these)
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_swarm_service_name"]
+		target_label  = "service_name"
+	}
+
+	// Extract stack name
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_stack_namespace"]
+		target_label  = "stack_name"
+	}
+
+	// Only collect logs from containers with specific labels or names
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_stack_namespace"]
+		regex         = "minitwit"
+		action        = "keep"
+	}
 }
 
-// This component is responsible for collecting logs from the discovered containers
+// Collect logs from discovered minitwit_alloy
 loki.source.docker "minitwit_alloy" {
 	host             = "unix:///var/run/docker.sock"
-	targets          = discovery.docker.minitwit_alloy.targets
+	targets          = discovery.relabel.minitwit_alloy.output
 	forward_to       = [loki.process.minitwit_alloy.receiver]
-	relabel_rules    = discovery.relabel.minitwit_alloy.rules
 	refresh_interval = "5s"
 }
 
 // This component is responsible for processing the logs (In this case adding static labels)
 loki.process "minitwit_alloy" {
-    stage.static_labels {
-    values = {
-      env = "production",
-    }
-}
-    forward_to = [loki.write.minitwit_alloy.receiver]
+	stage.static_labels {
+		values = {
+			env = "production",
+			cluster = "minitwit-swarm",
+		}
+	}
+
+	// Extract log level if present
+	stage.regex {
+		expression = "(?i)(?P<level>(DEBUG|INFO|WARN|ERROR|FATAL))"
+	}
+
+	stage.labels {
+		values = {
+			level = "",
+		}
+	}
+	forward_to = [loki.write.minitwit_alloy.receiver]
 }
 
 // This component is responsible for writing the logs to Loki
@@ -46,5 +75,5 @@ loki.write "minitwit_alloy" {
 
 // Enables the ability to view logs in the Alloy UI in realtime
 livedebugging {
-  enabled = true
+	enabled = true
 }
