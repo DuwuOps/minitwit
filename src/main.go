@@ -54,21 +54,21 @@ func main() {
 
 	app.Use(middleware.BodyLimit("2M")) // drop >2 MiB payloads early
 	app.Use(middleware.RateLimiter(
-        middleware.NewRateLimiterMemoryStore(100))) // 100 req/s per IP
-	
+		middleware.NewRateLimiterMemoryStore(100))) // 100 req/s per IP
+
 	routes.SetupRoutes(app)
 
 	snapshots.RecordSnapshots()
 
 	srv := &http.Server{
-        Addr:              ":8000",
-        Handler:           app,
-        ReadHeaderTimeout: utils.GetEnvDuration("READ_HEADER_TIMEOUT", "5s"),
-        ReadTimeout:       utils.GetEnvDuration("READ_TIMEOUT", "10s"),
-        WriteTimeout:      utils.GetEnvDuration("WRITE_TIMEOUT", "10s"),
-        IdleTimeout:       utils.GetEnvDuration("IDLE_TIMEOUT", "60s"),
-        MaxHeaderBytes:    utils.GetEnvInt("MAX_HEADER_BYTES", 1<<20),
-    }
+		Addr:              ":8000",
+		Handler:           app,
+		ReadHeaderTimeout: utils.GetEnvDuration("READ_HEADER_TIMEOUT", "5s"),
+		ReadTimeout:       utils.GetEnvDuration("READ_TIMEOUT", "10s"),
+		WriteTimeout:      utils.GetEnvDuration("WRITE_TIMEOUT", "10s"),
+		IdleTimeout:       utils.GetEnvDuration("IDLE_TIMEOUT", "60s"),
+		MaxHeaderBytes:    utils.GetEnvInt("MAX_HEADER_BYTES", 1<<20),
+	}
 
-    app.Logger.Fatal(srv.ListenAndServe())
+	app.Logger.Fatal(srv.ListenAndServe())
 }
