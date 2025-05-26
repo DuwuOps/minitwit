@@ -81,6 +81,13 @@ jobs:
           set: |
             *.cache-to=type=gha,mode=max                                                                                
             *.cache-from=type=gha
+            tags: 
+                ${{ vars.DOCKER_USERNAME }}/app:${{ vars.DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/prometheus:${{ vars.DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/alloy:${{ vars.DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/loki:${{ vars.DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/grafana:${{ vars.DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/database:${{ vars.DOCKER_TAG }}
     
   release:
     name: Release

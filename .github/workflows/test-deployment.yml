@@ -77,16 +77,22 @@
           uses: docker/bake-action@master
           env:
             DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
-            DOCKER_TAG: ${{ vars.TEST_ENV_DOCKER_TAG }}
           with:
             load: true
             push: true
             files: |
               docker-compose.yml
+              docker-compose.deploy.yml
             set: |
               *.cache-to=type=gha,mode=max
               *.cache-from=type=gha
-
+              tags: 
+                ${{ vars.DOCKER_USERNAME }}/app:${{ vars.TEST_ENV_DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/prometheus:${{ vars.TEST_ENV_DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/alloy:${{ vars.TEST_ENV_DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/loki:${{ vars.TEST_ENV_DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/grafana:${{ vars.TEST_ENV_DOCKER_TAG }}
+                ${{ vars.DOCKER_USERNAME }}/database:${{ vars.TEST_ENV_DOCKER_TAG }}
   
     deploy:
       name: Deploy to DigitalOcean
