@@ -57,6 +57,7 @@ func main() {
 
 	app.Use(middleware.SecureWithConfig(middleware.SecureConfig{
         XFrameOptions: 			"DENY", // prevents clickjacking
+		ContentTypeNosniff:		"nosniff", // prevents content-type sniffing
     }))
 
 	app.Use(middleware.BodyLimit("2M")) // drop >2 MiB payloads early
