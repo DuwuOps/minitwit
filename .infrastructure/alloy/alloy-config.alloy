@@ -1,10 +1,9 @@
 // From https://github.com/grafana/loki-fundamentals
 
 // This component is responsible for disovering new containers within the docker environment
-discovery.dockerswarm "minitwit_alloy" {
+discovery.docker "minitwit_alloy" {
 	host = "unix:///var/run/docker.sock"
 	refresh_interval = "5s"
-	role = "nodes"
 }
 
 // This component is responsible for relabeling the discovered containers
@@ -21,7 +20,7 @@ discovery.relabel "minitwit_alloy" {
 // This component is responsible for collecting logs from the discovered containers
 loki.source.docker "minitwit_alloy" {
 	host             = "unix:///var/run/docker.sock"
-	targets          = discovery.dockerswarm.minitwit_alloy.targets
+	targets          = discovery.docker.minitwit_alloy.targets
 	forward_to       = [loki.process.minitwit_alloy.receiver]
 	relabel_rules    = discovery.relabel.minitwit_alloy.rules
 	refresh_interval = "5s"
