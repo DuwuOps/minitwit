@@ -47,7 +47,9 @@ Delete droplets (replace ENV's value with the used env_type-value)
 
 ```
 ENV=""
-doctl compute droplet delete --force $ENV-web
+doctl compute droplet delete --force $ENV-worker-1
+doctl compute droplet delete --force $ENV-worker-2
+doctl compute droplet delete --force $ENV-manager
 doctl compute droplet delete --force $ENV-database
 ```
 
