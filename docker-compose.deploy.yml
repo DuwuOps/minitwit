@@ -52,5 +52,10 @@ services:
           - node.role == manager
 
 
+  database:
+    deploy:
+      replicas: 1
+
+
 volumes:
   grafana-storage: {}

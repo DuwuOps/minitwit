@@ -113,8 +113,8 @@
               
               DB_USER=${{ vars.DB_USER }} \
               DB_PASSWORD=${{ secrets.TEST_ENV_DB_PASSWORD }} \
-              DB_HOST=${{ vars.TEST_ENV_DB_HOST }} \
-              DB_PORT=${{ vars.DB_PORT }} \
+              DB_HOST=database \
+              DB_PORT=5432 \
               DB_NAME=${{ vars.DB_NAME }} \
               DOCKER_TAG=${{ vars.TEST_ENV_DOCKER_TAG }} \
               DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} \
