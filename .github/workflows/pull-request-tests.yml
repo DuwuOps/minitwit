@@ -37,7 +37,7 @@ jobs:
           mkdir -p build
           pandoc report.md -o build/MSc_group_c.pdf
 
-            - name: Commit and push updated PDF report
+      - name: Commit and push updated PDF report
         env:
           ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name || github.ref }}
