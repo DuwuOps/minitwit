@@ -2,6 +2,7 @@ networks:
   main:
     driver: overlay
     attachable: true
+    external: true
 
 services:
   app:
