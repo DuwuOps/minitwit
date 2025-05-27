@@ -1,5 +1,5 @@
 networks:
-  main:
+  main:    
 
 services:
   app:
@@ -77,21 +77,6 @@ services:
       - main
     volumes:
       - grafana-storage:/var/lib/grafana
-
-  # Database
-  database:
-    image: postgres:latest
-    container_name: database
-    ports:
-      - 5433:5432
-    environment:
-      - POSTGRES_USER=${DB_USER:-admin}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
-      - POSTGRES_DB=${DB_NAME:-minitwit}
-    volumes:
-      - pgdata:/var/lib/postgresql/data 
-    networks:
-      - main
 
 volumes:
   grafana-storage: {}
