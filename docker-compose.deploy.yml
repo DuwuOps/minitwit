@@ -58,8 +58,9 @@ services:
         constraints:
           - node.role == manager
 
-  database: !reset null
-
+  database: # This ensures that the web-servers do not create an internal database
+    deploy:
+        replicas: 0 # DO NOT DELETE
 
 volumes:
   grafana-storage: {}
