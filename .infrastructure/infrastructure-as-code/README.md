@@ -9,7 +9,7 @@ This is a guide of how to use these infrastructure-as-code Terraform-files to se
 5. Create a new personal access token with write access. 
     - Easiest just to give it "Full Access".
     - Name does not matter and you decide expiration date.
-6. Copy and paste your new personal access token into `env_type` in the `terraform.tfvars`-file.
+6. Copy and paste your new personal access token into `digitalocean_token` in the `terraform.tfvars`-file.
 7. Fill out the rest of the variables in the `terraform.tfvars`-file.
 
 
