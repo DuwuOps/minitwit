@@ -1,24 +1,58 @@
+networks:
+  main:
+    driver: overlay
+    attachable: true
+
 services:
   app:
     build: !reset null
     ports:
       - 0.0.0.0:80:8000
     restart: always
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
 
   prometheus:
     build: !reset null
+    ports:
+      - "0.0.0.0:9090:9090"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   alloy:
     build: !reset null
+    deploy:
+      mode: global  # Deploy on every node for comprehensive monitoring
+      restart_policy:
+        condition: on-failure
 
   loki:
     build: !reset null
+    ports:
+      - "3100:3100"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   grafana:
     build: !reset null
     volumes:
       - grafana-storage:/var/lib/grafana
-    
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
   database: !reset null
 
 
