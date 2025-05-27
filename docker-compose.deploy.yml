@@ -9,6 +9,7 @@ services:
     ports:
       - 0.0.0.0:80:8000
     restart: always
+    container_name: !reset null
     deploy:
       replicas: 2
       update_config:
@@ -23,6 +24,7 @@ services:
       - "0.0.0.0:9090:9090"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    container_name: !reset null
     deploy:
       placement:
         constraints:
@@ -30,6 +32,7 @@ services:
 
   alloy:
     build: !reset null
+    container_name: !reset null
     deploy:
       mode: global  # Deploy on every node for comprehensive monitoring
       restart_policy:
@@ -37,6 +40,7 @@ services:
 
   loki:
     build: !reset null
+    container_name: !reset null
     ports:
       - "3100:3100"
     deploy:
@@ -48,6 +52,7 @@ services:
     build: !reset null
     volumes:
       - grafana-storage:/var/lib/grafana
+    container_name: !reset null
     deploy:
       placement:
         constraints:
