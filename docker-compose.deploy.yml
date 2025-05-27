@@ -1,3 +1,8 @@
+networks:
+  main:
+    driver: overlay
+    attachable: true
+
 services:
   app:
     build: !reset null
@@ -24,9 +29,9 @@ services:
   alloy:
     build: !reset null
     deploy:
-      placement:
-        constraints:
-          - node.role == manager
+      mode: global  # Deploy on every node for comprehensive monitoring
+      restart_policy:
+        condition: on-failure
 
   loki:
     build: !reset null
