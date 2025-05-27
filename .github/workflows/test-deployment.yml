@@ -103,31 +103,22 @@
             TEST_ENV_SSH_SECRET_KEY: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
 
         - name: Deploy using Docker Compose
-          env:
-            DB_USER: ${{ vars.DB_USER }}
-            DB_PASSWORD: ${{ secrets.TEST_ENV_DB_PASSWORD }}
-            DB_HOST: ${{ vars.TEST_ENV_DB_HOST }}
-            DB_PORT: ${{ vars.DB_PORT }}
-            DB_NAME: ${{ vars.DB_NAME }}
-            DOCKER_TAG: ${{ vars.TEST_ENV_DOCKER_TAG }}
           uses: appleboy/ssh-action@master
           with:
             host: ${{ vars.TEST_ENV_SSH_HOST }}
             username: ${{ vars.SSH_USER }}
             key: ${{ secrets.TEST_ENV_SSH_SECRET_KEY }}
-            envs:
-              DB_USER,
-              DB_PASSWORD,
-              DB_HOST,
-              DB_PORT,
-              DB_NAME,
-              DOCKER_TAG
             script: |
               cd ~/.deploy/${{ github.event.repository.name }}
-              DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
-                -f docker-compose.yml \
-                -f docker-compose.deploy.yml \
-                up -d --pull always
+              
+              DB_USER=${{ vars.DB_USER }} \
+              DB_PASSWORD=${{ secrets.TEST_ENV_DB_PASSWORD }} \
+              DB_HOST=${{ vars.TEST_ENV_DB_HOST }} \
+              DB_PORT=${{ vars.DB_PORT }} \
+              DB_NAME=${{ vars.DB_NAME }} \
+              DOCKER_TAG=${{ vars.TEST_ENV_DOCKER_TAG }} \
+              DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} \
+              docker stack deploy -c docker-compose.yml -c docker-compose.deploy.yml --prune minitwit
 
         - name: Check running Docker containers
           uses: appleboy/ssh-action@master
