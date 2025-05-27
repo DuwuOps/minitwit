@@ -5,7 +5,7 @@ services:
   app:
     build: 
       dockerfile: ./Dockerfile
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}minitwit:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}/minitwit:${DOCKER_TAG:-local}
     container_name: app
     ports:
       - 8000:8000
@@ -36,11 +36,10 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/prometheus
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}prometheus:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}/prometheus:${DOCKER_TAG:-local}
     container_name: prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--web.listen-address=127.0.0.1:9090"
     ports:
       - "127.0.0.1:9090:9090"
     networks:
@@ -50,8 +49,8 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/alloy
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}alloy:${DOCKER_TAG:-local}
-    container_name: alloy 
+    image: ${DOCKER_USERNAME-}/alloy:${DOCKER_TAG:-local}
+    container_name: alloy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -61,16 +60,16 @@ services:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/loki
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}loki:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}/loki:${DOCKER_TAG:-local}
     container_name: loki
     networks:
-      - main  
+      - main
 
   grafana:
     build: 
       dockerfile: ./Dockerfile
       context: ./.infrastructure/grafana
-    image: ${DOCKER_USERNAME-}${DOCKER_USERNAME:+/}grafana:${DOCKER_TAG:-local}
+    image: ${DOCKER_USERNAME-}/grafana:${DOCKER_TAG:-local}
     container_name: grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -84,21 +83,5 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
 
-  # Database
-  database:
-    image: postgres:latest
-    container_name: database
-    ports:
-      - 5433:5432
-    environment:
-      - POSTGRES_USER=${DB_USER:-admin}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
-      - POSTGRES_DB=${DB_NAME:-minitwit}
-    volumes:
-      - pgdata:/var/lib/postgresql/data 
-    networks:
-      - main
-
 volumes:
   grafana-storage: {}
-  pgdata:
