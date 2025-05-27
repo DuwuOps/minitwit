@@ -12,11 +12,16 @@ services:
     container_name: !reset null
     deploy:
       replicas: 2
-      update_config:
-        parallelism: 2
-        delay: 10s
       restart_policy:
         condition: on-failure
+      update_config: # update_config configures how the service should be updated. Useful for configuring rolling updates.
+        parallelism: 1 # The number of containers to update at a time.
+        delay: 10s # The time to wait between updating a group of containers.
+        failure_action: rollback # What to do if an update fails. One of continue, rollback, or pause (default: pause).
+        monitor: 30s # Duration after each task update to monitor for failure (ns|us|ms|s|m|h) (default 0s).
+      rollback_config:
+        parallelism: 1 # The number of containers to rollback at a time. If set to 0, all containers rollback simultaneously.
+        delay: 10s # The time to wait between each container group's rollback (default 0s).
 
   prometheus:
     build: !reset null
