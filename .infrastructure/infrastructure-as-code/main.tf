@@ -79,9 +79,9 @@ resource "digitalocean_droplet" "database_droplet" {
   }
 }
 
-########## Setup Web-Droplet via SSH ##########
-resource "digitalocean_droplet" "web_droplet" {
-  name      = "${var.env_type}-web"
+########## Setup Manager Droplet via SSH ##########
+resource "digitalocean_droplet" "manager_droplet" {
+  name      = "${var.env_type}-manager"
   region    = "ams3"
   size      = "s-1vcpu-1gb"
   image     = "ubuntu-24-10-x64"
@@ -91,6 +91,7 @@ resource "digitalocean_droplet" "web_droplet" {
   tags = [
     "minitwit",
     "app",
+    "manager",
     var.env_type
   ]
 
@@ -117,17 +118,11 @@ resource "digitalocean_droplet" "web_droplet" {
 
   provisioner "remote-exec" {
     inline = [
-      ### Start Minitwit Application ###
-      "DB_USER=${var.docker_vars.db_user} \\",
-      "DB_PASSWORD=${var.docker_vars.db_password} \\",
-      "DB_HOST=${digitalocean_droplet.database_droplet.ipv4_address} \\",
-      "DB_PORT=${var.docker_vars.db_port} \\",
-      "DB_NAME=${var.docker_vars.db_name} \\",
-      "DOCKER_USERNAME=${var.docker_vars.dockerhub_username} \\",
-      "docker compose \\",
-      "  -f docker-compose.yml \\",
-      "  -f docker-compose.deploy.yml \\",
-      "  up -d --pull always",
+      # Initialize Docker Swarm
+      "docker swarm init --advertise-addr ${self.ipv4_address}",
+      
+      # Get join tokens for workers and save it in a file
+      "docker swarm join-token worker -q > /tmp/worker.token",
 
       "mkdir ~/.deploy/",
       "mv -f docker-compose.yml ~/.deploy/docker-compose.yml",
@@ -136,6 +131,74 @@ resource "digitalocean_droplet" "web_droplet" {
   }
 }
 
-output "droplet_public_ip" {
-  value = "http://${digitalocean_droplet.web_droplet.ipv4_address}/"
+########## Setup Worker Droplets via SSH ##########
+resource "digitalocean_droplet" "worker_droplet" {
+  count     = 2
+  name      = "${var.env_type}-worker-${count.index + 1}"
+  region    = "ams3"
+  size      = "s-1vcpu-1gb"
+  image     = "ubuntu-24-10-x64"
+  ssh_keys  = [
+    digitalocean_ssh_key.default.fingerprint
+  ]
+  tags = [
+    "minitwit",
+    "app",
+    "worker",
+    var.env_type
+  ]
+
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = file(var.ssh_vars.secret_key_path)
+    host        = self.ipv4_address
+  }
+
+  provisioner "remote-exec" {
+    inline = local.docker_install_script
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      # Join the swarm as worker
+      "docker swarm join --token $(ssh -o StrictHostKeyChecking=no -i ${var.ssh_vars.secret_key_path} root@${digitalocean_droplet.manager_droplet.ipv4_address} 'cat /tmp/worker.token') ${digitalocean_droplet.manager_droplet.ipv4_address}:2377"
+    ]
+  }
+
+  depends_on = [digitalocean_droplet.manager_droplet]  # Don't do this before manager is set up
+}
+
+########## Deploy Stack on Manager ##########
+resource "null_resource" "deploy_stack" {
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = file(var.ssh_vars.secret_key_path)
+    host        = digitalocean_droplet.manager_droplet.ipv4_address
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      ### Start Minitwit Application ###
+      "cd ~/.deploy/",
+      "DB_USER=${var.docker_vars.db_user} \\",
+      "DB_PASSWORD=${var.docker_vars.db_password} \\",
+      "DB_HOST=${digitalocean_droplet.database_droplet.ipv4_address} \\",
+      "DB_PORT=${var.docker_vars.db_port} \\",
+      "DB_NAME=${var.docker_vars.db_name} \\",
+      "DOCKER_USERNAME=${var.docker_vars.dockerhub_username} \\",
+      "docker stack deploy -c docker-compose.yml -c docker-compose.deploy.yml --prune minitwit"
+    ]
+  }
+
+  depends_on = [digitalocean_droplet.worker_droplet] # Don't do this before workers are set up
+}
+
+output "manager_web_address" {
+  value = "http://${digitalocean_droplet.manager_droplet.ipv4_address}/"
+}
+
+output "worker_ips" {
+  value = digitalocean_droplet.worker_droplet[*].ipv4_address
 }
