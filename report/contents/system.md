@@ -134,6 +134,10 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 : Price comparison of VPS providers. {#tbl:vps-comparison}
 
 
+### Infrastructure-as-Code
+
+To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an infrastructure as code tool[@Terraform_MainPage], which has an easy to use inbuilt provider for DigitalOcean[@Anicas_Hogan_2022]. Please see figure **ref** for an overview of how Terraform builds the infrastructure of the system on DigitalOcean.
+
 ### Allocation viewpoint
 
 ![Deployment diagram](../images/deployment_diagram.png)
