@@ -1,20 +1,23 @@
-# Process perspective
+# Process Perspective
 
 ## CI/CD
 - Github actions
 - Python test were modified to work withour CI chains and now serves as a quiality gate. <!-- This is from a task description:  https://github.com/itu-devops/lecture_notes/blob/master/sessions/session_07/README_TASKS.md -->
 
 ## Monitoring 
-<!-- Monitoring choice arguments is not a requirement (I checked)  -->
+<!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
 - Prometheus as an Echo middleware, with additional custom made metrics.
     - TODO: make list of custom metrics.
+    - Was chosen on the background of:
+        - Demonstrated in Class
+        - Prior experience for members of the g
 - Grafana
     - As of writing this the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
     - Users:
         - Admin user with password shared with the group.
         - Helge and Mircea specific login as described on Teams.
 
-Request and response dashboard:
+Whitebox Request and response monitoring dashboard:
 
 Timeframe: last 30 minutes:
 ![Request and response dashboard last 30 minutes](/report/images/monitoring-response-request-t2d.png)
@@ -22,15 +25,15 @@ Timeframe: last 30 minutes:
 Timeframe: Last 2 days:
 ![Request and response dashboardLast 2 days](/report/images/monitoring-response-request-t30.png)
 
-User action dashboards:
+Whitebox User action dashboards monitoring:
 Timeframe: Last 7 days:
 ![User action dashboards Last 7 days](/report/images/monitoring-user-actions-t7d.png)
 
-Virtual memory dashboard:
+Whitebox Virtual memory dashboard monitoring:
+Timframe: last 5 minutes:
+![Virtual Memory dashbord Last 5 minutes](/report/images/monitoring-VM-usage-t5.png)
 
-TODO: insert picture
-
-- User side error logging was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
+- Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
 ## Logging
 - The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather out logging and monitoring the same place. 
