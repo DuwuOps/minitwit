@@ -35,7 +35,20 @@ The following table summarizes key code quality metrics from SonarQube analysis:
 | Cyclomatic Complexity | 216 (handlers: 151)    |
 | Technical Debt        | ~1 hour 7 minutes      |
 
-An interesting metric is the cyclomatic complexity, to investigate further it can be explored that the handlers module accounts for 151, which is approx 70% of the total complexity.
+### Code climate
+
+The following table summarizes key code quality metrics from Code Climate analysis:
+
+| Metric                | Value                  |
+|-----------------------|------------------------|
+| Lines of Code (LOC)   | 1,912                  |
+| Code Duplication      | 0 %                   |
+| Overall Rating        | A (Excellent quality)  |
+| Complexity | 299 (handlers: 196)    |
+| Technical Debt        | ~1 day 2 hours      |
+
+### Overall assesment
+Both tools show a high complexity in the handlers module
 
 ## Database (PostgreSQL)
 
