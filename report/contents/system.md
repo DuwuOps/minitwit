@@ -90,6 +90,12 @@ The following table summarizes key code quality metrics from Code Climate analys
 
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
+## Deployment
+
+### Allocation viewpoint
+
+![Deployment diagram](../images/deployment_diagram.png)
+
 ## Database (PostgreSQL)
 
 Our setup includes two PostgreSQL databases: one for production and one for testing. Each runs on a separate, containerized droplet, with access restricted via a firewall to ensure security and isolation between environments (see Figure 1).
