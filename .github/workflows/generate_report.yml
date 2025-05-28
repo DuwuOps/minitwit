@@ -51,7 +51,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f report/build/MSc_group_c.pdf
-          git diff --cached --quiet || git commit -m "Update report PDF [skip ci]"
+          git diff --cached --quiet || git commit -m "Update report PDF"
           BRANCH=$(echo "${BRANCH_NAME}" | sed 's#refs/heads/##')
           echo "Pushing to branch $BRANCH"
           git push origin HEAD:refs/heads/$BRANCH
