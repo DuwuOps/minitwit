@@ -1,26 +1,71 @@
+networks:
+  main:
+    driver: overlay
+    attachable: true
+
 services:
   app:
     build: !reset null
     ports:
       - 0.0.0.0:80:8000
     restart: always
+    container_name: !reset null
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      # These configs are for ensuring rolling updates.
+      update_config:
+        parallelism: 1 # Only update 1 app-container at a time. Don't update all at once.
+        delay: 10s # Wait 10 seconds after last update started to start the next.
+      # Configs for if update fails (i.e. if the container crashses after update)
+        failure_action: rollback
+        monitor: 30s
+      rollback_config:
+        parallelism: 1
+        delay: 10s
 
   prometheus:
     build: !reset null
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    container_name: !reset null
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   alloy:
     build: !reset null
+    container_name: !reset null
+    deploy:
+      mode: global  # Deploy on every node for comprehensive monitoring
+      restart_policy:
+        condition: on-failure
 
   loki:
     build: !reset null
+    container_name: !reset null
+    ports:
+      - "127.0.0.1:3100:3100"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   grafana:
     build: !reset null
     volumes:
       - grafana-storage:/var/lib/grafana
-    
-  database: !reset null
+    container_name: !reset null
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
+  database: # This ensures that the web-servers do not create an internal database
+    deploy:
+        replicas: 0 # DO NOT DELETE
 
 volumes:
   grafana-storage: {}

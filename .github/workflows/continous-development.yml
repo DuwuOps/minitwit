@@ -174,28 +174,19 @@ jobs:
           target: "~/.deploy/${{ github.event.repository.name }}/"
 
       - name: Deploy to Digital Ocean droplet via SSH action
-        env:
-          DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ vars.DB_HOST }}
-          DB_PORT: ${{ vars.DB_PORT }}
-          DB_NAME: ${{ vars.DB_NAME }}
-          DOCKER_TAG: ${{ vars.DOCKER_TAG }}
         uses: appleboy/ssh-action@master
         with:
           host: ${{ vars.SSH_HOST }}
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          envs:
-            DB_USER,
-            DB_PASSWORD,
-            DB_HOST,
-            DB_PORT,
-            DB_NAME,
-            DOCKER_TAG
           script: |
             cd ~/.deploy/${{ github.event.repository.name }}
-            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} docker compose \
-              -f docker-compose.yml \
-              -f docker-compose.deploy.yml \
-              up -d --pull always
+              
+            DB_USER=${{ vars.DB_USER }} \
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            DB_HOST=${{ vars.DB_HOST }} \
+            DB_PORT=${{ vars.DB_PORT }} \
+            DB_NAME=${{ vars.DB_NAME }} \
+            DOCKER_TAG=${{ vars.DOCKER_TAG }} \
+            DOCKER_USERNAME=${{ vars.DOCKER_USERNAME }} \
+            docker stack deploy -c docker-compose.yml -c docker-compose.deploy.yml --prune minitwit
