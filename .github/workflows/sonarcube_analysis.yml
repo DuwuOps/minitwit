@@ -8,6 +8,8 @@ on:
       - opened
       - synchronize
       - reopened
+    paths:
+      - 'src/**'
   workflow_dispatch:
 
 permissions:
