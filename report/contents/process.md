@@ -24,25 +24,25 @@
 Whitebox Request and response monitoring dashboard:
 
 Timeframe: last 30 minutes:
-![Request and response dashboard last 30 minutes](/report/images/monitoring-response-request-t2d.png)
+![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png)
 
 Timeframe: Last 2 days:
-![Request and response dashboardLast 2 days](/report/images/monitoring-response-request-t30.png)
+![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png)
 
 Whitebox User action dashboards monitoring:
 Timeframe: Last 7 days:
-![User action dashboards Last 7 days](/report/images/monitoring-user-actions-t7d.png)
+![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png)
 
 Whitebox Virtual memory dashboard monitoring:
 Timframe: last 5 minutes:
-![Virtual Memory dashbord Last 5 minutes](/report/images/monitoring-VM-usage-t5.png)
+![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png)
 
 Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
 DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here]
 
 An alert system was set up via a Discord bot that on the server via a cronjob that checks every 5 miniutes. If the application is not up it sends a Discord message and tags everyone on our group server. 
-![Alert bot example](/report/images/alert-example.png)
+![Alert bot example](../images/alert-example.png)
 
 ## Logging
 - The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather our logging and monitoring the same place. 
