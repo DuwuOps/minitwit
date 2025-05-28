@@ -125,6 +125,7 @@ DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Di
 An alert system was set up via a Discord bot that on the server via a cronjob that checks every 5 miniutes. If the application is not up it sends a Discord message and tags everyone on our group server. 
 ![Alert bot example](../images/alert-example.png)
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
+ <!-- So cute! luv it -->
 
 ## Logging
 - The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather our logging and monitoring the same place. 
