@@ -1,4 +1,41 @@
 # System perspective
+This section presents the system.
+
+## Design and architecture 
+The system is refactored with the Go programming language. 
+
+### Module diagram
+An overview of the modules of the codebase is presented by the following package diagram.
+The package diagram models the internal structure of the codebase from the src folder (not infrastructure).
+Though it should be noted that within the handlers folder, the classes auth.go, message.go and user.go are presented, and its dependencies. This is to depict the complexity of that modules (since it is the biggest and most central module in the system).
+
+![Module diagram](../images/module_diagram.png)
+
+In the diagram it can be seen, that the main.go file orchestrates the system. It (in this context) has the responsibility for:
+1. Render the template (frontend)
+2. Initialize a new instance of the database object
+3. Setup middleware
+4. Setup routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
+
+## Dependencies
+
+## System interactions
+
+## Current state of the system
+### SonarQube analysis summary
+
+The following table summarizes key code quality metrics from SonarQube analysis:
+
+| Metric                | Value                  |
+|-----------------------|------------------------|
+| Lines of Code (LOC)   | 1,591                  |
+| Code Duplication      | 4.1%                   |
+| Security Hotspots     | 8                      |
+| Overall Rating        | A (Excellent quality)  |
+| Cyclomatic Complexity | 216 (handlers: 151)    |
+| Technical Debt        | ~1 hour 7 minutes      |
+
+An interesting metric is the cyclomatic complexity, to investigate further it can be explored that the handlers module accounts for 151, which is approx 70% of the total complexity.
 
 ## Database (PostgreSQL)
 
