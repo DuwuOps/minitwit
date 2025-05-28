@@ -11,7 +11,7 @@
 - Grafana
     - As of writing this the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
     - Users:
-        - admin user with password shared with the group
+        - Admin user with password shared with the group.
         - Helge and Mircea specific login as described on Teams.
 
 Request and response dashboard:
@@ -43,4 +43,4 @@ TODO: insert picture
 ## Strategy for scaling and upgrades
 
 ## AI use
-
+Throughout the development process, all team members leveraged artificial intelligence tools to varying degrees and for diverse applications. The primary AI systems employed included ChatGPT, Claude, DeepSeek, and GitHub Copilot. Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
