@@ -32,8 +32,22 @@ The first version shows the processes involved when the request is sent via. the
 Note that the two versions use different endpoints to interact with the same API.
 
 ## Dependencies
+| Dependency                               | Description                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Go (Golang)**                          | Programming language for backend development.                                                 |
+| **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
+| **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
+| **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
+| **PostgreSQL**                           | Relational database storing                                                       |
+| **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
+| **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
+| **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
+| **github.com/klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
+| **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
+| **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
+| **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
+| **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
 
-## System interactions
 
 ## Current state of the system
 
@@ -65,8 +79,6 @@ The following table summarizes key code quality metrics from Code Climate analys
 ### Overall assessment
 
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
-### Overall assesment
-Both tools show a high complexity in the handlers module
 
 ## Orchestration
 To streamline the deployment of the program, Docker, docker-compose, Docker Swarm, and Terraform are used. 
