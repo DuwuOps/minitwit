@@ -3,7 +3,7 @@
 This section presents the system.
 
 ## Design and architecture 
-The system is primarily built using Go (Golang) for backend development. The Echo web framework is used for HTTP routing and middleware management. PostgreSQL serves as the database. Additionally, the system uses various Go libraries for security, session management, data serialization, monitoring, system metrics and external systems that will be presented later. 
+The system is primarily built using Go (Golang) for backend development. The Echo web framework is used for HTTP routing and middleware management. PostgreSQL serves as the database. Additionally, the system uses various Go libraries for security, session management, data serialization, monitoring, system metrics, and external systems that will be presented later. 
 
 This section presents the architecture of the system by exploring the `src` folder of the repository.
 
@@ -15,10 +15,10 @@ Note that within the `handlers` folder, the classes `auth.go`, `message.go`, and
 ![Module diagram](../images/module_diagram.png)
 
 In the diagram it can be seen, that the main.go file orchestrates the system. It (in this context) has the responsibility for:
-1. Render the template (frontend)
-2. Initialize a new instance of the database object
-3. Setup middleware
-4. Setup routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
+1. Rendering the template (frontend)
+2. Initializing a new instance of the database object
+3. Setting up middleware
+4. Setting up routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
 
 ### Sequence diagrams
 Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
