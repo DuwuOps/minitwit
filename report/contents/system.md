@@ -36,7 +36,13 @@ In the diagram, it can be seen that the `main.go` file orchestrates the system. 
 | **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
 
 ### Sequence diagrams
-![Module diagram](../images/sequence__)
+Below, two sequence diagrams showcase how the different parts of the system interact when procecssing a "Follow" request. The first version shows the processes involved when the request is sent via. the UI, whereas the second version shows the processes involved when sent via. the API. 
+
+![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
+
+![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png)
+
+Note that while both versions use the same API, they use different endpoints.
 
 ## External dependencies
 
