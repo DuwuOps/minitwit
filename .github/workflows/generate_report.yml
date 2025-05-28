@@ -41,7 +41,7 @@ jobs:
             }
             { print }
           ' report.md > ../build/report_full.md
-          pandoc --number-sections ../build/report_full.md -o ../build/MSc_group_c.pdf
+          pandoc --number-sections --citeproc ../build/report_full.md -o ../build/MSc_group_c.pdf --csl=./ieee.csl --bibliography=./main.bib
 
       - name: Commit and push updated PDF report
         env:
