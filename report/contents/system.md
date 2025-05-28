@@ -18,13 +18,15 @@ In the diagram it can be seen, that the main.go file orchestrates the system. It
 4. Setup routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
 
 ### Sequence diagrams
-Below, two sequence diagrams showcase how the different parts of the system interact when procecssing a "Follow" request. The first version shows the processes involved when the request is sent via. the UI, whereas the second version shows the processes involved when sent via. the API. 
+Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
+
+The first version shows the processes involved when the request is sent via. the UI, whereas the second version shows the processes involved when sent via. the API. 
 
 ![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
 
 ![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png)
 
-Note that while both versions use the same API, they use different endpoints.
+Note that the two versions use different endpoints to interact with the same API.
 
 ## Dependencies
 
