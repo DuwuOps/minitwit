@@ -79,6 +79,19 @@ Infrastructure-as-Code is used simplify the setup of the Docker Swarm remotely. 
 
 ## Deployment
 
+### VPS
+
+To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], its familiarity to the group.
+
+| **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
+|---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
+| **Virtual Machine Price** | ca. $12/mo [@digitalocean_price]      | ca. $15/mo [@azure_price]     | $13/mo [@oracle_price]            | ca. $12/mo [@aws_lightsail_price]     |
+| **Storage Price**         | 50GB included [@digitalocean_price]   | ca. $5 (64GB) [@azure_price]  | ca. $2.5 (50GB) [@oracle_price]   | ca. $12/mo [@aws_lightsail_price]  |
+| **Total Price**           | ca. $12/mo                            | ca. $20/mo                    | ca. $15.5/mo                      | ca. $12/mo                            |
+
+: Price comparison of VPS providers. {#tbl:vps-comparison}
+
+
 ### Allocation viewpoint
 
 ![Deployment diagram](../images/deployment_diagram.png)
