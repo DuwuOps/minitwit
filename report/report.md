@@ -1,10 +1,8 @@
-% MSc_group_a
+% MSc_group_c
 % ITU MiniTwit Report Skeleton
 % May 2024
 
 # Introduction
-
-<!-- Add an intro here -->
 
 @include system.md
 

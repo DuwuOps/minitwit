@@ -14,45 +14,9 @@ on:
   workflow_dispatch:
     
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  build_report_pdf:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo with full history
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # needed for pushing commits and tags
-
-      - name: Install Pandoc and LaTeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
-
-      - name: Build PDF report
-        working-directory: ./report
-        run: |
-          mkdir -p build
-          pandoc report.md -o build/MSc_group_c.pdf
-
-      - name: Commit and push updated PDF report
-        env:
-          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name || github.ref }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f report/build/MSc_group_c.pdf
-          git diff --cached --quiet || git commit -m "Update report PDF [skip ci]"
-          
-          # Determine the branch name without refs/heads/ prefix if present
-          BRANCH=$(echo "${BRANCH_NAME}" | sed 's#refs/heads/##')
-          echo "Pushing to branch $BRANCH"
-          git push origin HEAD:refs/heads/$BRANCH
-
-
   tests:
     name: Tests
     runs-on: ubuntu-latest

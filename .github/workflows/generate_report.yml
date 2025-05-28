@@ -1,0 +1,61 @@
+---
+name: Pull-request testing
+
+on:
+  push:
+    paths:
+      - 'report/**'
+  pull_request:
+    paths:
+      - 'report/**'
+  workflow_dispatch:
+    
+permissions:
+  contents: write
+
+jobs:
+  build_report_pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo with full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+
+      - name: Build PDF report
+        working-directory: ./report
+        run: |
+          mkdir -p build
+
+          # Preprocess report.md to handle @include statements
+          awk '
+            /^@include / {
+              file = substr($0, 10)
+              while ((getline line < file) > 0) print line
+              close(file)
+              next
+            }
+            { print }
+          ' report.md > build/report_full.md
+
+          pandoc --number-sections build/report_full.md -o build/MSc_group_c.pdf
+
+      - name: Commit and push updated PDF report
+        env:
+          ACTIONS_PAT: ${{ secrets.ACTIONS_PAT }}
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name || github.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f report/build/MSc_group_c.pdf
+          git diff --cached --quiet || git commit -m "Update report PDF [skip ci]"
+
+          BRANCH=$(echo "${BRANCH_NAME}" | sed 's#refs/heads/##')
+          echo "Pushing to branch $BRANCH"
+          git push origin HEAD:refs/heads/$BRANCH
