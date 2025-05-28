@@ -2,48 +2,58 @@
 
 ## CI/CD (GitHub Actions)
 
-[GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and pricing (free for public repositories). A motivating factor, was the suite of services supported natively in GitHub. Therefore:
+[GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and free pricing [@githubactions_vs_jenkins], [@20_cicd_comparison]. 
+A motivating factor, was the suite of services supported natively in Github, of these a few were utilized:
 
-* GitHub *Secrets & Variables* was used to store environment variables, and deployment keys..
-* GitHub *Tags*, *Releases*, and *Artifact Storage* were utilized, in order to create a clean version history of our application. 
-* GitHub integrations, such as *Dependabot*, *SonarCube*, and *Webhooks*. 
+* [GitHub  Action Secrets & Variables](https://github.com/DuwuOps/minitwit/settings/secrets/actions) for storing ssh-keys, passwords, etc.
+* [GitHub Tags, Releases & Artifacts Storage](https://github.com/DuwuOps/minitwit/releases) for artifact versioning of the GoLang application.
+* [GitHub Applications](https://github.com/DuwuOps/minitwit/settings/installations) for code quality evaluations with [CodeClimate](https://codeclimate.com/), [SonarQubeCloud](https://docs.sonarsource.com/sonarqube-cloud/), and [qtlysh](https://github.com/qltysh).
+* [GitHub Projects, Tasks & Backlog](https://github.com/orgs/DuwuOps/projects/1) for managing task formulation and distribution.
 
-**Write about**:
-* *Linters*
-* *Python testing*
+### CI/CD Pipelines
+A total of **7** pipelines are established, these are: 
 
-A total of **7** workflows are established, and can be found under `/.github/workflows/`. These are:
+| File    | Purpose | Invoked on |
+| ---- | ------ | --- |
+| `continous-development.yml`  | Primary CI/CD flow against PROD | Pushing `main` |
+| `codeql.yml` | Analyzes go source code using [`CodeQL`](https://codeql.github.com/) | Push & PRs to `main`. | 
+| `generate-report.yml`| Generates `report.pdf` from files in `/report/*` | Push to `/report/*` | 
+| `linter-workflow.yml`| Runs [golangci-lint](https://github.com/golangci/golangci-lint) on go source code. | Push `main` or any PR | 
+| `pull-request-tests.yml` | Runs python tests. | All PRs |
+| `test-deployment.yml`    | Secondary CI/CD flow against TEST. | Tag `test-env*` | 
+| `sonarcube_analysis.yml` | Analyses go source code using SonarCloud. | PRs to `main` |
 
-| File    | Purpose | Runs when |
-| -------- | ------- |------- |
-| `continous-development.yml`  | Primary CI/CD flow for continous integration & delivery. Consists of steps `Tests`, `Build & Push`, `Release`, and `Deploy` | Any changes to `main` |
-| `codeql.yml` | Analyzes GoLang source code using [CodeQL Analysis tool](github/codeql-action/analyze@v3) | Any push to `main`. Any pull-request to `main`. Once a week in cron-job. | 
-| `generate-report.yml`| Generates `report.pdf` from markdown files & images in `/report/`     | Any changes to `/report/*` recursively.   | | 
-| `linter-workflow.yml`| Runs [golangci-lint](https://github.com/golangci/golangci-lint) linter on GoLang source code. Configured by `/golangci.yml`. | Push to `main` or any action to pull-requests. | 
-| `pull-request-tests.yml` | Runs python tests. | Any actions to pull-requests |
-| `test-deployment.yml`    | Secondary CI/CD flow for continous integration & delivery against TEST-environment. Consists of `Tests`, `Build & Push`, `Deploy` | On push with tag `test-env*`. |Identical to `continous-development.yml` but does not include a `Release` step. | 
-| `sonarcube_analysis.yml` | Analyses GoLang source code using SonarCloud. | On pull-requests to `main`. |
-> **Table**: GitHub Action workflows employed.
+Table:  List of GitHub Actions workflows employed.
+<!-- This is how you write table captions!!!! -->
 
-![Visualization of continous-development.yml](../images/github_actions-continuous-development.png)
-> **Figure**: Visualization of `continous-development.yml`
+### CI/CD Specific Technologies
+* The [`golangci-lint`](https://github.com/golangci/golangci-lint) linter is implemented in [`linter-workflow.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/linter-workflow.yml) (see tasks [#119](https://github.com/DuwuOps/minitwit/issues/119) and [#129](https://github.com/DuwuOps/minitwit/issues/129))
+* The [`pandoc`](https://pandoc.org/) library is used to generate laTeX reports from markdown in [`generate_report.yml
+`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/generate_report.yml)
+* The [`CodeQL`](https://codeql.github.com/) code analysis engine is used in [`codeql.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/codeql.yml) to check for security vulnerabilities.
+* Original `pytest` files are used in [`continous-development.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/continous-development.yml)–now functioning as a `Test` stage (see [`minitwit_tests.py`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/refactored_minitwit_tests.py) and [`sim_api_test.py`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/sim_api_test.py)).
 
-#### Choice of CI/CD
+![Informal visualization of `continous-development.yml` (primary pipline), with stages `Tests`, `Build & Push`, `Release`, and `Deploy`](../images/github_actions-continuous-development.png)
 
-Since GitHub was chosen as the git repository management site, options such as [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded as candidates, as they are specific to alternative git repository management sites. As such, the choice was between GitHub's native [GitHub Actions](https://github.com/features/actions) or CI/CD systems agnostic to repository management sites. 
+![Informal visualization of other pipelines](../images/github_actions-other.png)
 
-Furthermore, commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing and limitations of their free plans. An overview of the comparison performed can be seen in the table below.
 
-| **CI/CD Tool / Platform**       | **GitHub Actions**                                                                 | **Jenkins**                                                         | **Azure DevOps**                                | **TeamCity (JetBrains)**                       |
-|----------------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------|--------------------------------------------------|
-| **Ease-of-use**                 | Simple [¹](#ref1)                                                                  | Medium [¹](#ref1)                                                   | *Undetermined*                                  | *Undetermined*                                  |
-| **Version Control**             | Native GitHub Integration [²](#ref2)                                               | Agnostic [²](#ref2)                                                 | Agnostic [²](#ref2)                             | Agnostic [²](#ref2)                             |
-| **Hosting**                     | Primarily cloud-based [²](#ref2)                                                   | Self-hosted [²](#ref2)                                              | Cloud-based [²](#ref2)                          | Cloud-based or self-hosted [²](#ref2)          |
-| **Pricing Model**               | Free for public repositories, tiered for private [²](#ref2)                        | Open-source (MIT License), only cost is for hosting [²](#ref2)      | Commercial with a limited free tier [²](#ref2)  | Commercial [²](#ref2)                          |
+### Choice of CI/CD
 
-> **Table**: Comparison between CI/CD systems.
+* Since GitHub was chosen, [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded, as they are specific to alternative git repository management sites.
+* Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing and limitations of their free plans.
 
-It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [¹](#ref1) dissuaded it as the choice of CI/CD system.
+As such, the choice was between GitHub's native [GitHub Actions](https://github.com/features/actions) or a CI/CD system agnostic to repository management sites. 
+
+It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded it as the choice of CI/CD system.
+
+| **CI/CD Tool / Platform** | **GitHub Actions** | **Jenkins** | **Azure DevOps** | **TeamCity (JetBrains)** |
+|--------|--------|--------|--------|--------|
+| **Ease-of-use** | Simple [@githubactions_vs_jenkins] | Medium [@githubactions_vs_jenkins] | *Undetermined* | *Undetermined* |
+| **Version Control** | Native GitHub Integration [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] |
+| **Hosting** | Primarily cloud-based [@20_cicd_comparison] | Self-hosted [@20_cicd_comparison] | Cloud-based [@20_cicd_comparison] | Cloud-based or self-hosted [@20_cicd_comparison] |
+| **Pricing Model** | Free for public repositories, tiered for private [@20_cicd_comparison] | Open-source (MIT License), only cost is for hosting [@20_cicd_comparison] | Commercial with a limited free tier [@20_cicd_comparison] | Commercial [@20_cicd_comparison] |
+Table: Comparison between CI/CD systems.
 
 ## Monitoring 
 <!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
