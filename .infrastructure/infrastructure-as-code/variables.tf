@@ -9,6 +9,12 @@ variable "digitalocean_token" {
   type        = string
 }
 
+variable "enable_backups" {
+  description = "Turn on DigitalOcean automated backups for the DB droplet"
+  type        = bool
+  default     = true
+}
+
 variable "ssh_vars" {
   description = "Variables for SSH Key Pair for DigitalOcean"
   type = object({
