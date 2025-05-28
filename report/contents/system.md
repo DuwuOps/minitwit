@@ -23,7 +23,13 @@ In the diagram it can be seen, that the main.go file orchestrates the system. It
 ### Sequence diagrams
 Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
 
-The first version shows the processes involved when the request is sent via. the UI, whereas the second version shows the processes involved when sent via. the API. 
+They contain the following high-level lifelines:
+- User Interface: The minitwit web application
+- API Handlers: All functions in the `handlers` package, which handle requests to the API endpoints.
+- Datalayer: The `datalayer`package, which handles database interactions and returns structs (see the `model` package).
+- Database: The postgres database.
+
+The first version shows the processes involved when the request is sent via. the *UI*, whereas the second version shows the processes involved when sent via. the *API*. 
 
 ![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
 
