@@ -46,23 +46,22 @@ The first version shows the processes involved when the request is sent via. the
 
 Note that the two versions use different endpoints to interact with the same API.
 
-## External dependencies
-
-| Dependency                       | Description                                                                                         |
-|---------------------------------|---------------------------------------------------------------------------------------------------|
-| **Go (Golang)**                 | Main programming language for backend development.                                                |
-| **github.com/labstack/echo/v4** | Web framework for routing and HTTP handling.                                                      |
-| **github.com/gorilla/sessions** | Session management with secure cookie support.                                                   |
-| **github.com/lib/pq**           | PostgreSQL driver for database connectivity.                                                     |
-| **PostgreSQL**                  | Relational database storing application data.                                                    |
-| **golang.org/x/crypto**         | Cryptographic utilities for security features.                                                   |
-| **github.com/prometheus/client_golang** | Prometheus client for metrics and monitoring.                                              |
-| **github.com/shirou/gopsutil/v4** | System metrics collection for health monitoring.                                                |
-| **github.com/klauspost/compress** | Compression libraries to optimize data transfer.                                               |
-| **golang.org/x/sys**             | Low-level OS interaction and system calls.                                                       |
-| **google.golang.org/protobuf**   | Protocol Buffers support for data serialization.                                                |
-| **github.com/gorilla/securecookie** | Secure cookie encoding/decoding for session safety.                                         |
-| **Gravatar**                   | External web service providing avatar images generated from email hashes (used for user profiles). |
+## Dependencies
+| Dependency                               | Description                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Go (Golang)**                          | Programming language for backend development.                                                 |
+| **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
+| **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
+| **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
+| **PostgreSQL**                           | Relational database storing                                                       |
+| **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
+| **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
+| **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
+| **github.com/klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
+| **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
+| **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
+| **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
+| **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
 
 ### Choices of Go and Echo 
 This needs to be taken from the latex report.
