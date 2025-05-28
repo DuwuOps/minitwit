@@ -96,6 +96,9 @@ The following table summarizes key code quality metrics from Code Climate analys
 
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
+## Orchestration
+![Sequence diagram of IaC](../images/sequence_diagram_IaC.png)
+
 ## Deployment
 
 ### Allocation viewpoint
