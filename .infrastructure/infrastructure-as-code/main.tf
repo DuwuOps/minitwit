@@ -55,6 +55,13 @@ resource "digitalocean_droplet" "database_droplet" {
     var.env_type
   ]
 
+  backups = var.enable_backups
+  backup_policy {
+    plan    = "weekly"
+    weekday = "TUE"
+    hour    = "01:00"
+  }
+
   connection {
     type        = "ssh"
     user        = "root"
