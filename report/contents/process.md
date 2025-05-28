@@ -36,11 +36,11 @@ Timframe: last 5 minutes:
 - Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
 ## Logging
-- The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather out logging and monitoring the same place. 
+- The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather our logging and monitoring the same place. 
 - Practical Principles:
     - TODO: A process should not worry about storage
     - TODO: A process should log only what is necessary
-    - TODO: Logging should be done at the proper level 
+    - TODO: Logging should be done at the proper level: Mention emoji use
     - Logs should be centralised: All logs can be found via Grafana->Drilldown->Logs
 
 ## Strategy for scaling and upgrades
