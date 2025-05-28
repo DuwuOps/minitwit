@@ -26,7 +26,7 @@ services:
   prometheus:
     build: !reset null
     ports:
-      - "0.0.0.0:9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     container_name: !reset null
@@ -47,7 +47,7 @@ services:
     build: !reset null
     container_name: !reset null
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
     deploy:
       placement:
         constraints:
