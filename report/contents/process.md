@@ -1,8 +1,49 @@
 # Process Perspective
 
-## CI/CD
-- Github actions
-- Python test were modified to work withour CI chains and now serves as a quiality gate. <!-- This is from a task description:  https://github.com/itu-devops/lecture_notes/blob/master/sessions/session_07/README_TASKS.md -->
+## CI/CD (GitHub Actions)
+
+[GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and pricing (free for public repositories). A motivating factor, was the suite of services supported natively in GitHub. Therefore:
+
+* GitHub *Secrets & Variables* was used to store environment variables, and deployment keys..
+* GitHub *Tags*, *Releases*, and *Artifact Storage* were utilized, in order to create a clean version history of our application. 
+* GitHub integrations, such as *Dependabot*, *SonarCube*, and *Webhooks*. 
+
+**Write about**:
+* *Linters*
+* *Python testing*
+
+A total of **7** workflows are established, and can be found under `/.github/workflows/`. These are:
+
+| File    | Purpose | Runs when |
+| -------- | ------- |------- |
+| `continous-development.yml`  | Primary CI/CD flow for continous integration & delivery. Consists of steps `Tests`, `Build & Push`, `Release`, and `Deploy` | Any changes to `main` |
+| `codeql.yml` | Analyzes GoLang source code using [CodeQL Analysis tool](github/codeql-action/analyze@v3) | Any push to `main`. Any pull-request to `main`. Once a week in cron-job. | 
+| `generate-report.yml`| Generates `report.pdf` from markdown files & images in `/report/`     | Any changes to `/report/*` recursively.   | | 
+| `linter-workflow.yml`| Runs [golangci-lint](https://github.com/golangci/golangci-lint) linter on GoLang source code. Configured by `/golangci.yml`. | Push to `main` or any action to pull-requests. | 
+| `pull-request-tests.yml` | Runs python tests. | Any actions to pull-requests |
+| `test-deployment.yml`    | Secondary CI/CD flow for continous integration & delivery against TEST-environment. Consists of `Tests`, `Build & Push`, `Deploy` | On push with tag `test-env*`. |Identical to `continous-development.yml` but does not include a `Release` step. | 
+| `sonarcube_analysis.yml` | Analyses GoLang source code using SonarCloud. | On pull-requests to `main`. |
+> **Table**: GitHub Action workflows employed.
+
+![Visualization of continous-development.yml](/report/images/github_actions-continuous-development.png)
+> **Figure**: Visualization of `continous-development.yml`
+
+#### Choice of CI/CD
+
+Since GitHub was chosen as the git repository management site, options such as [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded as candidates, as they are specific to alternative git repository management sites. As such, the choice was between GitHub's native [GitHub Actions](https://github.com/features/actions) or CI/CD systems agnostic to repository management sites. 
+
+Furthermore, commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing and limitations of their free plans. An overview of the comparison performed can be seen in the table below.
+
+| **CI/CD Tool / Platform**       | **GitHub Actions**                                                                 | **Jenkins**                                                         | **Azure DevOps**                                | **TeamCity (JetBrains)**                       |
+|----------------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------|--------------------------------------------------|
+| **Ease-of-use**                 | Simple [¹](#ref1)                                                                  | Medium [¹](#ref1)                                                   | *Undetermined*                                  | *Undetermined*                                  |
+| **Version Control**             | Native GitHub Integration [²](#ref2)                                               | Agnostic [²](#ref2)                                                 | Agnostic [²](#ref2)                             | Agnostic [²](#ref2)                             |
+| **Hosting**                     | Primarily cloud-based [²](#ref2)                                                   | Self-hosted [²](#ref2)                                              | Cloud-based [²](#ref2)                          | Cloud-based or self-hosted [²](#ref2)          |
+| **Pricing Model**               | Free for public repositories, tiered for private [²](#ref2)                        | Open-source (MIT License), only cost is for hosting [²](#ref2)      | Commercial with a limited free tier [²](#ref2)  | Commercial [²](#ref2)                          |
+
+> **Table**: Comparison between CI/CD systems.
+
+It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [¹](#ref1) dissuaded it as the choice of CI/CD system.
 
 ## Monitoring 
 <!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
@@ -58,3 +99,11 @@ An alert system was set up via a Discord bot that on the server via a cronjob th
 
 ## AI use
 Throughout the development process, all team members leveraged artificial intelligence tools to varying degrees and for diverse applications. The primary AI systems employed included ChatGPT, Claude, DeepSeek, and GitHub Copilot. Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
+
+
+---
+
+### References
+
+<a name="ref1">¹</a>: githubactions_vs_jenkins  
+<a name="ref2">²</a>: 20_cicd_comparison
