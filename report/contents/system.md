@@ -98,7 +98,7 @@ The following table summarizes key code quality metrics from Code Climate analys
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
 ## Orchestration
-To streamline the deployment of the program, Docker, docker-compose, Docker Swarm, and Terraform are used. 
+To streamline deployment, Docker, docker-compose, Docker Swarm, and Terraform are used. 
 
 The Dockerfile copies all source code from the `src` package to a binary image of the program.
 
