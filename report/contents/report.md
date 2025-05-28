@@ -3,7 +3,6 @@ title: "MSc Group C"
 author: John Doe
 date: May 30, 2025
 geometry: margin=2.5cm
-bibliography: ./main.bib
 output:
   pdf_document:
     citation_package: biblatex
