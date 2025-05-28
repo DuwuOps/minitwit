@@ -25,7 +25,7 @@ A total of **7** workflows are established, and can be found under `/.github/wor
 | `sonarcube_analysis.yml` | Analyses GoLang source code using SonarCloud. | On pull-requests to `main`. |
 > **Table**: GitHub Action workflows employed.
 
-![Visualization of continous-development.yml](/report/images/github_actions-continuous-development.png)
+![Visualization of continous-development.yml](../images/github_actions-continuous-development.png)
 > **Figure**: Visualization of `continous-development.yml`
 
 #### Choice of CI/CD
