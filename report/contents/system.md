@@ -49,3 +49,9 @@ The following table summarizes key code quality metrics from Code Climate analys
 
 ### Overall assesment
 Both tools show a high complexity in the handlers module
+
+## Deployment
+
+### Allocation viewpoint
+
+![Deployment diagram](../images/deployment_diagram.png)
