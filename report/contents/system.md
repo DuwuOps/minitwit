@@ -97,6 +97,19 @@ The following table summarizes key code quality metrics from Code Climate analys
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
 ## Orchestration
+To streamline the deployment of the program, Docker, docker-compose, Docker Swarm, and Terraform are used. 
+
+The Dockerfile copies all source code from the `src` package to a binary image of the program.
+
+There are two docker-compose files, `docker-compose.yml` and `docker-compose.deploy.yml`. Both define the six central services of the system: app, prometheus, alloy, loki, grafana, and database. 
+
+`docker-compose.yml` is needed for local deployment. It uses localhost IP-adresses and has default usernames and passwords. 
+
+`docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml`, but replaces information where relevant. 
+It specifies the configuration of a Docker Swarm with one manager and two workers: The app runs on two worker replicas, while logging and monitoring services are constrained to only run on the manager node (though alloy collects logs from everywhere). This enables horizontal scaling. 
+
+Infrastructure-as-Code is used simplify the setup of the Docker Swarm remotely. Terraform files can be found in `.infrastructure/infrastructure-as-code`. Automatic deployment via. Terraform works as illustrated in the sequence diagram below. 
+
 ![Sequence diagram of IaC](../images/sequence_diagram_IaC.png)
 
 ## Deployment
