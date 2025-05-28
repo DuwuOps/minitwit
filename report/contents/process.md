@@ -17,14 +17,14 @@
 Request and response dashboard:
 
 Timeframe: last 30 minutes:
-![alt text](image.png)
+![Request and response dashboard last 30 minutes](/report/images/monitoring-response-request-t2d.png)
 
 Timeframe: Last 2 days:
-![alt text](image-1.png)
+![Request and response dashboardLast 2 days](/report/images/monitoring-response-request-t30.png)
 
 User action dashboards:
 Timeframe: Last 7 days:
-![alt text](image-2.png)
+![User action dashboards Last 7 days](/report/images/monitoring-user-actions-t7d.png)
 
 Virtual memory dashboard:
 
