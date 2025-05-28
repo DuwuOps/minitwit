@@ -6,7 +6,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.22.0
-	github.com/shirou/gopsutil/v4 v4.25.3
+	github.com/shirou/gopsutil/v4 v4.25.4
 )
 
 require (
