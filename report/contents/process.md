@@ -10,12 +10,16 @@
     - TODO: make list of custom metrics.
     - Was chosen on the background of:
         - Demonstrated in Class
-        - Prior experience for members of the g
+        - Easy integration with golang/echo via. middleware.
 - Grafana
     - As of writing this the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
     - Users:
         - Admin user with password shared with the group.
         - Helge and Mircea specific login as described on Teams.
+    - Was chosen on the background of:
+        - Demonstrated in Class
+        - Rich Visualization 
+        <!-- Har fjernet Alerting Functionality fordi vi alerter gennem botten og ikke gennem grafana -->
 
 Whitebox Request and response monitoring dashboard:
 
@@ -33,7 +37,10 @@ Whitebox Virtual memory dashboard monitoring:
 Timframe: last 5 minutes:
 ![Virtual Memory dashbord Last 5 minutes](/report/images/monitoring-VM-usage-t5.png)
 
-- Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
+Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
+
+An alert system was set up via a Discord bot that on the server via a cronjob that checks every 5 miniutes. If the application is not up it sends a Discord message and tags everyone on our group server. 
+![Alert bot example](/report/images/alert-example.png)
 
 ## Logging
 - The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather our logging and monitoring the same place. 
