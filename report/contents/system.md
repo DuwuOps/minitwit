@@ -35,8 +35,8 @@ In the diagram, it can be seen that the `main.go` file orchestrates the system. 
 | **`templates`**            | Holds frontend HTML files.                                                                                                                                                                     |
 | **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
 
-## Sequence diagram
-Waiting on sequence diagram is done :)
+### Sequence diagrams
+![Module diagram](../images/sequence__)
 
 ## External dependencies
 
