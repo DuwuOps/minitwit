@@ -17,6 +17,9 @@ In the diagram it can be seen, that the main.go file orchestrates the system. It
 3. Setup middleware
 4. Setup routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
 
+### Sequence diagrams
+![Module diagram](../images/sequence__)
+
 ## Dependencies
 
 ## System interactions
