@@ -59,6 +59,9 @@ The following table summarizes key code quality metrics from Code Climate analys
 ### Overall assesment
 Both tools show a high complexity in the handlers module
 
+## Orchestration
+![Sequence diagram of IaC](../images/sequence_diagram_IaC.png)
+
 ## Deployment
 
 ### Allocation viewpoint
