@@ -135,9 +135,13 @@ An alert system was set up via a Discord bot that on the server via a cronjob th
     - Logs should be centralised: All logs can be found via Grafana->Drilldown->Logs
 
 ## Strategy for scaling and upgrades
-- We used docker swarm with docker stack so that we can leverage the docker compose setup that was already made. Some changes were made to accommodate the swarm set up. These are: a network overlay, setting how many replicas per service, where nesecary setting where the service should be placed, and update confirguration.
-- The update config for the minitwit application is set so that it updates one at a time. This is set as we only have two instances of minitwit and if an update fails we don't want more than one instance to be down. On failure we do a rollback. 
-- We do rolling updates as this is nativly supported on docker swarm.
+- We used docker swarm with docker stack so that we could leverage the docker compose configurations that were already in use. However, some changes has to be made to accommodate the docker stack specifications and issues related to splitting the services unto different droplets. The changes were: 
+    - an overlay network
+    - defining how many replicas should be deployed per service
+    - defining on which droplet the monitoring services should be running
+    - other configurations across technologies
+- Docker has been configured to do rolling updates as this is nativly supported on docker swarm, through various update-configurations for relevant services.
+- Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
 
 ## AI use
 Throughout the development process, all team members leveraged artificial intelligence tools to varying degrees and for diverse applications. The primary AI systems employed included ChatGPT, Claude, DeepSeek, and GitHub Copilot. Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
