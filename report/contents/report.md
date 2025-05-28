@@ -13,6 +13,7 @@ linkcolor: blue
 urlcolor: blue
 toccolor: blue
 toc: true
+toc-depth: 2
 ---
 
 # Introduction
