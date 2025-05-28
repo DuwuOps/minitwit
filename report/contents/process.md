@@ -41,6 +41,8 @@ TODO: insert picture
     - Logs should be centralised: All logs can be found via Grafana->Drilldown->Logs
 
 ## Strategy for scaling and upgrades
+- Used docker swarm using docker stack so that we can leverage the docker compose setup that was already made. Some changes were made to accomidate the swarm set up. These are a network overlay, setting how many replicas per service, where nesecary setting where the service should be placed, and update configs.
+- The update config for the minitwit application is set so that it updates one at a time. This is set as we only have two instances of minitwit and if an update fails we don't want more than one instance to be down. On failure we do a rollback. 
 
 ## AI use
 Throughout the development process, all team members leveraged artificial intelligence tools to varying degrees and for diverse applications. The primary AI systems employed included ChatGPT, Claude, DeepSeek, and GitHub Copilot. Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
