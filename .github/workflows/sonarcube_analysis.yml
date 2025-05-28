@@ -1,0 +1,74 @@
+name: SonarCloud Analysis
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check Go version
+      run: go version
+
+    - name: Check Python version
+      run: python --version
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'  
+
+    - name: Cache Go modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+    - name: Install Go dependencies
+      run: go mod download
+
+    - name: Run Go tests with coverage
+      run: go test -v -coverprofile=coverage.out ./...
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'  
+
+    - name: Install Python test dependencies
+      run: |
+        pip install -U pip
+        pip install pytest requests
+
+    - name: Run Python tests
+      run: |
+        pytest refactored_minitwit_tests.py
+        pytest sim_api_test.py
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarqube-scan-action@v5.0.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.organization=duwuops
+          -Dsonar.projectKey=DuwuOps_minitwit
+          -Dsonar.projectBaseDir=.
+          -Dsonar.go.coverage.reportPaths=coverage.out

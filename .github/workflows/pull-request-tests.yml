@@ -43,17 +43,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest Requests
 
-    - name: SonarCloud Scan
-      if: github.event_name == 'pull_request'
-      uses: SonarSource/sonarcloud-github-action@master
-      with:
-        projectBaseDir: .
-        args: >
-          -Dsonar.organization=duwuops
-          -Dsonar.projectKey=DuwuOps_minitwit
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
     - name: Test with refactored_minitwit_tests.py
       run: |
         pytest refactored_minitwit_tests.py
