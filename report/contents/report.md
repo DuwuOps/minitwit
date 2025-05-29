@@ -39,4 +39,6 @@ toc-depth: 2
 
 @include reflections.md
 
+\newpage
+
 # Bibliography
