@@ -26,27 +26,6 @@ stop:
 docker stop minitwit_app
 ```
 
-## Monitoring
-
-To access grafana or prometheus, you must setup an ssh tunnel, using the following command:
-
-Windows:
-
-```bat
-ssh -L 3000:127.0.0.1:3000 root@droplet.ip.adress.here
-```
-
-- where port `3000` is the port served by Grafana, you can replace the ports with `9090` to have a tunnel to prometheus
-- `droplet.ip.adress.here` should be either `167.71.64.240` for test web, or `159.223.8.210` for prod web
-- (OBS! remember to white-list yourself on the firewall on digital ocean, as well as having setup the ssh access keys)
-
-Now you can access grana by:
-
-1. opening a browser
-2. navigate to `http://localhost:3000`
-
-And you should be redirected to the Grafana login page
-
 # Cleanup
 
 Remove image. It is not always necessary to use -f it is only when you want to force deletion:
