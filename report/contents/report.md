@@ -1,7 +1,13 @@
 ---
-title: "MSc Group C"
-author: John Doe
-date: May 30, 2025
+title: "DevOps Project: Minitwit - MSc. Group DuwuOps"
+author: 
+  - Babette Bækgaard (babb@itu.dk)
+  - David Martin Sørensen (daso@itu.dk)
+  - Dea Lærke Thim (death@itu.dk)
+  - Gustav Müller Christoffersen (guch@itu.dk)
+  - Nikoline Burman (nibu@itu.dk)
+  - Simone Haukjær Jakobsen (hasj@itu.dk)
+date: May, 2025
 geometry: margin=2.5cm
 output:
   pdf_document:
