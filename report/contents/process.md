@@ -3,7 +3,7 @@
 ## CI/CD
 
 [GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and free pricing [@githubactions_vs_jenkins], [@20_cicd_comparison]. 
-A motivating factor, was the suite of services supported natively in Github, of these a few were utilized:
+A motivating factor was the suite of services supported natively in Github, where a few of which were utilized:
 
 * [GitHub  Action Secrets & Variables](https://github.com/DuwuOps/minitwit/settings/secrets/actions) for storing ssh-keys, passwords, etc.
 * [GitHub Tags, Releases & Artifacts Storage](https://github.com/DuwuOps/minitwit/releases) for artifact versioning of the GoLang application.
