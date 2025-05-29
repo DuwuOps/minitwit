@@ -124,9 +124,12 @@ The implementation contains two separate docker compose files, defining core ser
 
 ![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
-- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes default usernames and passwords.
+- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system
 
-- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup with 1 manager node and 2 worker nodes, which runs the application (`app`). Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager, while `alloy` collects logs, and is applied to all nodes. This setup enables horizontal scaling.
+- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configurations. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup-specifications, with 1 manager node and at least 1 worker node, which enables horizontal scaling.
+    - The application (`app`) is on the 2 of the nodes
+    - Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager
+    - OpenTelemetry Collector distribution (`alloy`) runs on all nodes.
 
 Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. Terraform[@Terraform_MainPage] files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac.
 
