@@ -113,14 +113,9 @@ Table: Summarized quality metrics from CodeClimate analysis. {#tbl:CodeClimateAn
 
 ## Orchestration
 
-To streamline deployment, [Docker](https://www.docker.com/),[Docker-Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized.
+To streamline deployment, [Docker](https://www.docker.com/), [Docker-Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized.
 
-MiniTwit contains a central [DockerFile](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/Dockerfile), which builds the MiniTwit container in two stages:
-
-1. Compiling the Minitwit source code in [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) into a binary.
-2. Copying the compiled binary and static files into a runtime docker image.
-
-The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some services use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) (see @fig:dockerComposeViz).
+The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Each service has a corresponding Dockerfile, which details how the image is built. Some services also use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) (see @fig:dockerComposeViz).
 
 ![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
