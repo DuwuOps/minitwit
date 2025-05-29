@@ -29,7 +29,8 @@ jobs:
             texlive-xetex \
             texlive-fonts-recommended \
             texlive-latex-extra \
-            fonts-dejavu-core
+            fonts-dejavu-core \
+            fonts-noto-color-emoji
           
           # Install pandoc-crossref from GitHub releases
           CROSSREF_VERSION="v0.3.17.0"
@@ -59,10 +60,12 @@ jobs:
                  --citeproc \
                  --pdf-engine=xelatex \
                  -V mainfont="DejaVu Sans" \
+                 -V emoji-font="Noto Color Emoji" \
                  ../build/report_full.md \
                  -o ../build/MSc_group_c.pdf \
                  --csl=./ieee.csl \
                  --bibliography=./main.bib
+
 
       - name: Commit and push updated PDF report
         env:

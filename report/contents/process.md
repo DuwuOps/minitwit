@@ -59,24 +59,9 @@ Table: Comparison between CI/CD systems.
 ## Monitoring 
 <!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
 ### Prometheus
-We use Prometheus as an Echo middleware, with additional custom-made metrics to scrape our application every 5 seconds.
+Prometheus is used as an Echo middleware, with custom-made metrics to scrape our application every 5 seconds. Prometheus was chosen since the familiarity from class, easy integration with golang, popularity, easy integration with Grafana and free price.
 
-Custom metrics: 
-- User follower (gauge)
-
-- User followees (gauge)
-
-- VM CPU usage (gauge)
-
-- Messages posted (by time) (counter)
-
-- Messages posted (by user) (gauge)
-
-- Mesages flagged (by user) (gauge)
-
-- New user (counter)
-
-- Total users (gauge)
+The custom metrics are: User follower (gauge), user followees (gauge), VM CPU usage (gauge), messages posted (by time) (counter), messages posted (by user) (gauge), mesages flagged (by user) (gauge), new user (counter), total users (gauge)
 
 <!-- Der er det her i vores kode som jeg ikke helt ved hvad er og om det burde komme med her:
 MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
@@ -85,33 +70,9 @@ MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
             MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
 -->
 
-Prometheus was chosen on the background of:
-
-- Demonstrated in Class
-
-- Easy integration with golang/echo via. middleware
-
-- Widespread usage and easy to integrate with e.g. Grafana
-
-- Free to use
-
 ### Grafana
-As of writing this, the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
-
-Users:
-
-- Admin user
-
-- Helge and Mircea specific login
-
-
-Grafana was chosen on the background of:
-
-- Demonstrated in Class
-
-- Rich Visualization 
-
-- Free to use 
+Grafana was chosen because of the familiarity from class, rich visualisation and free price. In Grafana two users are configured: Admin user and the specific login for Helge and Mircea.
+After introducing swarm scaling the dashboards are non-functional. Therefore, the pictures presented is from the day of the simulator stopping.
 
 <!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
 
@@ -121,11 +82,11 @@ Grafana was chosen on the background of:
 
 Timeframe: last 30 minutes:
 
-![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=H}
+![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=H}
 
 Timeframe: Last 2 days:
 
-![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=H}
+![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=H}
 
 **Whitebox User Action Dashboards Monitoring:**
 
@@ -139,17 +100,13 @@ Timframe: last 5 minutes:
 
 ![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=H}
 
-#### Black Box Monitoring
+### Other types of monitoring
 
-Black box user-side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
+- **Black Box Monitoring:** By the Status and Simulator API errors graf from class
 
-#### DigitalOcean Monitoring
+- **DigitalOcean Monitoring:** DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O).
 
-DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here] <!-- TODO DO NOT FORGET -->
-
-### Alert System
-An alert system was set up via a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
-
+- **Alert System:** An alert system was set up via a Discord bot that checks the application on the server every 5 minutes. If the application is not up, it sends a Discord message and tags everyone on our group server. 
 ![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=H}
 
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
@@ -190,21 +147,21 @@ Loki is currently configured to store logs in a folder called `tmp`. While this 
     - Yes: Logging should be done at the proper level: Mention emoji use-->
 
 ## Strategy for Scaling and Upgrades
-We used docker swarm with docker stack so that we could leverage the docker compose configurations that were already in use. However, some changes has to be made to accommodate the docker stack specifications and issues related to splitting the services onto different droplets. 
+We used Docker Swarm with Docker Stack to reuse the already existing Docker compose configurations. 
+However, some changes was necessary to accommodate the Docker Stack specifications and issues related to splitting the services onto different droplets. 
 
-The changes were: 
+The changes included:
 
-- an overlay network
+- Setting up an overlay network
 
-- defining how many replicas should be deployed per service
+- Specifying the number of replicas for each service
 
-- defining on which droplet the monitoring services should be running
+- Assigning monitoring services to specific droplets
 
-- other configurations across technologies
+- Adjusting configurations across various technologies
 
-Docker has been configured to do rolling updates as this is nativly supported on docker swarm, through various update-configurations for relevant services.
-
-Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
+Docker has been configured to do rolling updates as this is nativly supported on docker swarm.
+Additionally, Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
 
 ## AI Use
 Throughout the development process, the team used the AIs ChatGPT, Claude, DeepSeek, and GitHub Copilot. 
