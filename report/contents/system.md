@@ -125,7 +125,7 @@ Infrastructure as Code is used simplify the remote setup of the Docker Swarm. Te
 
 ### VPS
 
-To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], its familiarity to the group.
+To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and its familiarity to the group.
 
 | **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
 |---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
@@ -138,7 +138,7 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 
 ### Infrastructure-as-Code
 
-To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an infrastructure as code tool[@Terraform_MainPage], which has an easy to use inbuilt provider for DigitalOcean[@Anicas_Hogan_2022]. Please see figure **ref** for an overview of how Terraform builds the infrastructure of the system on DigitalOcean.
+To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an infrastructure as code tool[@Terraform_MainPage], which has an easy to use built-in provider for DigitalOcean[@Anicas_Hogan_2022]. Please see figure **ref** for an overview of how Terraform builds the infrastructure of the system on DigitalOcean.
 
 ### Allocation viewpoint
 
