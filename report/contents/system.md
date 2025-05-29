@@ -82,13 +82,13 @@ The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde
 
 Table: Description of modules in GoLang MiniTwit implementation. {#tbl:moduleslist}
 
-![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui height=45% position=h}
+![Sequence diagram - Follow request via UI. Note: "API Handlers" refers to files from the `handlers` package.](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui height=45% position=h}
 
-![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api height=45% position=h}
+![Sequence diagram - Follow request via API. Note: "API Handlers" refers to files from the `handlers` package.](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api height=45% position=h}
 
 ### Current State of the System
 
-The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized to gauge the complexity of the implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require attention for maintainability.
+The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized to gauge the complexity of the implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require attention for maintainability.
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
