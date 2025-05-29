@@ -26,6 +26,8 @@ toc-depth: 2
 
 @include process.md
 
+@include security.md
+
 \newpage
 
 @include reflection.md
