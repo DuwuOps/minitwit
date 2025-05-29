@@ -27,11 +27,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
           
-          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 sh
-          ghcup install ghc --set
-          ghcup install cabal --set
-          cabal v2-update
-          cabal v2-install --install-method=copy pandoc-cli pandoc-crossref
+          # Install pandoc-crossref from GitHub releases
+          CROSSREF_VERSION="v0.3.17.0"
+          wget https://github.com/lierdakil/pandoc-crossref/releases/download/${CROSSREF_VERSION}/pandoc-crossref-Linux.tar.xz
+          tar -xf pandoc-crossref-Linux.tar.xz
+          sudo mv pandoc-crossref /usr/local/bin/
+          chmod +x /usr/local/bin/pandoc-crossref
+          rm pandoc-crossref-Linux.tar.xz
+          rm pandoc-crossref.1
 
       - name: Build PDF report
         working-directory: ./report/contents
