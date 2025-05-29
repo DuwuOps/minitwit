@@ -1,8 +1,9 @@
 # Introduction
-
-her skal der stå noget sejt
-
 ## System Depiction
+
+An initial overview of the system is provided in Figure 1.
+
+![Informal System Depiction Diagram w. associated legend](../images/Informal%20System%20Depiction.png)
 
 ## Tech-Stack Overview
 
