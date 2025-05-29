@@ -3,84 +3,75 @@
 ## Minitwit
 
 ### Programming Language
-GoLang (Go) was chosen based on documentation, community support, industry adoption, and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
+[GoLang](https://go.dev/) (Go) was chosen based on documentation (**ref**), community support (**ref**), industry adoption [@stackoverflow_survey_2024], and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
 
-The programming languages C#, Java, GoLang, and Crystal were considered.
-Java and C# were discarded as candidates, as both were considered to be verbose object-oriented languages. 
-The group also had extensive experience within these languages. This led to a comparison between GoLang and Crystal, outlined in Table 2.
+The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csharp), [Java](https://www.java.com/en/), [GoLang](https://go.dev/), and [Crystal](https://crystal-lang.org/) were considered.
+[Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates, as both were considered to be verbose object-oriented languages, and that the group had extensive previous experience within these languages.
+This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in Table 2.
  
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
 |--------------------------|-------------------------------------------|------------------------------------------|
 | **Team Competences**     | Some prior exposure in small capacities   | No prior experience                      |
 | **Ecosystem & Libraries**| Well-supported, uses GitHub               | Uses GitHub, but less extensive          |
-| **Industry Usage**       | Extensive adoption [^1]                   | Limited adoption [^1]                    |
+| **Industry Usage**       | Extensive adoption [@stackoverflow_survey_2024] | Limited adoption [@stackoverflow_survey_2024]|
 | **Docker Compatibility** | Yes                                       | Yes                                      |
 | **Performance**          | Fast                                      | Fast                                     |
 | **Concurrency**          | Strong support                            | Good                                     |
 | **Documentation**        | Well-documented                           | Good but less extensive                  |
 | **Community**            | Large and active                          | Smaller and less active                  |
 
-[^1]: Stack Overflow Developer Survey 2024
+Table: Comparison between programming languages [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/).
 
 ### External dependencies in GoLang
-| **Dependency**                               | **Description**                                                                                        |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
-| **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
-| **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
-| **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
-| **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
-| **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
-| **github.com/klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
-| **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
-| **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
-| **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
-| **Gravatar**                             | External web service providing avatar images generated from email hashes. |
+| **Dependency** | **Description** |
+| --- | ------- |
+| **labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
+| **gorilla/sessions**          | Session management with secure cookie support.                                                     |
+| **lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
+| **golang.org/x/crypto**       | Cryptographic utilities for security features.                                                     |
+| **prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
+| **shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
+| **klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
+| **golang.org/x/sys**          | Low-level OS interaction and system calls.                                                         |
+| **google.golang.org/protobuf**| Protocol Buffers support for data serialization.                                                   |
+| **gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
+| **Gravatar**                  | External web service providing avatar images generated from email hashes. |
 
+Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/go.mod) for more details.)
 
 ### Design and Architecture 
-This section presents the architecture of the system by exploring the `src` folder of the repository.
+This section presents the architecture of the system by exploring the [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) directory. The architecture is explored through two views:
 
-#### Module Diagram
+1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (**Figure X**), and table detailing each module with corresponding description (**Table X**).
+2. Two UML sequence diagrams (**Figure x** and **Figure X**). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
 
-An overview of the modules of the codebase in the `src` folder is presented by the following package diagram.    
-Note that within the `handlers` folder, the classes `auth.go`, `message.go`, and `user.go` and their dependencies are highlighted, depicting the complexity of this central module. This is thereby not a normal package diagram.
+![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png)
 
-![Module diagram](../images/module_diagram.png)
+| Module | Description |
+|---|---------|
+| **`datalayer`** | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`. |
+| **`models`** | Contains data models: `User`, `Message`, `Follower`, and `LatestAccessed`. |
+| **`handlers`** | Central logic of the system. Orchestrates operations for each model. |
+| **`handlers.repo_wrappers`** | Utility functions extending repository logic. |
+| **`handlers.helpers`** | Shared logic. |
+| **`routes`** | Maps HTTP endpoints to their corresponding handlers. |
+| **`metrics`** | Registers custom Prometheus metrics to monitor system statistics. |
+| **`middleware`** | Applies Cross-Site Request Forgery middleware. |
+| **`snapshots`** | Handles creation of database snapshots for models. |
+| **`template_rendering`** | Renders templates used by the frontend. |
+| **`templates`** | Holds frontend HTML files. |
+| **`utils`** | Contains shared utility methods used across the codebase. |
 
-##### Description of Modules
-
-| Module                     | Description                                                                                                                                                                                  |
-|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`datalayer`**            | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`.                                         |
-| **`models`**               | Contains data models: `User`, `Message`, `Follower`, and `LatestAccessed`.                                            |
-| **`handlers`**             | Central logic of the system. Orchestrates operations for each model. 
-<br>Includes **`repo_wrappers`**: utility functions extending repository logic. 
-<br>Includes **`helpers`**: shared logic. |
-| **`routes`**               | Maps HTTP endpoints to their corresponding handlers.                                                                                                                                           |
-| **`metrics`**              | Registers custom Prometheus metrics to monitor system statistics.                                                                                                                                     |
-| **`middleware`**           | Applies Cross-Site Request Forgery middleware.                                                                                                                 |
-| **`snapshots`**            | Handles creation of database snapshots for models.                                                                                                                                             |
-| **`template_rendering`**   | Renders templates used by the frontend.                                                                                                                                                        |
-| **`templates`**            | Holds frontend HTML files.                                                                                                                                                                     |
-| **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
-
-#### Sequence Diagrams
-Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
-
-The first version shows the processes involved when the request is sent via the *UI*, whereas the second version shows the processes involved when sent via the *API*. 
+Table: Description of modules in GoLang MiniTwit implementation.
 
 ![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
 
 ![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png)
 
-Note that the two versions use different endpoints to interact with the same API.
 
 ### Current State of the System
 
-#### SonarQube Analysis Summary
-
-The following table summarizes key code quality metrics from SonarQube analysis:
+The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized in order to gauge the complexity of the MiniTwit implementation (**Figure X** and **Figure X**). Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
@@ -91,9 +82,7 @@ The following table summarizes key code quality metrics from SonarQube analysis:
 | Cyclomatic Complexity  | 216 (handlers: 151)    |
 | Technical Debt         | ~1 hour 7 minutes      |
 
-#### Code Climate
-
-The following table summarizes key code quality metrics from Code Climate analysis:
+Table: Summarized quality metrics from SonarQube analysis.
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
@@ -103,9 +92,7 @@ The following table summarizes key code quality metrics from Code Climate analys
 | Complexity             | 299 (handlers: 196)    |
 | Technical Debt         | ~1 day 2 hours         |
 
-#### Overall Assessment
-
-Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
+Table: Summarized quality metrics from CodeClimate analysis.
 
 ## Orchestration
 To streamline deployment, Docker, Docker Compose, Docker Swarm, and Terraform were chosen. 

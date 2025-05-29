@@ -7,8 +7,8 @@ An initial overview of the system is provided in Figure 1.
 
 ## Tech-Stack Overview
 
-| **Week** | **Topic** | **Tech Choices** | **Section** |
-| --- | --- | ----- | ----- |
+| **Topic** | **Tech Choice** | **Section** |
+| --- | --- | ----- |
 | Refactoring | [GoLang](https://go.dev/), [Echo](https://echo.labstack.com/) | **2.1 Programming Language** |
 | Orchestrazation | [Docker](https://www.docker.com/) | **2.2 Orchestrazation** |
 | Deployment | [DigitalOcean](https://www.digitalocean.com/) | **2.3 VPS** |

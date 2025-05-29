@@ -1,6 +1,6 @@
 # Process Perspective
 
-## CI/CD (GitHub Actions)
+## CI/CD
 
 [GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and free pricing [@githubactions_vs_jenkins], [@20_cicd_comparison]. 
 A motivating factor, was the suite of services supported natively in Github, of these a few were utilized:
