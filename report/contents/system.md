@@ -135,6 +135,10 @@ The Dockerfile builds a minitwit container image in two stages:
 
 There are two docker-compose files, `docker-compose.yml` and `docker-compose.deploy.yml`. Both define the six core services of the system: `app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`. 
 
+Except for the minitwit app and the database, the services use configuration specifications from corresponding `/.infrastructure/` sub-packages. 
+
+![Informal context diargam](../images/informal_context_diagram.png)
+
 `docker-compose.yml` is used for local deployment. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
 `docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. 
