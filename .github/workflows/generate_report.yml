@@ -29,23 +29,17 @@ jobs:
             texlive-xetex \
             texlive-fonts-recommended \
             texlive-latex-extra \
-            fonts-dejavu-core \
-            wget unzip
+            fonts-symbola
 
-          # Install Symbola font for emoji support
-          wget https://fontlibrary.org/assets/downloads/symbola/1f6305ceec9bc2e8e77d63b73122257a/symbola.zip
-          unzip symbola.zip -d symbola
-          sudo mv symbola/*.ttf /usr/share/fonts/truetype/
-          fc-cache -f -v
-
-          # Install pandoc-crossref that matches Pandoc 3.1.3
-          CROSSREF_VERSION="v0.3.17.0"  # Must match your Pandoc version
+          # Install pandoc-crossref that matches Pandoc version
+          CROSSREF_VERSION="v0.3.17.0"
           wget https://github.com/lierdakil/pandoc-crossref/releases/download/${CROSSREF_VERSION}/pandoc-crossref-Linux.tar.xz
           tar -xf pandoc-crossref-Linux.tar.xz
           sudo mv pandoc-crossref /usr/local/bin/
           chmod +x /usr/local/bin/pandoc-crossref
           rm pandoc-crossref-Linux.tar.xz
           rm pandoc-crossref.1
+
 
       - name: Build PDF report
         working-directory: ./report/contents
