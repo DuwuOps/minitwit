@@ -3,12 +3,13 @@
 ## Minitwit
 
 ### Programming Language
+
 [GoLang](https://go.dev/) (Go) was chosen based on documentation [@go_documentation], community support [@go_support], industry adoption [@stackoverflow_survey_2024], and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
 
 The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csharp), [Java](https://www.java.com/en/), [GoLang](https://go.dev/), and [Crystal](https://crystal-lang.org/) were considered.
 [Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates, as both were considered to be verbose object-oriented languages, and that the group had extensive previous experience within these languages.
 This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in @tbl:GoCrystalComparison.
- 
+
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
 |--------------------------|-------------------------------------------|------------------------------------------|
 | **Team Competences**     | Some prior exposure in small capacities   | No prior experience                      |
@@ -38,6 +39,7 @@ Table: Comparison of select GoLang web frameworks.
 
 
 ### External dependencies in GoLang
+
 | **Dependency** | **Description** |
 | ----- | ------- |
 | **labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
@@ -54,11 +56,12 @@ Table: Comparison of select GoLang web frameworks.
 
 Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/go.mod) for more details.) {#tbl:GoExternalDeps}
 
-### Design and Architecture 
-This section presents the architecture of the system by exploring the [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) directory. The architecture is explored through two views:
+### Design and Architecture
 
-1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
-2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
+The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) is explored through two views:
+
+1. A module view of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
+2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api) showcasing the user requests processes of "follow"-interaction through respectively the *UI* and the testing *API* (note: these are separate endpoints).
 
 ![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=100% position=h}  
 
@@ -79,14 +82,13 @@ This section presents the architecture of the system by exploring the [`src/`](h
 
 Table: Description of modules in GoLang MiniTwit implementation. {#tbl:moduleslist}
 
-![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui height=45% position=h} 
+![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui height=45% position=h}
 
-![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api height=45% position=h} 
-
+![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api height=45% position=h}
 
 ### Current State of the System
 
-The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized in order to gauge the complexity of the MiniTwit implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
+The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized to gauge the complexity of the implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require attention for maintainability.
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
@@ -110,30 +112,31 @@ Table: Summarized quality metrics from SonarQube analysis. {#tbl:SonarQubeAnalys
 Table: Summarized quality metrics from CodeClimate analysis. {#tbl:CodeClimateAnalysis}
 
 ## Orchestration
-To streamline deployment, [Docker](https://www.docker.com/),[Docker Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized. 
+
+To streamline deployment, [Docker](https://www.docker.com/),[Docker-Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized.
 
 MiniTwit contains a central [DockerFile](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/Dockerfile), which builds the MiniTwit container in two stages:
 
-1. Compiling the Minitwit source code in [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) into a binary. 
-2. Copying the compiled binary and necessary static files into a runtime docker image.
+1. Compiling the Minitwit source code in [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) into a binary.
+2. Copying the compiled binary and static files into a runtime docker image.
 
-The MiniTwit repository contains two separate docker compose files, defining six core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some of the services use custom configuration specifications, found under the [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) directory (see @fig:dockerComposeViz). 
+The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some services use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) (see @fig:dockerComposeViz).
 
-![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h} 
+![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
-- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
+- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes default usernames and passwords.
 
-- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup with 1 manager node and 2 worker nodes, which runs the MiniTwit GoLang application (`app`). Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager, while `alloy` collects all logs, and is therefore applied to all nodes. This setup enables horizontal scaling.
+- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup with 1 manager node and 2 worker nodes, which runs the application (`app`). Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager, while `alloy` collects logs, and is applied to all nodes. This setup enables horizontal scaling.
 
-Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac. 
+Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. Terraform[@Terraform_MainPage] files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac.
 
-![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h} 
+![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h}
 
 ## Deployment
 
-### VPS
+### Virtual Private Server (VPS)
 
-To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the Virtual Private Server (VPS) provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and its familiarity to the group.
+To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and familiarity to the group through lecture demonstration.
 
 | **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
 |---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
@@ -143,20 +146,19 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 
 : Price comparison of VPS providers. {#tbl:vps-comparison}
 
-
 ### Infrastructure-as-Code
 
-To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an IaC tool[@Terraform_MainPage], which has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022]. 
+The Terraform setup ensure a consistent and automatic creation of infrastructure on DigitalOcean. Terraform has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022].
 
 ### Allocation Viewpoint
 
-![Deployment diagram](../images/deployment_diagram.png){#fig:deployment-diagram position=h} 
+![Deployment diagram](../images/deployment_diagram.png){#fig:deployment-diagram position=h}
 
-## Database 
+## Database
 
-Our setup includes two PostgreSQL databases: one for production and one for testing. Each runs on a separate, containerized droplet, with access restricted via a firewall to ensure security and isolation between environments (see Figure 1).
+The database runs on a separate, containerized droplet, with restricted access through firewall to ensure security and isolation between environments (see Figure 1).
 
-[PostgreSQL](https://www.postgresql.org/) was chosen to replace the SQLite setup, due to strong SQL standards compliance [@do_dbcomparison], high community adoption [@stackoverflow_survey_2024], and advanced features (e.g., JSON, HStore, Security) [@tooljet_mariavspostgres], [@Medium_Peymaan_DB_Comparison].
+[PostgreSQL](https://www.postgresql.org/) was chosen to replace the SQLite setup, due to strong SQL standards compliance [@do_dbcomparison], high community adoption [@stackoverflow_survey_2024], and advanced features [@tooljet_mariavspostgres], [@Medium_Peymaan_DB_Comparison].
 
 ### Choice of Technology - Database
 
@@ -174,5 +176,5 @@ We compared leading relational databases based on the Stack Overflow 2024 Develo
 Table: Comparison of RDBMSs. {#tbl:ComparisonOfRDBMSs}
 
 **Note**: Performance benchmarks are excluded due to license restrictions placed on benchmarking by licensing of proprietary DBMSs [@Oracle_Network_License].
- 
+
 MySQL was ruled out due to licensing issues and development concerns post-Oracle acquisition [@Fedora_MariaDB], [@do_dbcomparison].
