@@ -57,7 +57,7 @@ This section presents the architecture of the system by exploring the [`src/`](h
 | **`routes`** | Maps HTTP endpoints to their corresponding handlers. |
 | **`metrics`** | Registers custom Prometheus metrics to monitor system statistics. |
 | **`middleware`** | Applies Cross-Site Request Forgery middleware. |
-| **`snapshots`** | Handles creation of database snapshots for models. |
+| **`snapshots`** | Handles Prometheus snapshots of database. |
 | **`template_rendering`** | Renders templates used by the frontend. |
 | **`templates`** | Holds frontend HTML files. |
 | **`utils`** | Contains shared utility methods used across the codebase. |
