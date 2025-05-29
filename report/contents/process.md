@@ -33,9 +33,9 @@ Table:  List of GitHub Actions workflows employed.
 * The [`CodeQL`](https://codeql.github.com/) code analysis engine is used in [`codeql.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/codeql.yml) to check for security vulnerabilities.
 * Original `pytest` files are used in [`continous-development.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/continous-development.yml)–now functioning as a `Test` stage (see [`minitwit_tests.py`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/refactored_minitwit_tests.py) and [`sim_api_test.py`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/sim_api_test.py)).
 
-![Informal visualization of `continous-development.yml` (primary pipline), with stages `Tests`, `Build & Push`, `Release`, and `Deploy`](../images/github_actions-continuous-development.png)
+![Informal visualization of `continous-development.yml` (primary pipline), with stages `Tests`, `Build & Push`, `Release`, and `Deploy`](../images/github_actions-continuous-development.png){#fig:github_actions-continuous-development width=80% placement=H}
 
-![Informal visualization of other pipelines](../images/github_actions-other.png)
+![Informal visualization of other pipelines](../images/github_actions-other.png){#fig:github_actions-other width=80% placement=H}
 
 
 ### Choice of CI/CD
@@ -121,23 +121,23 @@ Grafana was chosen on the background of:
 
 Timeframe: last 30 minutes:
 
-![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png)
+![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=H}
 
 Timeframe: Last 2 days:
 
-![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png)
+![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=H}
 
 **Whitebox User Action Dashboards Monitoring:**
 
 Timeframe: Last 7 days:
 
-![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png)
+![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png){#fig:monitoring-user-actions-t7d width=80% placement=H}
 
 **Whitebox Virtual Memory Dashboard Monitoring:**
 
 Timframe: last 5 minutes:
 
-![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png)
+![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=H}
 
 #### Black Box Monitoring
 
@@ -150,7 +150,8 @@ DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Di
 ### Alert System
 An alert system was set up via a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
 
-![Alert bot example](../images/alert-example.png)
+![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=H}
+
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
 
