@@ -24,7 +24,7 @@ Table: Comparison between programming languages [GoLang](https://go.dev/) and [C
 
 ### External dependencies in GoLang
 | **Dependency** | **Description** |
-| --- | ------- |
+| ----- | ------- |
 | **labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
 | **gorilla/sessions**          | Session management with secure cookie support.                                                     |
 | **lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
