@@ -119,14 +119,14 @@ The implementation contains two separate docker compose files, defining core ser
 
 ![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
-- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system
+- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system.
 
 - [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configurations. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup-specifications, with 1 manager node and at least 1 worker node, which enables horizontal scaling.
-    - The application (`app`) is on the 2 of the nodes
+    - The application (`app`) is on 2 of the nodes
     - Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager
     - OpenTelemetry Collector distribution (`alloy`) runs on all nodes.
 
-Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. Terraform[@Terraform_MainPage] files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac.
+Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. Terraform[@Terraform_MainPage] files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via Terraform is illustrated in @fig:sequence-diagram-iac.
 
 ![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h}
 
@@ -146,7 +146,7 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 
 ### Infrastructure-as-Code
 
-The Terraform setup ensure a consistent and automatic creation of infrastructure on DigitalOcean. Terraform has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022].
+The Terraform setup ensures a consistent and automatic creation of infrastructure on DigitalOcean. Terraform has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022].
 
 ### Allocation Viewpoint
 
