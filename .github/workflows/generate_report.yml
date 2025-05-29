@@ -22,10 +22,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Pandoc and LaTeX
+      - name: Install Pandoc and XeLaTeX
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
+          sudo apt-get install -y pandoc \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-latex-extra \
+            fonts-dejavu-core
           
           # Install pandoc-crossref from GitHub releases
           CROSSREF_VERSION="v0.3.17.0"
