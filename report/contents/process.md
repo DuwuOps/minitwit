@@ -3,15 +3,15 @@
 ## CI/CD
 
 [GitHub Actions](https://github.com/features/actions) was chosen based on its simplicity, familiarity, and free pricing [@githubactions_vs_jenkins], [@20_cicd_comparison]. 
-A motivating factor was the suite of services supported natively in Github, where a few of which were utilized:
+A motivating factor was the suite of services supported natively in Github, of which the following were utilized:
 
 * [GitHub  Action Secrets & Variables](https://github.com/DuwuOps/minitwit/settings/secrets/actions) for storing ssh-keys, passwords, etc.
-* [GitHub Tags, Releases & Artifacts Storage](https://github.com/DuwuOps/minitwit/releases) for artifact versioning of the GoLang application.
+* [GitHub Tags, Releases & Artifacts Storage](https://github.com/DuwuOps/minitwit/releases) for artifact versioning of the application.
 * [GitHub Applications](https://github.com/DuwuOps/minitwit/settings/installations) for code quality evaluations with [CodeClimate](https://codeclimate.com/) and [SonarQubeCloud](https://docs.sonarsource.com/sonarqube-cloud/).
-* [GitHub Projects, Tasks & Backlog](https://github.com/orgs/DuwuOps/projects/1) for managing task formulation and distribution.
+* [GitHub Projects, Tasks & Backlog](https://github.com/orgs/DuwuOps/projects/1) for defining and distributing tasks.
 
 ### CI/CD Pipelines
-A total of **7** pipelines are established (see @tbl:pipelines).
+In total, **7** pipelines are established (see @tbl:pipelines).
 
 +---------------------------+------------------------------------------------------------+---------------------------+
 | **File**                  | **Purpose**                                                | **Invoked On**            |
@@ -52,11 +52,11 @@ Table: List of GitHub Actions workflows employed. {#tbl:pipelines}
 A comparison of CI/CD systems was performed, and the results can be seen in @tbl:cicd-comparison.
 
 * Since GitHub was chosen, [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded, as they are specific to alternative git repository management sites.
-* Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing.
+* Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to pricing.
 
-As such, the choice was between GitHub's native [GitHub Actions](https://github.com/features/actions) or a CI/CD system agnostic to repository management sites. 
+As such, the choice was between GitHub's [GitHub Actions](https://github.com/features/actions) or a CI/CD system agnostic to repository management sites. 
 
-It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded us from this choice.
+The self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded us from this choice, as time-to-production for *establishing* CI/CD pipelines was an important factor for us.
 
 +-----------------------------+---------------------+---------------------+---------------------+---------------------------+
 | **Feature**                 | **GitHub Actions** | **Jenkins**         | **Azure DevOps**   | **TeamCity**              |
