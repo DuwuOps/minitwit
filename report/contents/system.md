@@ -1,20 +1,13 @@
-# System perspective
+# System Perspective
 
-The system is primarily built using Go (Golang) for backend development. The Echo web framework is used for HTTP routing and middleware management. PostgreSQL serves as the database. Additionally, the system uses various Go libraries for security, session management, data serialization, monitoring, system metrics, and external systems that will be presented later. 
+## Minitwit
 
-## Programming language
-
-The GoLang programming language was chosen as the language.
-
-Go was chosen based on documentation, community support, industry adoption, and the notion of being ’lightweight’ - both
-in terms of syntax and performance overhead. 
-Furthermore, the group also prioritezed Go, because there was limited prior experience.
+### Programming Language
+GoLang (Go) was chosen based on documentation, community support, industry adoption, and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
 
 The programming languages C#, Java, GoLang, and Crystal were considered.
-Java and C# were discarded as candidates, as both were considered to be
-verbose object-oriented languages and, therefore, not ’lightweight.’ The group also
-has extensive experience within these languages. This led to a comparison between
-GoLang and Crystal outlined in table 2, which supported the choice of using GoLang.
+Java and C# were discarded as candidates, as both were considered to be verbose object-oriented languages. 
+The group also had extensive experience within these languages. This led to a comparison between GoLang and Crystal, outlined in Table 2.
  
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
 |--------------------------|-------------------------------------------|------------------------------------------|
@@ -29,14 +22,12 @@ GoLang and Crystal outlined in table 2, which supported the choice of using GoLa
 
 [^1]: Stack Overflow Developer Survey 2024
 
-## External dependencies
-| Dependency                               | Description                                                                                        |
+### External dependencies in GoLang
+| **Dependency**                               | **Description**                                                                                        |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Go (Golang)**                          | Programming language for backend development.                                                 |
 | **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
 | **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
 | **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
-| **PostgreSQL**                           | Relational database storing                                                       |
 | **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
 | **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
 | **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
@@ -44,50 +35,40 @@ GoLang and Crystal outlined in table 2, which supported the choice of using GoLa
 | **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
 | **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
 | **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
-| **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
+| **Gravatar**                             | External web service providing avatar images generated from email hashes. |
 
 
-## Design and architecture 
+### Design and Architecture 
 This section presents the architecture of the system by exploring the `src` folder of the repository.
 
-### Module diagram
+#### Module Diagram
 
 An overview of the modules of the codebase in the `src` folder is presented by the following package diagram.    
 Note that within the `handlers` folder, the classes `auth.go`, `message.go`, and `user.go` and their dependencies are highlighted, depicting the complexity of this central module. This is thereby not a normal package diagram.
 
 ![Module diagram](../images/module_diagram.png)
 
-In the diagram it can be seen, that the main.go file orchestrates the system. It (in this context) has the responsibility for:
-1. Rendering the template (frontend)
-2. Initializing a new instance of the database object
-3. Setting up middleware
-4. Setting up routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
-
-#### Description of modules
+##### Description of Modules
 
 | Module                     | Description                                                                                                                                                                                  |
 |----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`datalayer`**            | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`.                                         |
-| **`models`**               | Contains core data models: `User`, `Message`, `Follower`, and `LatestAccessed` (used to track recent activity, e.g., new followers or messages).                                            |
-| **`handlers`**             | Central logic of the system. Orchestrates operations for each model.<br>Includes **`repo_wrappers`**: utility functions extending repository logic.<br>Includes **`helpers`**: shared logic. |
+| **`models`**               | Contains data models: `User`, `Message`, `Follower`, and `LatestAccessed`.                                            |
+| **`handlers`**             | Central logic of the system. Orchestrates operations for each model. 
+<br>Includes **`repo_wrappers`**: utility functions extending repository logic. 
+<br>Includes **`helpers`**: shared logic. |
 | **`routes`**               | Maps HTTP endpoints to their corresponding handlers.                                                                                                                                           |
-| **`metrics`**              | Registers Prometheus metrics to monitor system statistics.                                                                                                                                     |
-| **`middleware`**           | Applies security measures such as CSRF token validation to incoming requests.                                                                                                                 |
+| **`metrics`**              | Registers custom Prometheus metrics to monitor system statistics.                                                                                                                                     |
+| **`middleware`**           | Applies Cross-Site Request Forgery middleware.                                                                                                                 |
 | **`snapshots`**            | Handles creation of database snapshots for models.                                                                                                                                             |
 | **`template_rendering`**   | Renders templates used by the frontend.                                                                                                                                                        |
 | **`templates`**            | Holds frontend HTML files.                                                                                                                                                                     |
 | **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
 
-### Sequence diagrams
+#### Sequence Diagrams
 Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
 
-They contain the following high-level lifelines:
-- User Interface: The minitwit web application
-- API Handlers: All functions in the `handlers` package, which handle requests to the API endpoints.
-- Datalayer: The `datalayer`package, which handles database interactions and returns structs (see the `model` package).
-- Database: The postgres database.
-
-The first version shows the processes involved when the request is sent via. the *UI*, whereas the second version shows the processes involved when sent via. the *API*. 
+The first version shows the processes involved when the request is sent via the *UI*, whereas the second version shows the processes involved when sent via the *API*. 
 
 ![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
 
@@ -95,9 +76,9 @@ The first version shows the processes involved when the request is sent via. the
 
 Note that the two versions use different endpoints to interact with the same API.
 
-## Current state of the system
+### Current State of the System
 
-### SonarQube analysis summary
+#### SonarQube Analysis Summary
 
 The following table summarizes key code quality metrics from SonarQube analysis:
 
@@ -110,7 +91,7 @@ The following table summarizes key code quality metrics from SonarQube analysis:
 | Cyclomatic Complexity  | 216 (handlers: 151)    |
 | Technical Debt         | ~1 hour 7 minutes      |
 
-### Code Climate
+#### Code Climate
 
 The following table summarizes key code quality metrics from Code Climate analysis:
 
@@ -122,7 +103,7 @@ The following table summarizes key code quality metrics from Code Climate analys
 | Complexity             | 299 (handlers: 196)    |
 | Technical Debt         | ~1 day 2 hours         |
 
-### Overall assessment
+#### Overall Assessment
 
 Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
@@ -130,21 +111,23 @@ Both tools show that the `handlers` module has relatively high complexity, which
 To streamline deployment, Docker, Docker Compose, Docker Swarm, and Terraform were chosen. 
 
 The Dockerfile builds a minitwit container image in two stages: 
+
 1. Compiling the Go source code from the `src` package into a binary. 
+
 2. Copying the compiled binary and necessary static files into a runtime image.
 
 There are two docker-compose files, `docker-compose.yml` and `docker-compose.deploy.yml`. Both define the six core services of the system: `app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`. 
 
 Except for the minitwit app and the database, the services use configuration specifications from corresponding `/.infrastructure/` sub-packages. 
 
-![Informal context diargam](../images/informal_context_diagram.png)
+![Informal context diagram](../images/informal_context_diagram.png)
 
-`docker-compose.yml` is used for local deployment. It uses `localhost` IP-adresses and includes default usernames and passwords. 
+- `docker-compose.yml` is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
-`docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. 
+- `docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. 
 It defines a Docker Swarm setup with one manager and two worker nodes. The `app` runs on two worker replicas, while logging and monitoring services are constrained to only run on the manager node (though `alloy` collects logs from all nodes). This setup enables horizontal scaling. 
 
-Infrastructure as Code is used simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
+Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
 
 ![Sequence diagram of IaC](../images/sequence_diagram_IaC.png)
 
@@ -152,7 +135,7 @@ Infrastructure as Code is used simplify the remote setup of the Docker Swarm. Te
 
 ### VPS
 
-To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and its familiarity to the group.
+To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the Virtual Private Server (VPS) provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and its familiarity to the group.
 
 | **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
 |---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
@@ -165,21 +148,21 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 
 ### Infrastructure-as-Code
 
-To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an infrastructure as code tool[@Terraform_MainPage], which has an easy to use built-in provider for DigitalOcean[@Anicas_Hogan_2022]. Please see figure **ref** for an overview of how Terraform builds the infrastructure of the system on DigitalOcean.
+To ensure a consistent and automatic creation of the infrastructure of the system on DigitalOcean, Terraform was used. Terraform is an IaC tool[@Terraform_MainPage], which has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022]. 
 
-### Allocation viewpoint
+### Allocation Viewpoint
 
 ![Deployment diagram](../images/deployment_diagram.png)
 
-## Database (PostgreSQL)
+## Database 
 
 Our setup includes two PostgreSQL databases: one for production and one for testing. Each runs on a separate, containerized droplet, with access restricted via a firewall to ensure security and isolation between environments (see Figure 1).
 
-[PostgreSQL](https://www.postgresql.org/) was to replace the SQLite setup, due to strong SQL standards compliance [@do_dbcomparison], high community adoption [@stackoverflow_survey_2024], advanced features (e.g., JSON, HStore, Security) [@tooljet_mariavspostgres], [@Medium_Peymaan_DB_Comparison].
+[PostgreSQL](https://www.postgresql.org/) was chosen to replace the SQLite setup, due to strong SQL standards compliance [@do_dbcomparison], high community adoption [@stackoverflow_survey_2024], and advanced features (e.g., JSON, HStore, Security) [@tooljet_mariavspostgres], [@Medium_Peymaan_DB_Comparison].
 
 ### Choice of Technology - Database
 
-To replace our current SQLite setup, we compared leading relational databases based on the Stack Overflow 2024 Developer Survey [@stackoverflow_survey_2024]. Only open-source, self-hosted RDBMSs were considered—excluding NoSQL and cloud services.
+We compared leading relational databases based on the Stack Overflow 2024 Developer Survey [@stackoverflow_survey_2024]. Only open-source, self-hosted Relational Database Management Systems (RDBMSs) were considered.
 
 | **Database** | **SQLite** | **PostgreSQL** | **MySQL** | **Oracle** | **SQL Server** | **MariaDB** |
 | --- | --- | --- | --- | --- | --- | --- |

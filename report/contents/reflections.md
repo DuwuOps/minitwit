@@ -9,6 +9,8 @@
 
 - Database migration
 
+- Helpers VS utils - are they the same?
+
 ## Operations
 
 ## Maintenance
