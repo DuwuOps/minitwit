@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Pandoc and XeLaTeX
+      - name: Install Pandoc, XeLaTeX, and Symbola font
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc \
@@ -30,10 +30,16 @@ jobs:
             texlive-fonts-recommended \
             texlive-latex-extra \
             fonts-dejavu-core \
-            fonts-noto-color-emoji
-          
-          # Install pandoc-crossref from GitHub releases
-          CROSSREF_VERSION="v0.3.17.0"
+            wget unzip
+
+          # Install Symbola font for emoji support
+          wget https://fontlibrary.org/assets/downloads/symbola/1f6305ceec9bc2e8e77d63b73122257a/symbola.zip
+          unzip symbola.zip -d symbola
+          sudo mv symbola/*.ttf /usr/share/fonts/truetype/
+          fc-cache -f -v
+
+          # Install pandoc-crossref that matches Pandoc 3.1.3
+          CROSSREF_VERSION="v0.3.17.0"  # Must match your Pandoc version
           wget https://github.com/lierdakil/pandoc-crossref/releases/download/${CROSSREF_VERSION}/pandoc-crossref-Linux.tar.xz
           tar -xf pandoc-crossref-Linux.tar.xz
           sudo mv pandoc-crossref /usr/local/bin/
@@ -55,17 +61,16 @@ jobs:
             }
             { print }
           ' report.md > ../build/report_full.md
+
           pandoc --number-sections \
                  --filter pandoc-crossref \
                  --citeproc \
                  --pdf-engine=xelatex \
-                 -V mainfont="DejaVu Sans" \
-                 -V emoji-font="Noto Color Emoji" \
+                 -V mainfont="Symbola" \
                  ../build/report_full.md \
                  -o ../build/MSc_group_c.pdf \
                  --csl=./ieee.csl \
                  --bibliography=./main.bib
-
 
       - name: Commit and push updated PDF report
         env:
