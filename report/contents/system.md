@@ -1,10 +1,53 @@
 # System perspective
 
-This section presents the system.
-
-## Design and architecture 
 The system is primarily built using Go (Golang) for backend development. The Echo web framework is used for HTTP routing and middleware management. PostgreSQL serves as the database. Additionally, the system uses various Go libraries for security, session management, data serialization, monitoring, system metrics, and external systems that will be presented later. 
 
+## Programming language
+
+The GoLang programming language was chosen as the language.
+
+Go was chosen based on documentation, community support, industry adoption, and the notion of being ’lightweight’ - both
+in terms of syntax and performance overhead. 
+Furthermore, the group also prioritezed Go, because there was limited prior experience.
+
+The programming languages C#, Java, GoLang, and Crystal were considered.
+Java and C# were discarded as candidates, as both were considered to be
+verbose object-oriented languages and, therefore, not ’lightweight.’ The group also
+has extensive experience within these languages. This led to a comparison between
+GoLang and Crystal outlined in table 2, which supported the choice of using GoLang.
+ 
+| **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
+|--------------------------|-------------------------------------------|------------------------------------------|
+| **Team Competences**     | Some prior exposure in small capacities   | No prior experience                      |
+| **Ecosystem & Libraries**| Well-supported, uses GitHub               | Uses GitHub, but less extensive          |
+| **Industry Usage**       | Extensive adoption [^1]                   | Limited adoption [^1]                    |
+| **Docker Compatibility** | Yes                                       | Yes                                      |
+| **Performance**          | Fast                                      | Fast                                     |
+| **Concurrency**          | Strong support                            | Good                                     |
+| **Documentation**        | Well-documented                           | Good but less extensive                  |
+| **Community**            | Large and active                          | Smaller and less active                  |
+
+[^1]: Stack Overflow Developer Survey 2024
+
+## External dependencies
+| Dependency                               | Description                                                                                        |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Go (Golang)**                          | Programming language for backend development.                                                 |
+| **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
+| **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
+| **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
+| **PostgreSQL**                           | Relational database storing                                                       |
+| **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
+| **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
+| **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
+| **github.com/klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
+| **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
+| **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
+| **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
+| **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
+
+
+## Design and architecture 
 This section presents the architecture of the system by exploring the `src` folder of the repository.
 
 ### Module diagram
@@ -19,6 +62,21 @@ In the diagram it can be seen, that the main.go file orchestrates the system. It
 2. Initializing a new instance of the database object
 3. Setting up middleware
 4. Setting up routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
+
+#### Description of modules
+
+| Module                     | Description                                                                                                                                                                                  |
+|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`datalayer`**            | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`.                                         |
+| **`models`**               | Contains core data models: `User`, `Message`, `Follower`, and `LatestAccessed` (used to track recent activity, e.g., new followers or messages).                                            |
+| **`handlers`**             | Central logic of the system. Orchestrates operations for each model.<br>Includes **`repo_wrappers`**: utility functions extending repository logic.<br>Includes **`helpers`**: shared logic. |
+| **`routes`**               | Maps HTTP endpoints to their corresponding handlers.                                                                                                                                           |
+| **`metrics`**              | Registers Prometheus metrics to monitor system statistics.                                                                                                                                     |
+| **`middleware`**           | Applies security measures such as CSRF token validation to incoming requests.                                                                                                                 |
+| **`snapshots`**            | Handles creation of database snapshots for models.                                                                                                                                             |
+| **`template_rendering`**   | Renders templates used by the frontend.                                                                                                                                                        |
+| **`templates`**            | Holds frontend HTML files.                                                                                                                                                                     |
+| **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
 
 ### Sequence diagrams
 Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
@@ -36,24 +94,6 @@ The first version shows the processes involved when the request is sent via. the
 ![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png)
 
 Note that the two versions use different endpoints to interact with the same API.
-
-## Dependencies
-| Dependency                               | Description                                                                                        |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Go (Golang)**                          | Programming language for backend development.                                                 |
-| **github.com/labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
-| **github.com/gorilla/sessions**          | Session management with secure cookie support.                                                     |
-| **github.com/lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
-| **PostgreSQL**                           | Relational database storing                                                       |
-| **golang.org/x/crypto**                  | Cryptographic utilities for security features.                                                     |
-| **github.com/prometheus/client\_golang** | Prometheus client for metrics and monitoring.                                                      |
-| **github.com/shirou/gopsutil/v4**        | System metrics collection for health monitoring.                                                   |
-| **github.com/klauspost/compress**        | Compression libraries to optimize data transfer.                                                   |
-| **golang.org/x/sys**                     | Low-level OS interaction and system calls.                                                         |
-| **google.golang.org/protobuf**           | Protocol Buffers support for data serialization.                                                   |
-| **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
-| **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
-
 
 ## Current state of the system
 
