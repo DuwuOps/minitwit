@@ -59,6 +59,8 @@ jobs:
                  --citeproc \
                  --pdf-engine=xelatex \
                  -V mainfont="DejaVu Sans" \
+                 --figure-caption-position=below \
+                 --table-caption-position=below \
                  ../build/report_full.md \
                  -o ../build/MSc_group_c.pdf \
                  --csl=./ieee.csl \

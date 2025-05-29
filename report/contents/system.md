@@ -45,7 +45,7 @@ This section presents the architecture of the system by exploring the [`src/`](h
 1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (**Figure X**), and table detailing each module with corresponding description (**Table X**).
 2. Two UML sequence diagrams (**Figure x** and **Figure X**). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
 
-![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png)
+![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=80% placement=H}
 
 | Module | Description |
 |---|---------|
@@ -64,9 +64,9 @@ This section presents the architecture of the system by exploring the [`src/`](h
 
 Table: Description of modules in GoLang MiniTwit implementation.
 
-![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png)
+![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui width=80% placement=H}
 
-![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png)
+![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api width=80% placement=H}
 
 
 ### Current State of the System
@@ -107,7 +107,7 @@ There are two docker-compose files, `docker-compose.yml` and `docker-compose.dep
 
 Except for the minitwit app and the database, the services use configuration specifications from corresponding `/.infrastructure/` sub-packages. 
 
-![Informal context diagram](../images/informal_context_diagram.png)
+![Informal context diargam](../images/informal_context_diagram.png){#fig:informal-context-diagram width=80% placement=H}
 
 - `docker-compose.yml` is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
@@ -116,7 +116,7 @@ It defines a Docker Swarm setup with one manager and two worker nodes. The `app`
 
 Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
 
-![Sequence diagram of IaC](../images/sequence_diagram_IaC.png)
+![Sequence diagram of IaC](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac width=80% placement=H}
 
 ## Deployment
 
@@ -139,7 +139,7 @@ To ensure a consistent and automatic creation of the infrastructure of the syste
 
 ### Allocation Viewpoint
 
-![Deployment diagram](../images/deployment_diagram.png)
+![Deployment diagram](../images/deployment_diagram.png){#fig:deployment-diagram width=80% placement=H}
 
 ## Database 
 
