@@ -4,18 +4,18 @@
 
 ## Risk Identification
 
-Our public-facing asset is a single web application droplet, while the database instance is protected by a firewall.
-To identify the attack surface, we performed a TCP SYN scan of the most common ports against web droplets IP.
-The scan revealed the following open ports:
+Our public-facing asset is a single web-app, while the database instance is protected by a firewall.
+To identify the attack surface, we performed a TCP SYN scan of the most common ports against web's IP.
+The scan revealed open ports:
 
 - SSH (port 22)
 - HTTP (port 80)
 - Grafana (port 3000)
 - Prometheus (port 9090)
 
-Ports 3000 and 9090 are default monitoring services, and are not neccessarry to keep open, and hence should be privated. Exposing SSH on port 22 is expected for maintenance access, and HTTP on port 80 is the web application interface and should memain open for communication.
+Ports 3000 and 9090 are default monitoring services, and should be privated. Exposing SSH on port 22 is expected for maintenance access, and HTTP on port 80 is the web-app's interface and should remain open.
 
-To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports 22 and 80, which identified exposure to cross-site request forgery (CSRF) and Slowloris denial-of-service attacks. Given prior incidents of idle-connection exhaustion, the Slowloris finding was expected. A subsequent Nikto scan of the IP revealed missing security headers to prevent clickjacking and content sniffing.
+To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports 22 and 80, which identified exposure to cross-site request forgery (CSRF) and Slowloris denial-of-service attacks. Given prior incidents of idle-connection exhaustion, the Slowloris finding was expected. A subsequent Nikto scan revealed missing security headers to prevent clickjacking and content sniffing.
 
 ## Risk Scenarios
 
@@ -36,10 +36,8 @@ Based on this analysis, we prioritized patches in the following order: Slowloris
 
 ## Mitigation and Remediation
 
-All identified vulnerabilities have been addressed.
-
-- To guard against Slowloris attacks, we configured Read, Write, and Idle connection timeouts on the web server and imposed limits on header size (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
-- Database connection pooling now enforces maximum open and idle connections with reduced lifetimes to prevent resource exhaustion (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
-- CSRF protection was implemented by integrating middleware that issues and validates per-request tokens for all form submissions (see PR [#152](https://github.com/DuwuOps/minitwit/pull/158)).
-- To prevent content sniffing, we added response headers instructing browsers not to infer MIME types (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
-- Clickjacking is blocked by setting the `X-Frame-Options: DENY` header on all responses (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
+- Slowloris attacks: configure Read, Write, and Idle connection timeouts on the web server and imposed limits on header size (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
+- Slowloris attacks: enforce maximun database open- and idle connections with reduced lifetimes to prevent resource exhaustion (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
+- CSRF: integrating middleware that issues and validates per-request tokens for all form submissions (see PR [#152](https://github.com/DuwuOps/minitwit/pull/158)).
+- Content sniffing: adding response headers instructing browsers not to infer MIME types (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
+- Clickjacking: blocked by setting the `X-Frame-Options: DENY` header on all responses (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
