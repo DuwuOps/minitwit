@@ -7,7 +7,7 @@ A motivating factor was the suite of services supported natively in Github, wher
 
 * [GitHub  Action Secrets & Variables](https://github.com/DuwuOps/minitwit/settings/secrets/actions) for storing ssh-keys, passwords, etc.
 * [GitHub Tags, Releases & Artifacts Storage](https://github.com/DuwuOps/minitwit/releases) for artifact versioning of the GoLang application.
-* [GitHub Applications](https://github.com/DuwuOps/minitwit/settings/installations) for code quality evaluations with [CodeClimate](https://codeclimate.com/), [SonarQubeCloud](https://docs.sonarsource.com/sonarqube-cloud/), and [qtlysh](https://github.com/qltysh).
+* [GitHub Applications](https://github.com/DuwuOps/minitwit/settings/installations) for code quality evaluations with [CodeClimate](https://codeclimate.com/) and [SonarQubeCloud](https://docs.sonarsource.com/sonarqube-cloud/).
 * [GitHub Projects, Tasks & Backlog](https://github.com/orgs/DuwuOps/projects/1) for managing task formulation and distribution.
 
 ### CI/CD Pipelines
@@ -41,11 +41,11 @@ Table:  List of GitHub Actions workflows employed.
 ### Choice of CI/CD
 
 * Since GitHub was chosen, [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded, as they are specific to alternative git repository management sites.
-* Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing and limitations of their free plans.
+* Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing.
 
 As such, the choice was between GitHub's native [GitHub Actions](https://github.com/features/actions) or a CI/CD system agnostic to repository management sites. 
 
-It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded it as the choice of CI/CD system.
+It was decided that time-to-production, in the case of establishing working CI/CD pipelines, was the biggest priority. As an alternative, the self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded us from this choice.
 
 | **CI/CD Tool / Platform** | **GitHub Actions** | **Jenkins** | **Azure DevOps** | **TeamCity (JetBrains)** |
 |--------|--------|--------|--------|--------|
@@ -53,41 +53,67 @@ It was decided that time-to-production, in the case of establishing working CI/C
 | **Version Control** | Native GitHub Integration [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] |
 | **Hosting** | Primarily cloud-based [@20_cicd_comparison] | Self-hosted [@20_cicd_comparison] | Cloud-based [@20_cicd_comparison] | Cloud-based or self-hosted [@20_cicd_comparison] |
 | **Pricing Model** | Free for public repositories, tiered for private [@20_cicd_comparison] | Open-source (MIT License), only cost is for hosting [@20_cicd_comparison] | Commercial with a limited free tier [@20_cicd_comparison] | Commercial [@20_cicd_comparison] |
+
 Table: Comparison between CI/CD systems.
 
 ## Monitoring 
 <!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
-- We use Prometheus as an Echo middleware, with additional custom-made metrics to scrape our application every 5 seconds.
-    - Custom metrics: 
-        - User follower (gauge)
-        - User followees (gauge)
-        - VM CPU usage (gauge)
-        - Messages posted (by time) (counter)
-        - Messages posted (by user) (gauge)
-        - Mesages flagged (by user) (gauge)
-        - New user (counter)
-        - Total users (gauge)
-    <!-- Der er det her i vores kode som jeg ikke helt ved hvad er og om det burde komme med her:
-    MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
-                MemoryUsage.WithLabelValues("Used").Set(float64(vm.Used))
-                MemoryUsage.WithLabelValues("Available").Set(float64(vm.Available))
-                MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
-    -->
-    - Prometheus was chosen on the background of:
-        - Demonstrated in Class
-        - Easy integration with golang/echo via. middleware
-        - Widespread usage and easy to integrate with e.g. Grafana
-        - Free to use
-- Grafana
-    - As of writing this, the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
-    - Users:
-        - An admin user
-        - Helge and Mircea specific login
-    - Was chosen on the background of:
-        - Demonstrated in Class
-        - Rich Visualization 
-        - Free to use 
-        <!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
+### Prometheus
+We use Prometheus as an Echo middleware, with additional custom-made metrics to scrape our application every 5 seconds.
+
+Custom metrics: 
+- User follower (gauge)
+
+- User followees (gauge)
+
+- VM CPU usage (gauge)
+
+- Messages posted (by time) (counter)
+
+- Messages posted (by user) (gauge)
+
+- Mesages flagged (by user) (gauge)
+
+- New user (counter)
+
+- Total users (gauge)
+
+<!-- Der er det her i vores kode som jeg ikke helt ved hvad er og om det burde komme med her:
+MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
+            MemoryUsage.WithLabelValues("Used").Set(float64(vm.Used))
+            MemoryUsage.WithLabelValues("Available").Set(float64(vm.Available))
+            MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
+-->
+
+Prometheus was chosen on the background of:
+
+- Demonstrated in Class
+
+- Easy integration with golang/echo via. middleware
+
+- Widespread usage and easy to integrate with e.g. Grafana
+
+- Free to use
+
+### Grafana
+As of writing this, the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
+
+Users:
+
+- Admin user
+
+- Helge and Mircea specific login
+
+
+Grafana was chosen on the background of:
+
+- Demonstrated in Class
+
+- Rich Visualization 
+
+- Free to use 
+
+<!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
 
 ### Grafana Dashboards
 
@@ -113,16 +139,16 @@ Timframe: last 5 minutes:
 
 ![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png)
 
-### Black box monitoring
+#### Black box monitoring
 
 Black box user-side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
-### DigitalOcean monitoring
+#### DigitalOcean monitoring
 
 DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here] <!-- TODO DO NOT FORGET -->
 
 ### Alert System
-An alert system was set up via. a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
+An alert system was set up via a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
 ![Alert bot example](../images/alert-example.png)
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
