@@ -22,16 +22,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Pandoc, XeLaTeX, and Symbola font
+      - name: Install Pandoc and XeLaTeX
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc \
             texlive-xetex \
             texlive-fonts-recommended \
-            texlive-latex-extra \
-            fonts-symbola
+            texlive-latex-extra
 
-          # Install pandoc-crossref that matches Pandoc version
+          # Install pandoc-crossref matching Pandoc version
           CROSSREF_VERSION="v0.3.17.0"
           wget https://github.com/lierdakil/pandoc-crossref/releases/download/${CROSSREF_VERSION}/pandoc-crossref-Linux.tar.xz
           tar -xf pandoc-crossref-Linux.tar.xz
@@ -39,7 +38,6 @@ jobs:
           chmod +x /usr/local/bin/pandoc-crossref
           rm pandoc-crossref-Linux.tar.xz
           rm pandoc-crossref.1
-
 
       - name: Build PDF report
         working-directory: ./report/contents
@@ -60,7 +58,7 @@ jobs:
                  --filter pandoc-crossref \
                  --citeproc \
                  --pdf-engine=xelatex \
-                 -V mainfont="Symbola" \
+                 -V mainfont="DejaVu Sans" \
                  ../build/report_full.md \
                  -o ../build/MSc_group_c.pdf \
                  --csl=./ieee.csl \
