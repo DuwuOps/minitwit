@@ -45,7 +45,7 @@ This section presents the architecture of the system by exploring the [`src/`](h
 1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
 2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
 
-![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram position=h}  
+![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=100% position=h}  
 
 | Module | Description |
 |---|---------|
@@ -64,9 +64,9 @@ This section presents the architecture of the system by exploring the [`src/`](h
 
 Table: Description of modules in GoLang MiniTwit implementation. {#tbl:moduleslist}
 
-![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui position=h} 
+![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui height=45% position=h} 
 
-![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api position=h} 
+![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api height=45% position=h} 
 
 
 ### Current State of the System
@@ -104,18 +104,13 @@ MiniTwit contains a central [DockerFile](https://github.com/DuwuOps/minitwit/blo
 
 The MiniTwit repository contains two separate docker compose files, defining six core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some of the services use custom configuration specifications, found under the [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) directory (see @fig:dockerComposeViz). 
 
-![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz position=h} 
+![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h} 
 
 - [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
 - [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup with 1 manager node and 2 worker nodes, which runs the MiniTwit GoLang application (`app`). Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager, while `alloy` collects all logs, and is therefore applied to all nodes. This setup enables horizontal scaling.
 
 Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac. 
-
-- `docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. 
-It defines a Docker Swarm setup with one manager and two worker nodes. The `app` runs on two worker replicas, while logging and monitoring services are constrained to only run on the manager node (though `alloy` collects logs from all nodes). This setup enables horizontal scaling. 
-
-Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
 
 ![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h} 
 
