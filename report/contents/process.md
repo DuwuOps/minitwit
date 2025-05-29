@@ -92,21 +92,21 @@ In our implementation, [Prometheus](https://prometheus.io/) scrapes application 
 +--------------------------------+-------------+---------------------------------------------------------------------+
 | **Operation**                  | **Type**    | **Purpose**                                                         |
 +================================+=============+=====================================================================+
-| User follower                  | Gauge       | Tracks the current number of followers a user has                   |
+| User follower                  | Gauge       | Tracks the number of followers a user has                   |
 +--------------------------------+-------------+---------------------------------------------------------------------+
-| User followees                 | Gauge       | Tracks the current number of users a specific user is following     |
+| User followees                 | Gauge       | Tracks the number of users a specific user is following     |
 +--------------------------------+-------------+---------------------------------------------------------------------+
 | VM CPU usage                   | Gauge       | Monitors real-time CPU usage on a virtual machine                   |
 +--------------------------------+-------------+---------------------------------------------------------------------+
 | Messages posted (by time)      | Counter     | Counts the total number of messages posted over time                |
 +--------------------------------+-------------+---------------------------------------------------------------------+
-| Messages posted (by user)      | Gauge       | Tracks the current message count for individual users               |
+| Messages posted (by user)      | Gauge       | Tracks the message count for individual users               |
 +--------------------------------+-------------+---------------------------------------------------------------------+
 | Messages flagged (by user)     | Gauge       | Tracks how many messages a user has flagged                         |
 +--------------------------------+-------------+---------------------------------------------------------------------+
 | New user                       | Counter     | Counts the number of new users registered over time                 |
 +--------------------------------+-------------+---------------------------------------------------------------------+
-| Total users                    | Gauge       | Tracks the current total number of users in the system              |
+| Total users                    | Gauge       | Tracks the total number of users in the system              |
 +--------------------------------+-------------+---------------------------------------------------------------------+
 
 Table: Custom-made metrics for [Prometheus](https://prometheus.io/). **Note:** See [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics) for implementation. {#tbl:prometheus-metrics}
@@ -119,8 +119,8 @@ MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
             MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total)) -->
 
 ### Grafana
-[Grafana](https://grafana.com/) was chosen because of the familiarity from class, rich visualisation and open-source license. In Grafana two users are configured: Admin user and a specific login for Helge and Mircea.
-As per the introduction of [Docker Swarm](https://docs.docker.com/engine/swarm/), the dashboards created unfortunately became non-functional. As such, pictures are presented showing how the dashboards functioned prior to the simular stopping.
+[Grafana](https://grafana.com/) was chosen due to its familiarity from class, rich visualisation and open-source license. In Grafana, two users are configured: An admin user and a specific login for Helge and Mircea.
+When [Docker Swarm](https://docs.docker.com/engine/swarm/) was implemented, the created dashboards unfortunately became non-functional. As such, the presented pictures show what they *used to* look like.
 
 <!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
 
@@ -150,11 +150,11 @@ Timframe: last 5 minutes:
 
 ### Other types of monitoring
 
-- **Black Box Monitoring:** By the Status and Simulator API errors graf from class
+- **Black Box Monitoring:** Via the Status and Simulator API errors graf from class
 
-- **DigitalOcean Monitoring:** DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O).
+- **DigitalOcean Monitoring:** DigitalOcean shows CPU usage, Bandwidth, and Disk I/O.
 
-- **Alert System:** An alert system was set up via a Discord bot that checks the application on the server every 5 minutes. If the application is not up, it sends a Discord message and tags everyone on our group server.
+- **Alert System:** An alert system was set up via a [cron-job](../../.infrastructure/check_status.sh) that checks the web-application every 5 minutes. If the application is not up, it activates a Discord bot that sends an alert and tags everyone.
 
 ![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=h}
 
