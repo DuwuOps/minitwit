@@ -23,8 +23,8 @@ A total of **7** pipelines are established (see @tbl:pipelines).
 | `test-deployment.yml`    | Secondary CI/CD flow against TEST. | Tag `test-env*` | 
 | `sonarcube_analysis.yml` | Analyses go source code using SonarCloud. | PRs to `main` |
 
-Table:  List of GitHub Actions workflows employed.
-<!-- This is how you write table captions!!!! -->
+Table:  List of GitHub Actions workflows employed. {#tbl:pipelines}
+
 
 ### CI/CD Specific Technologies
 * The [`golangci-lint`](https://github.com/golangci/golangci-lint) linter is implemented in [`linter-workflow.yml`](https://github.com/DuwuOps/minitwit/blob/ff2bcaca1b56694ef6ac8f08f58988c04c87ad2a/.github/workflows/linter-workflow.yml) (see tasks [#119](https://github.com/DuwuOps/minitwit/issues/119) and [#129](https://github.com/DuwuOps/minitwit/issues/129))
@@ -85,8 +85,8 @@ MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
             MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total)) -->
 
 ### Grafana
-Grafana was chosen because of the familiarity from class, rich visualisation and free price. In Grafana two users are configured: Admin user and the specific login for Helge and Mircea.
-After introducing swarm scaling the dashboards are non-functional. Therefore, the pictures presented is from the day of the simulator stopping.
+[Grafana](https://grafana.com/) was chosen because of the familiarity from class, rich visualisation and open-source license. In Grafana two users are configured: Admin user and a specific login for Helge and Mircea.
+As per the introduction of [Docker Swarm](https://docs.docker.com/engine/swarm/), the dashboards created unfortunately became non-functional. As such, pictures are presented showing how the dashboards functioned prior to the simular stopping.
 
 <!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
 
@@ -96,23 +96,23 @@ After introducing swarm scaling the dashboards are non-functional. Therefore, th
 
 Timeframe: last 30 minutes:
 
-![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=H}
+![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=h}
 
 Timeframe: Last 2 days:
 
-![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=H}
+![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=h}
 
 **Whitebox User Action Dashboards Monitoring:**
 
 Timeframe: Last 7 days:
 
-![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png){#fig:monitoring-user-actions-t7d width=80% placement=H}
+![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png){#fig:monitoring-user-actions-t7d width=80% placement=h}
 
 **Whitebox Virtual Memory Dashboard Monitoring:**
 
 Timframe: last 5 minutes:
 
-![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=H}
+![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=h}
 
 ### Other types of monitoring
 
@@ -122,7 +122,7 @@ Timframe: last 5 minutes:
 
 - **Alert System:** An alert system was set up via a Discord bot that checks the application on the server every 5 minutes. If the application is not up, it sends a Discord message and tags everyone on our group server.
 
-![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=H}
+![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=h}
 
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
