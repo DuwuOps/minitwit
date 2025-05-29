@@ -116,7 +116,7 @@ It defines a Docker Swarm setup with one manager and two worker nodes. The `app`
 
 Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
 
-![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean synchronously, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac width=80% placement=H}
+![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac width=80% placement=H}
 
 ## Deployment
 
