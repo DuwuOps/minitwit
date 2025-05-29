@@ -127,11 +127,7 @@ Grafana Alloy, Grafana Loki and Grafana were chosen to handle the collection, ag
 
 To ensure application log messages are usable, logs are created at different levels of severity. To further ensure they are readable at a glance, emojis are used:
 
-- ℹ️, 📝, ✅, 📸: Different types of info messages
-
-- ⚠️: Warnings
-
-- ❌: Error messages 
+![](../images/logging-emojis.png){#fig:logging-emojis width=40% placement=H}
 
 Alloy collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to Loki for aggregation and eventual display. One instance of Alloy exists on each worker node. 
 
@@ -166,5 +162,10 @@ Additionally, Docker has been configured to rollback if a minitwit-container cra
 ## AI Use
 Throughout the development process, the team used the AIs ChatGPT, Claude, DeepSeek, and GitHub Copilot. 
 
-Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
-<!-- Det her er bare mig der syntes det er thihi fnis as få AI til at skrive AI afsnittet. Hvis nogle er uenige så bare lav det om <3 > -->
+These were used to:
+
+- Understand and fix code issues
+- Help format and phrase code and text
+- Provide inspiration during development 
+
+The team has found them expecially helpful for bug-fixing, but has been mindful to always set AIs as co-authors on relevant commits. 
