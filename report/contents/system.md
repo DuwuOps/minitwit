@@ -3,7 +3,7 @@
 ## Minitwit
 
 ### Programming Language
-[GoLang](https://go.dev/) (Go) was chosen based on documentation (**ref**), community support (**ref**), industry adoption [@stackoverflow_survey_2024], and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
+[GoLang](https://go.dev/) (Go) was chosen based on documentation [@go_documentation], community support [@go_support], industry adoption [@stackoverflow_survey_2024], and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
 
 The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csharp), [Java](https://www.java.com/en/), [GoLang](https://go.dev/), and [Crystal](https://crystal-lang.org/) were considered.
 [Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates, as both were considered to be verbose object-oriented languages, and that the group had extensive previous experience within these languages.
@@ -12,15 +12,30 @@ This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https:/
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
 |--------------------------|-------------------------------------------|------------------------------------------|
 | **Team Competences**     | Some prior exposure in small capacities   | No prior experience                      |
-| **Ecosystem & Libraries**| Well-supported, uses GitHub               | Uses GitHub, but less extensive          |
 | **Industry Usage**       | Extensive adoption [@stackoverflow_survey_2024] | Limited adoption [@stackoverflow_survey_2024]|
-| **Docker Compatibility** | Yes                                       | Yes                                      |
 | **Performance**          | Fast                                      | Fast                                     |
-| **Concurrency**          | Strong support                            | Good                                     |
-| **Documentation**        | Well-documented                           | Good but less extensive                  |
-| **Community**            | Large and active                          | Smaller and less active                  |
+| **Concurrency**          | Yes                            | Yes                                     |
+| **Documentation**        | Well-documented  [@go_documentation]                         | Good but less extensive [@stackoverflow_survey_2024]                 |
+| **Community**            | Large and active    [@stackoverflow_survey_2024]                      | Smaller and less active    [@stackoverflow_survey_2024]               |
 
 Table: Comparison between programming languages [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/). {#tbl:GoCrystalComparison}
+
+**Echo** was chosen as the Go web framework for the REST APIs due to its perceived ease-of-use, high-performance, and its native prometheus interoperability. Table @tbl:Web-Framework-Comparison outlines the analysis of comparison between select web frameworks for the GoLang programming language.
+
+
+| **Framework**       | **Gin**                                                    | **Chi**                                         | **Echo**                                                             | **Gorilla**                                         |
+|---------------------|-------------------------------------------------------------|--------------------------------------------------|----------------------------------------------------------------------|------------------------------------------------------|
+| **Prior Experience** | Some                                                       | None                                             | None                                                                 | None                                                 |
+| **Performance**      | Fast [@MediumGoLangComp]                                   | Fast [@MediumGoLangComp]                         | Fast [@MediumGoLangComp; @dailydev_top8goframeworks]                | Fast [@yash_ginvsgorilla]                            |
+| **Features**         | Moderate [@medium_ginchimux]                               | Many [@medium_ginchimux]                         | Many [@dailydev_top8goframeworks; @mattermost_ginvsecho]            | Many [@yash_ginvsgorilla]                            |
+| **Scalability**      | Great [@medium_ginchimux]                                  | Great                                            | Good [@dailydev_top8goframeworks]                                   | Great [@yash_ginvsgorilla]                           |
+| **Community**        | Good [@dailydev_top8goframeworks]                          | Good                                             | Growing [@dailydev_top8goframeworks]                                | Stale [@yash_ginvsgorilla]                           |
+| **Ease of use**      | Good [@yash_ginvsgorilla; @medium_ginchimux]              | Complex [@bruno_choosingGoFramework]             | Great [@mattermost_ginvsecho]                                       | Complex [@yash_ginvsgorilla]                         |
+| **Popularity**       | High [@awesomego_ginvschi]                                 | Low [@awesomego_ginvschi; @awesomego_echovschi]  | Medium [@awesomego_echovschi]                                       | Low                                                  |
+
+Table: Comparison of select GoLang web frameworks. 
+{#tbl:Web-Framework-Comparison}
+
 
 ### External dependencies in GoLang
 | **Dependency** | **Description** |
