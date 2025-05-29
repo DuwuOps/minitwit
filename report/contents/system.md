@@ -45,7 +45,7 @@ This section presents the architecture of the system by exploring the [`src/`](h
 1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
 2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
 
-![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=80% placement=H} 
+![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram position=h}  
 
 | Module | Description |
 |---|---------|
@@ -64,9 +64,9 @@ This section presents the architecture of the system by exploring the [`src/`](h
 
 Table: Description of modules in GoLang MiniTwit implementation. {#tbl:moduleslist}
 
-![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui width=80% placement=H}
+![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui position=h} 
 
-![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api width=80% placement=H}
+![Sequence diagram - Follow request via API](../images/sequence_diagram_follow_API.png){#fig:sequence-diagram-follow-api position=h} 
 
 
 ### Current State of the System
@@ -104,7 +104,7 @@ MiniTwit contains a central [DockerFile](https://github.com/DuwuOps/minitwit/blo
 
 The MiniTwit repository contains two separate docker compose files, defining six core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some of the services use custom configuration specifications, found under the [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) directory (see @fig:dockerComposeViz). 
 
-![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=60% placement=H}
+![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz position=h} 
 
 - [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
@@ -117,7 +117,7 @@ It defines a Docker Swarm setup with one manager and two worker nodes. The `app`
 
 Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram below. 
 
-![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac width=80% placement=H}
+![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h} 
 
 ## Deployment
 
@@ -140,7 +140,7 @@ To ensure a consistent and automatic creation of the infrastructure of the syste
 
 ### Allocation Viewpoint
 
-![Deployment diagram](../images/deployment_diagram.png){#fig:deployment-diagram width=80% placement=H}
+![Deployment diagram](../images/deployment_diagram.png){#fig:deployment-diagram position=h} 
 
 ## Database 
 
