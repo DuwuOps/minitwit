@@ -1,6 +1,6 @@
 # Reflections
 
-The group has applied devops strategies to provide the best product the quickest:
+The group has applied DevOps strategies to provide the best product the quickest.
 
 - Visible work
   - Kanban board
@@ -12,7 +12,7 @@ The group has applied devops strategies to provide the best product the quickest
 - Minimal branch sizing
   - Big branches leads to more feedback delay and increase risk of bugs
 - Pipeline
-  - Fast Response time, minimizes downtimes
+  - Fast Response time minimizes downtime
   - Security alerts
   - Automatic dependency updates
   - Automated testing
