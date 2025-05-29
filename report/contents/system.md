@@ -7,7 +7,7 @@
 
 The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csharp), [Java](https://www.java.com/en/), [GoLang](https://go.dev/), and [Crystal](https://crystal-lang.org/) were considered.
 [Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates, as both were considered to be verbose object-oriented languages, and that the group had extensive previous experience within these languages.
-This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in Table 2.
+This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in @tbl:GoCrystalComparison.
  
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
 |--------------------------|-------------------------------------------|------------------------------------------|
@@ -20,7 +20,7 @@ This led to a comparison between [GoLang](https://go.dev/) and [Crystal](https:/
 | **Documentation**        | Well-documented                           | Good but less extensive                  |
 | **Community**            | Large and active                          | Smaller and less active                  |
 
-Table: Comparison between programming languages [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/).
+Table: Comparison between programming languages [GoLang](https://go.dev/) and [Crystal](https://crystal-lang.org/). {#tbl:GoCrystalComparison}
 
 ### External dependencies in GoLang
 | **Dependency** | **Description** |
@@ -37,15 +37,15 @@ Table: Comparison between programming languages [GoLang](https://go.dev/) and [C
 | **gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
 | **Gravatar**                  | External web service providing avatar images generated from email hashes. |
 
-Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/go.mod) for more details.)
+Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/go.mod) for more details.) {#tbl:GoExternalDeps}
 
 ### Design and Architecture 
 This section presents the architecture of the system by exploring the [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) directory. The architecture is explored through two views:
 
-1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (**Figure X**), and table detailing each module with corresponding description (**Table X**).
-2. Two UML sequence diagrams (**Figure x** and **Figure X**). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
+1. A module-level description of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
+2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api). Showcasing the process involved when user requests a "follow"-interaction through respectively the *UI* and the testing *API* (Note that these are separate endpoints).
 
-![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=80% placement=H}
+![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=80% placement=H} 
 
 | Module | Description |
 |---|---------|
@@ -62,7 +62,7 @@ This section presents the architecture of the system by exploring the [`src/`](h
 | **`templates`** | Holds frontend HTML files. |
 | **`utils`** | Contains shared utility methods used across the codebase. |
 
-Table: Description of modules in GoLang MiniTwit implementation.
+Table: Description of modules in GoLang MiniTwit implementation. {#tbl:moduleslist}
 
 ![Sequence diagram - Follow request via UI](../images/sequence_diagram_follow_UI.png){#fig:sequence-diagram-follow-ui width=80% placement=H}
 
@@ -71,7 +71,7 @@ Table: Description of modules in GoLang MiniTwit implementation.
 
 ### Current State of the System
 
-The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized in order to gauge the complexity of the MiniTwit implementation (**Figure X** and **Figure X**). Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
+The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized in order to gauge the complexity of the MiniTwit implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require focused attention for maintainability.
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
@@ -82,7 +82,7 @@ The analysis tools of [SonarQube](https://www.sonarsource.com/products/sonarqube
 | Cyclomatic Complexity  | 216 (handlers: 151)    |
 | Technical Debt         | ~1 hour 7 minutes      |
 
-Table: Summarized quality metrics from SonarQube analysis.
+Table: Summarized quality metrics from SonarQube analysis. {#tbl:SonarQubeAnalysis}
 
 | Metric                 | Value                  |
 |------------------------|------------------------|
@@ -92,24 +92,25 @@ Table: Summarized quality metrics from SonarQube analysis.
 | Complexity             | 299 (handlers: 196)    |
 | Technical Debt         | ~1 day 2 hours         |
 
-Table: Summarized quality metrics from CodeClimate analysis.
+Table: Summarized quality metrics from CodeClimate analysis. {#tbl:CodeClimateAnalysis}
 
 ## Orchestration
-To streamline deployment, Docker, Docker Compose, Docker Swarm, and Terraform were chosen. 
+To streamline deployment, [Docker](https://www.docker.com/),[Docker Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized. 
 
-The Dockerfile builds a minitwit container image in two stages: 
+MiniTwit contains a central [DockerFile](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/Dockerfile), which builds the MiniTwit container in two stages:
 
-1. Compiling the Go source code from the `src` package into a binary. 
+1. Compiling the Minitwit source code in [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) into a binary. 
+2. Copying the compiled binary and necessary static files into a runtime docker image.
 
-2. Copying the compiled binary and necessary static files into a runtime image.
+The MiniTwit repository contains two separate docker compose files, defining six core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Some of the services use custom configuration specifications, found under the [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) directory (see @fig:dockerComposeViz). 
 
-There are two docker-compose files, `docker-compose.yml` and `docker-compose.deploy.yml`. Both define the six core services of the system: `app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`. 
+![Informal context diargam](../images/informal_context_diagram.png){#fig:dockerComposeViz width=60% placement=H}
 
-Except for the minitwit app and the database, the services use configuration specifications from corresponding `/.infrastructure/` sub-packages. 
+- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
 
-![Informal context diargam](../images/informal_context_diagram.png){#fig:informal-context-diagram width=80% placement=H}
+- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup with 1 manager node and 2 worker nodes, which runs the MiniTwit GoLang application (`app`). Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager, while `alloy` collects all logs, and is therefore applied to all nodes. This setup enables horizontal scaling.
 
-- `docker-compose.yml` is used for local deployment and image publishing. It uses `localhost` IP-adresses and includes default usernames and passwords. 
+Infrastructure as Code (IaC) is used yo simplify the remote setup of the Docker Swarm. Terraform files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via. Terraform is illustrated in the sequence diagram in @fig:sequence-diagram-iac. 
 
 - `docker-compose.deploy.yml` is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configuration. 
 It defines a Docker Swarm setup with one manager and two worker nodes. The `app` runs on two worker replicas, while logging and monitoring services are constrained to only run on the manager node (though `alloy` collects logs from all nodes). This setup enables horizontal scaling. 
@@ -149,7 +150,7 @@ Our setup includes two PostgreSQL databases: one for production and one for test
 
 ### Choice of Technology - Database
 
-We compared leading relational databases based on the Stack Overflow 2024 Developer Survey [@stackoverflow_survey_2024]. Only open-source, self-hosted Relational Database Management Systems (RDBMSs) were considered.
+We compared leading relational databases based on the Stack Overflow 2024 Developer Survey [@stackoverflow_survey_2024]. Only open-source, self-hosted Relational Database Management Systems (RDBMSs) were considered. The comparison is shown in @tbl:ComparisonOfRDBMSs.
 
 | **Database** | **SQLite** | **PostgreSQL** | **MySQL** | **Oracle** | **SQL Server** | **MariaDB** |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -160,7 +161,8 @@ We compared leading relational databases based on the Stack Overflow 2024 Develo
 | **Horizontal Scaling** | No | Yes [@Medium_Peymaan_DB_Comparison] | Yes [@Medium_Peymaan_DB_Comparison] | *Unknown* | *Unknown* | Yes [@Medium_Peymaan_DB_Comparison] |
 | **Concurrency Handling** | None | Excellent [@Medium_Peymaan_DB_Comparison] | Moderate [@Medium_Peymaan_DB_Comparison] | *Unknown* | *Unknown* | Strong [@Medium_Peymaan_DB_Comparison] |
 
-Table: Comparison of RDBMSs.
+Table: Comparison of RDBMSs. {#tbl:ComparisonOfRDBMSs}
+
 **Note**: Performance benchmarks are excluded due to license restrictions placed on benchmarking by licensing of proprietary DBMSs [@Oracle_Network_License].
  
 MySQL was ruled out due to licensing issues and development concerns post-Oracle acquisition [@Fedora_MariaDB], [@do_dbcomparison].
