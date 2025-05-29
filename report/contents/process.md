@@ -142,7 +142,7 @@ Grafana Alloy, Grafana Loki and Grafana were chosen to handle the collection, ag
 
 To ensure application log messages are usable, logs are created at different levels of severity. To further ensure they are readable at a glance, emojis are used:
 
-![](../images/logging-emojis.png){#fig:logging-emojis width=40% placement=H}
+![Emojis](../images/logging-emojis.png){#fig:logging-emojis width=30% placement=H}
 
 Alloy collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to Loki for aggregation and eventual display. One instance of Alloy exists on each worker node. 
 
