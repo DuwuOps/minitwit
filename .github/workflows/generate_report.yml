@@ -50,7 +50,15 @@ jobs:
             }
             { print }
           ' report.md > ../build/report_full.md
-          pandoc --number-sections --filter pandoc-crossref --citeproc ../build/report_full.md -o ../build/MSc_group_c.pdf --csl=./ieee.csl --bibliography=./main.bib
+          pandoc --number-sections \
+                 --filter pandoc-crossref \
+                 --citeproc \
+                 --pdf-engine=xelatex \
+                 -V mainfont="DejaVu Sans" \
+                 ../build/report_full.md \
+                 -o ../build/MSc_group_c.pdf \
+                 --csl=./ieee.csl \
+                 --bibliography=./main.bib
 
       - name: Commit and push updated PDF report
         env:
