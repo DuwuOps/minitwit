@@ -20,21 +20,6 @@ In the diagram it can be seen, that the main.go file orchestrates the system. It
 3. Setting up middleware
 4. Setting up routes, which have the responsibility of exposing the endpoints that further orchestrates to the handlers module for the logic of the API.
 
-#### Description of modules
-
-| Module                     | Description                                                                                                                                                                                  |
-|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`datalayer`**            | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`.                                         |
-| **`models`**               | Contains core data models: `User`, `Message`, `Follower`, and `LatestAccessed` (used to track recent activity, e.g., new followers or messages).                                            |
-| **`handlers`**             | Central logic of the system. Orchestrates operations for each model.<br>Includes **`repo_wrappers`**: utility functions extending repository logic.<br>Includes **`helpers`**: shared logic. |
-| **`routes`**               | Maps HTTP endpoints to their corresponding handlers.                                                                                                                                           |
-| **`metrics`**              | Registers Prometheus metrics to monitor system statistics.                                                                                                                                     |
-| **`middleware`**           | Applies security measures such as CSRF token validation to incoming requests.                                                                                                                 |
-| **`snapshots`**            | Handles creation of database snapshots for models.                                                                                                                                             |
-| **`template_rendering`**   | Renders templates used by the frontend.                                                                                                                                                        |
-| **`templates`**            | Holds frontend HTML files.                                                                                                                                                                     |
-| **`utils`**                | Contains shared utility methods used across the codebase.                                                                                                                                      |
-
 ### Sequence diagrams
 Two sequence diagrams have been created to show the flow of information through the system, from a "Follow" request by a user, to the system's returned response. 
 
@@ -69,8 +54,6 @@ Note that the two versions use different endpoints to interact with the same API
 | **github.com/gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
 | **Gravatar**                             | External web service providing avatar images generated from email hashes (used for user profiles). |
 
-### Choices of Go and Echo 
-This needs to be taken from the latex report.
 
 ## Current state of the system
 
