@@ -85,7 +85,7 @@ Table: Comparison between CI/CD systems. {#tbl:cicd-comparison}
 ## Monitoring 
 
 ### Prometheus
-[Prometheus](https://prometheus.io/) is used to collect and store metrics, and is invoked as a middleware service of [Echo](https://echo.labstack.com/) in the MiniTwit GoLang application. [Prometheus](https://prometheus.io/) was chosen due to its familiarity from class, native integration with Echo [@echo_prometheus_middleware], inferred popularity, integration with Grafana, and open-source license [@prometheus].
+[Prometheus](https://prometheus.io/) is used to collect and store metrics, and is invoked as a middleware service of [Echo](https://echo.labstack.com/). [Prometheus](https://prometheus.io/) was chosen due to its familiarity from class, native integration with Echo [@echo_prometheus_middleware], inferred popularity, integration with Grafana, and open-source license [@prometheus].
 
 In our implementation, [Prometheus](https://prometheus.io/) scrapes application every 5 seconds (see [`prometheus.yml`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/.infrastructure/prometheus/prometheus.yml)). Custom-made metrics are implemented in [Echo](https://echo.labstack.com/) to expose specific information from the GoLang implementation (see [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics)), these are outlined in @tbl:prometheus-metrics
 
