@@ -57,7 +57,7 @@ Table: Comparison between CI/CD systems.
 
 ## Monitoring 
 <!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
-- We use Prometheus as an Echo middleware, with additional custom made metrics to scrape our application every 5 seconds.
+- We use Prometheus as an Echo middleware, with additional custom-made metrics to scrape our application every 5 seconds.
     - Custom metrics: 
         - User follower (gauge)
         - User followees (gauge)
@@ -76,13 +76,13 @@ Table: Comparison between CI/CD systems.
     - Prometheus was chosen on the background of:
         - Demonstrated in Class
         - Easy integration with golang/echo via. middleware
-        - Wide spread usage and easy to integrate with e.g. Grafana
+        - Widespread usage and easy to integrate with e.g. Grafana
         - Free to use
 - Grafana
     - As of writing this, the dashboards does not work due to swarm scaling. All pictures are from the day of the simulator stopping. 
     - Users:
-        - Admin user with password shared with the group.
-        - Helge and Mircea specific login as described on Teams.
+        - An admin user
+        - Helge and Mircea specific login
     - Was chosen on the background of:
         - Demonstrated in Class
         - Rich Visualization 
@@ -115,14 +115,14 @@ Timframe: last 5 minutes:
 
 ### Black box monitoring
 
-Black box user side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
+Black box user-side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
 ### DigitalOcean monitoring
 
-DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here]
+DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here] <!-- TODO DO NOT FORGET -->
 
 ### Alert System
-An alert system was set up via a Discord bot that on the server via a cronjob that checks every 5 miniutes. If the application is not up it sends a Discord message and tags everyone on our group server. 
+An alert system was set up via. a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
 ![Alert bot example](../images/alert-example.png)
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
