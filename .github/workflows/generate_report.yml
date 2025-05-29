@@ -36,8 +36,8 @@ jobs:
             }
             { print }
           ' report.md > ../build/report_full.md
-          sed -i 's/..\//report\//g' ../build/report_full.md
-          sed -i 's/report\/report\///g' ../build/report_full.md
+          sed -i 's/\.\.\//\.\.\///g' ../build/report_full.md
+          sed -i 's/\.\.\//report\//g' ../build/report_full.md
 
       - name: Build PDF report with pandoc through Docker
         uses: docker://pandoc/latex:latest
