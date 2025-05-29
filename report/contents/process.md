@@ -11,7 +11,7 @@ A motivating factor was the suite of services supported natively in Github, wher
 * [GitHub Projects, Tasks & Backlog](https://github.com/orgs/DuwuOps/projects/1) for managing task formulation and distribution.
 
 ### CI/CD Pipelines
-A total of **7** pipelines are established, these are: 
+A total of **7** pipelines are established (see @tbl:pipelines).
 
 | File    | Purpose | Invoked on |
 | ---- | ------ | --- |
@@ -39,6 +39,7 @@ Table:  List of GitHub Actions workflows employed.
 
 
 ### Choice of CI/CD
+A comparison of CI/CD systems was performed, and the results can be seen in @tbl:cicd-comparison.
 
 * Since GitHub was chosen, [GitLab CI/CD](https://docs.gitlab.com/ci/) and [BitBucket Pipelines](https://www.atlassian.com/software/bitbucket/features/pipelines) were discarded, as they are specific to alternative git repository management sites.
 * Commercial automation tools such as [Azure DevOps](https://azure.microsoft.com/en-us/products/devops) and [TeamCity](https://www.jetbrains.com/teamcity/) were discarded due to the pricing.
@@ -54,21 +55,34 @@ It was decided that time-to-production, in the case of establishing working CI/C
 | **Hosting** | Primarily cloud-based [@20_cicd_comparison] | Self-hosted [@20_cicd_comparison] | Cloud-based [@20_cicd_comparison] | Cloud-based or self-hosted [@20_cicd_comparison] |
 | **Pricing Model** | Free for public repositories, tiered for private [@20_cicd_comparison] | Open-source (MIT License), only cost is for hosting [@20_cicd_comparison] | Commercial with a limited free tier [@20_cicd_comparison] | Commercial [@20_cicd_comparison] |
 
-Table: Comparison between CI/CD systems.
+Table: Comparison between CI/CD systems. {#tbl:cicd-comparison}
 
 ## Monitoring 
-<!-- Monitoring choice arguments is not a requirement (I checked), but added anyway since we had it.  -->
-### Prometheus
-Prometheus is used as an Echo middleware, with custom-made metrics to scrape our application every 5 seconds. Prometheus was chosen since the familiarity from class, easy integration with golang, popularity, easy integration with Grafana and free price.
 
-The custom metrics are: User follower (gauge), user followees (gauge), VM CPU usage (gauge), messages posted (by time) (counter), messages posted (by user) (gauge), mesages flagged (by user) (gauge), new user (counter), total users (gauge)
+### Prometheus
+[Prometheus](https://prometheus.io/) is used to collect and store metrics, and is invoked as a middleware service of [Echo](https://echo.labstack.com/) in the MiniTwit GoLang application. [Prometheus](https://prometheus.io/) was chosen due to its familiarity from class, native integration with Echo [@echo_prometheus_middleware], inferred popularity, integration with Grafana, and open-source license [@prometheus].
+
+In our implementation, [Prometheus](https://prometheus.io/) scrapes application every 5 seconds (see [`prometheus.yml`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/.infrastructure/prometheus/prometheus.yml)). Custom-made metrics are implemented in [Echo](https://echo.labstack.com/) to expose specific information from the GoLang implementation (see [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics)), these are outlined in @tbl:prometheus-metrics
+
+| Operation                     | Type    | Purpose                                                             |
+|------------------------------|---------|---------------------------------------------------------------------|
+| User follower                | Gauge   | Tracks the current number of followers a user has                  |
+| User followees               | Gauge   | Tracks the current number of users a specific user is following    |
+| VM CPU usage                 | Gauge   | Monitors real-time CPU usage on a virtual machine                  |
+| Messages posted (by time)    | Counter | Counts the total number of messages posted over time               |
+| Messages posted (by user)    | Gauge   | Tracks the current message count for individual users              |
+| Messages flagged (by user)   | Gauge   | Tracks how many messages a user has flagged                        |
+| New user                     | Counter | Counts the number of new users registered over time                |
+| Total users                  | Gauge   | Tracks the current total number of users in the system             |
+
+Table: Custom-made metrics for [Prometheus](https://prometheus.io/). **Note:** See [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics) for implementation. {#tbl:prometheus-metrics}
+
 
 <!-- Der er det her i vores kode som jeg ikke helt ved hvad er og om det burde komme med her:
 MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
             MemoryUsage.WithLabelValues("Used").Set(float64(vm.Used))
             MemoryUsage.WithLabelValues("Available").Set(float64(vm.Available))
-            MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total))
--->
+            MemoryUsage.WithLabelValues("Total").Set(float64(vm.Total)) -->
 
 ### Grafana
 Grafana was chosen because of the familiarity from class, rich visualisation and free price. In Grafana two users are configured: Admin user and the specific login for Helge and Mircea.
