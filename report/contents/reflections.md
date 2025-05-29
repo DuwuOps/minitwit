@@ -12,6 +12,7 @@
 - Helpers VS utils - are they the same?
 
 ## Operations
+- We were attacked
 
 ## Maintenance
 

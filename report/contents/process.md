@@ -117,7 +117,7 @@ Grafana was chosen on the background of:
 
 ### Grafana Dashboards
 
-**Whitebox Request and response monitoring dashboard:**
+**Whitebox Request and Response Monitoring Dashboard:**
 
 Timeframe: last 30 minutes:
 
@@ -127,28 +127,29 @@ Timeframe: Last 2 days:
 
 ![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png)
 
-**Whitebox User action dashboards monitoring:**
+**Whitebox User Action Dashboards Monitoring:**
 
 Timeframe: Last 7 days:
 
 ![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png)
 
-**Whitebox Virtual memory dashboard monitoring:**
+**Whitebox Virtual Memory Dashboard Monitoring:**
 
 Timframe: last 5 minutes:
 
 ![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png)
 
-#### Black box monitoring
+#### Black Box Monitoring
 
 Black box user-side error monitoring was given by the Helge and Mircea in form of the Status and Simulator API errors graf. We were encouraged to just use this as our client side error monitoring. <!-- Helge said this in a lecture  -->
 
-#### DigitalOcean monitoring
+#### DigitalOcean Monitoring
 
 DigitalOcean provides some monitoring capabilities (Bandwidth, CPU usage, and Disk I/O). This did help to identify an attack. More on that [Insert refrence here] <!-- TODO DO NOT FORGET -->
 
 ### Alert System
 An alert system was set up via a Discord bot that checks the application on the server every 5 minutes via a cron job. If the application is not up, it sends a Discord message and tags everyone on our group server. 
+
 ![Alert bot example](../images/alert-example.png)
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
@@ -166,9 +167,12 @@ Jeg tænker det ville være helt godnat at opdatere config filerene nu, men vi m
 
 Grafana Alloy, Grafana Loki and Grafana were chosen to handle the collection, aggregation, and presentation of logs, respectively.
 
-To ensure application log messages are usable, logs are created at different levels of severity throughout the application. To further ensure they are readable at a glance, emojis are used:
+To ensure application log messages are usable, logs are created at different levels of severity. To further ensure they are readable at a glance, emojis are used:
+
 - ℹ️, 📝, ✅, 📸: Different types of info messages
+
 - ⚠️: Warnings
+
 - ❌: Error messages 
 
 Alloy collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to Loki for aggregation and eventual display. One instance of Alloy exists on each worker node. 
@@ -183,15 +187,25 @@ Loki is currently configured to store logs in a folder called `tmp`. While this 
     - Oh no: A process should log only what is necessary
     - Yes: Logging should be done at the proper level: Mention emoji use-->
 
-## Strategy for scaling and upgrades
-- We used docker swarm with docker stack so that we could leverage the docker compose configurations that were already in use. However, some changes has to be made to accommodate the docker stack specifications and issues related to splitting the services unto different droplets. The changes were: 
-    - an overlay network
-    - defining how many replicas should be deployed per service
-    - defining on which droplet the monitoring services should be running
-    - other configurations across technologies
-- Docker has been configured to do rolling updates as this is nativly supported on docker swarm, through various update-configurations for relevant services.
-- Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
+## Strategy for Scaling and Upgrades
+We used docker swarm with docker stack so that we could leverage the docker compose configurations that were already in use. However, some changes has to be made to accommodate the docker stack specifications and issues related to splitting the services onto different droplets. 
 
-## AI use
-Throughout the development process, all team members leveraged artificial intelligence tools to varying degrees and for diverse applications. The primary AI systems employed included ChatGPT, Claude, DeepSeek, and GitHub Copilot. Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
+The changes were: 
+
+- an overlay network
+
+- defining how many replicas should be deployed per service
+
+- defining on which droplet the monitoring services should be running
+
+- other configurations across technologies
+
+Docker has been configured to do rolling updates as this is nativly supported on docker swarm, through various update-configurations for relevant services.
+
+Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
+
+## AI Use
+Throughout the development process, the team used the AIs ChatGPT, Claude, DeepSeek, and GitHub Copilot. 
+
+Team members provided contextual information regarding code issues or implementation challenges, utilizing AI-generated responses as foundational guidance for problem-solving methodologies rather than direct solution implementation. This methodology facilitated the identification of potential problem domains and remediation strategies while preserving critical assessment of AI-derived recommendations. In accordance with transparency requirements, AI tools have been formally acknowledged as co-authors in relevant version control commits where their contributions influenced the development process.  (This paragraf was written using AI lol)
 <!-- Det her er bare mig der syntes det er thihi fnis as få AI til at skrive AI afsnittet. Hvis nogle er uenige så bare lav det om <3 > -->
