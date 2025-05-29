@@ -150,7 +150,7 @@ To ensure that logs are centralised, Loki only runs on the manager node, but col
 
 ![Logging dashboard.](../images/logging-dashboard-post-swarm.png){#fig:logging-dashboard-post-swarm width=80% placement=H}
 
-Loki is currently configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
+Loki is configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
 
 <!-- Practical Principles:
     - Oh no: A process should not worry about storage
@@ -171,7 +171,7 @@ The changes included:
 
 - Adjusting configurations across various technologies
 
-Docker has been configured to do rolling updates as this is nativly supported on docker swarm.
+Docker has been configured to do rolling updates as this is nativly supported on Docker Swarm.
 Additionally, Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
 
 ## AI Use
