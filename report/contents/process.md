@@ -180,8 +180,9 @@ Alloy collects logs by gathering data from containers on the same docker environ
 
 To ensure that logs are centralised, Loki only runs on the manager node, but collects data from all Alloy instances. The collected logs can be found via. Grafana->Drilldown->Logs. 
 
-Loki is currently configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
+![Logging dashboard (here newly implemented).](../images/logging-dashboard.png){#fig:logging-dashboard width=80% placement=H}
 
+Loki is currently configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
 
 <!-- Practical Principles:
     - Oh no: A process should not worry about storage
