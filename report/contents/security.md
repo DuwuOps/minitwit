@@ -20,7 +20,7 @@ To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports
 ## Risk Scenarios
 
 - A successful CSRF attack could trick authenticated users into unknowingly executing malicious actions.
-- Slowloris attack opportunity, could easily exhausted server memory and triggering an OOM kill; because Docker’s restart policy does not recover from OOM kills[@docker_docs_resource_constraints], the service would require manual intervention.
+- A Slowloris attack could exhaust server memory and trigger an OOM kill; because Docker’s restart policy does not recover from OOM kills[@docker_docs_resource_constraints], the service would require manual intervention.
 - Clickjacking could be achieved by embedding malicious code in transparent frames, deceiving users into performing unintended actions.
 - Content sniffing attacks could exploit the browser’s tendency to reclassify responses based on payload content, potentially executing embedded malicious scrips within user-submitted posts.
 
@@ -36,8 +36,8 @@ Based on this analysis, we prioritized patches in the following order: Slowloris
 
 ## Mitigation and Remediation
 
-- Slowloris attacks: configure Read, Write, and Idle connection timeouts on the web server and imposed limits on header size (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
-- Slowloris attacks: enforce maximun database open- and idle connections with reduced lifetimes to prevent resource exhaustion (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
-- CSRF: integrating middleware that issues and validates per-request tokens for all form submissions (see PR [#152](https://github.com/DuwuOps/minitwit/pull/158)).
-- Content sniffing: adding response headers instructing browsers not to infer MIME types (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
-- Clickjacking: blocked by setting the `X-Frame-Options: DENY` header on all responses (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
+- Slowloris attacks: Configure Read, Write, and Idle connection timeouts on the web-server and impose limits on header size (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
+- Slowloris attacks: Enforce maximun database connections, with reduced lifetimes, to prevent resource exhaustion (see PR [#160](https://github.com/DuwuOps/minitwit/pull/160)).
+- CSRF: Integrate middleware that issues and validates per-request tokens for all form submissions (see PR [#152](https://github.com/DuwuOps/minitwit/pull/158)).
+- Content sniffing: Add response headers instructing browsers not to infer MIME types (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
+- Clickjacking: Set the `X-Frame-Options: DENY` header on all responses (see PR [#157](https://github.com/DuwuOps/minitwit/pull/167)).
