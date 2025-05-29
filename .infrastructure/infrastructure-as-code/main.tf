@@ -59,7 +59,7 @@ resource "digitalocean_droplet" "database_droplet" {
   backup_policy {
     plan    = "weekly"
     weekday = "TUE"
-    hour    = "01:00"
+    hour    = 4
   }
 
   connection {
