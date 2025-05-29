@@ -128,12 +128,33 @@ An alert system was set up via a Discord bot that on the server via a cronjob th
  <!-- So cute! luv it -->
 
 ## Logging
-- The ELK method was implemented but ultimatly scraped in favor of using loki/alloy that intergrate with Grafana which gather our logging and monitoring the same place. 
-- Practical Principles:
-    - TODO: A process should not worry about storage
-    - TODO: A process should log only what is necessary
-    - TODO: Logging should be done at the proper level: Mention emoji use
-    - Logs should be centralised: All logs can be found via Grafana->Drilldown->Logs
+<!--Jeg har ikke genbesøgt Loki og Alloy config filerne siden jeg satte det op. 
+Her er status (desværre):
+1) 
+    Vi har aldrig customized de filtre man kan sætte i Alloy, så alting sendes (næsten) direkte videre til Loki i stedet for at filtreres (hvilket ikke er mandatory men noget man kan og bør)
+2) 
+    Loki storage er en lokal fil "/tmp/loki/" frem for det de anbefalede i forelæsningen som var en stream
+
+Jeg tænker det ville være helt godnat at opdatere config filerene nu, men vi må lige formulere os så vi er ærlige
+-->
+
+Grafana Alloy, Grafana Loki and Grafana were chosen to handle the collection, aggregation, and presentation of logs, respectively.
+
+To ensure application log messages are usable, logs are created at different levels of severity throughout the application. To further ensure they are readable at a glance, emojis are used:
+- ℹ️, 📝, ✅, 📸: Different types of info messages
+- ⚠️: Warnings
+- ❌: Error messages 
+
+Alloy collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to Loki for aggregation and eventual display. One instance of Alloy exists on each worker node. 
+
+To ensure that logs are centralised, Loki only runs on the manager node, but collects data from all Alloy instances. The collected logs can be found via. Grafana->Drilldown->Logs. 
+
+Unfortunately, Loki is configured to store logs in a hardcoded filpath in a folder called `tmp`, rather than via. an unbuffered stdout stream. Hardcoded filepaths limit the logs' usability in development environments, where the developer must open a file rather than just look at their terminal, and their flexibility of storage in development environments.
+
+<!-- Practical Principles:
+    - Oh no: A process should not worry about storage
+    - Oh no: A process should log only what is necessary
+    - Yes: Logging should be done at the proper level: Mention emoji use-->
 
 ## Strategy for scaling and upgrades
 - We used docker swarm with docker stack so that we could leverage the docker compose configurations that were already in use. However, some changes has to be made to accommodate the docker stack specifications and issues related to splitting the services unto different droplets. The changes were: 
