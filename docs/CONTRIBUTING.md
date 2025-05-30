@@ -3,10 +3,12 @@
 This document describes the agreed upon contribution guidelines by group "*DuwuOps*"' regarding their MiniTwit DevOps project.
 
 ## Tasks & Cooperation
+* **Note:** Was changed in later iteration by unanimous vote, but served as guiding principle until halfway through development - as such, one contributor may complete a task by themselves.
 1. A task must be completed through *cooperation*.
-2. A task must be assigned to *at least* 2 contributors, who share the responsibility of it's completion.   
+2. A task must be assigned to *at least* 2 contributors, who share the responsibility of it's completion.
 3. The process of completing a task should, unless specified otherwise, be completed through [*pair-programming*](https://qentelli.com/thought-leadership/insights/introduction-pair-programming#:~:text=Pair%20programming%20is%20a%20concept,the%20accuracy%20of%20the%20code). 
     * Unless it is deemed unecessary for a task, in which case, a task will be assigned the label *exempt from pair programming*.
+    
 
 ## GitHub Issues
 
@@ -153,14 +155,6 @@ For example:
     ```
 ```
 <br/>
-
-## Testing
-
-* TBD
-
-## Deployment
-
-* TBD
 
 ## Coding Conventions
 
