@@ -117,7 +117,7 @@ To streamline deployment, [Docker](https://www.docker.com/), [Docker-Compose](ht
 
 The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Each service has a corresponding Dockerfile, which details how the image is built. Some services also use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) (see @fig:dockerComposeViz).
 
-![Informal context diagram](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
+![Informal depiction of docker services and respective configurations](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
 - [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system.
 

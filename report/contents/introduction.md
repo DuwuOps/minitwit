@@ -1,9 +1,9 @@
 # Introduction
 ## System Depiction
 
-An overview of the system is provided in Figure 1.
+An informal depiction of the system as an initial overview is provided in @fig:informal-system-depiction.
 
-![Informal system depiction diagram and a legend](../images/Informal%20System%20Depiction.png){#fig:informal-system-depiction width=100% placement=H}
+![Informal system depiction and legend](../images/Informal%20System%20Depiction.png){#fig:informal-system-depiction width=100% placement=H}
 
 ## Tech-Stack Overview
 

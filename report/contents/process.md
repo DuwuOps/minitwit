@@ -86,33 +86,18 @@ MemoryUsage.WithLabelValues("UsedPercent").Set(vm.UsedPercent)
 
 ### Grafana
 [Grafana](https://grafana.com/) was chosen due to its familiarity from class, rich visualisation and open-source license. In Grafana, two users are configured: An admin user and a specific login for Helge and Mircea.
-When [Docker Swarm](https://docs.docker.com/engine/swarm/) was implemented, the created dashboards unfortunately became non-functional. As such, the presented pictures show what they *used to* look like.
+When [Docker Swarm](https://docs.docker.com/engine/swarm/) was implemented, the created dashboards unfortunately became non-functional. As such, the presented pictures show what they *used to* look like (see @fig:monitoring-response-request-t30, @fig:monitoring-response-request-t2d, @fig:monitoring-user-actions-t7d, @fig:monitoring-VM-usage-t5)
 
 <!-- Har fjernet Alerting Functionality (fra overleaf listen) fordi vi alerter gennem botten og ikke gennem grafana -->
 
-### Grafana Dashboards
 
-**Whitebox Request and Response Monitoring Dashboard:**
+![Grafana Dashboard: Whitebox Request and Response Monitoring Dashboard (Timeframe: last 30 mins)](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=h}
 
-Timeframe: last 30 minutes:
+![Grafana Dashboard: Whitebox Request and Response Monitoring Dashboard (Timeframe: last 2 days)](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=h}
 
-![Request and response dashboardLast 2 days](../images/monitoring-response-request-t30.png){#fig:monitoring-response-request-t30 width=80% placement=h}
+![Grafana Dashboard: Whitebox User Action Dashboards Monitoring (Timeframe: last 7 days)](../images/monitoring-user-actions-t7d.png){#fig:monitoring-user-actions-t7d width=80% placement=h}
 
-Timeframe: Last 2 days:
-
-![Request and response dashboard last 30 minutes](../images/monitoring-response-request-t2d.png){#fig:monitoring-response-request-t2d width=80% placement=h}
-
-**Whitebox User Action Dashboards Monitoring:**
-
-Timeframe: Last 7 days:
-
-![User action dashboards Last 7 days](../images/monitoring-user-actions-t7d.png){#fig:monitoring-user-actions-t7d width=80% placement=h}
-
-**Whitebox Virtual Memory Dashboard Monitoring:**
-
-Timframe: last 5 minutes:
-
-![Virtual Memory dashbord Last 5 minutes](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=h}
+![Grafana Dashboard: Whitebox Virtual Memory Dashboard Monitoring (Timeframe: last 5 mins) ](../images/monitoring-VM-usage-t5.png){#fig:monitoring-VM-usage-t5 width=80% placement=h}
 
 ### Other types of monitoring
 
@@ -120,9 +105,9 @@ Timframe: last 5 minutes:
 
 - **DigitalOcean Monitoring:** DigitalOcean shows CPU usage, Bandwidth, and Disk I/O.
 
-- **Alert System:** An alert system was set up via a [cron-job](../../.infrastructure/check_status.sh) that checks the web-application every 5 minutes. If the application is not up, it activates a Discord bot that sends an alert and tags everyone.
+- **Alert System:** An alert system was set up via a [cron-job](../../.infrastructure/check_status.sh) that checks the web-application every 5 minutes. If the application is not up, it activates a Discord bot that sends an alert and tags everyone (see @fig:alert-example).
 
-![Alert bot example](../images/alert-example.png){#fig:alert-example width=80% placement=h}
+![Discord Alert System (Bot) example](../images/alert-example.png){#fig:alert-example width=80% placement=h}
 
  <!-- Jeg syntes det var sødt med et billede af vores discord, hvis nogen er uenige så bare fjern <3> -->
  <!-- So cute! luv it -->
@@ -138,19 +123,19 @@ Her er status (desværre):
 Jeg tænker det ville være helt godnat at opdatere config filerene nu, men vi må lige formulere os så vi er ærlige
 -->
 
-Grafana Alloy, Grafana Loki and Grafana were chosen to handle the collection, aggregation, and presentation of logs.
+[Grafana Alloy](https://grafana.com/docs/alloy/latest/), [Grafana Loki](https://grafana.com/oss/loki/) and [Grafana](https://grafana.com/grafana/) were chosen to handle the collection, aggregation, and presentation of logs.
 
-To ensure application log messages are usable, logs are created at different levels of severity. To ensure they are readable at a glance, emojis are used:
+To ensure application log messages are usable, logs are created at different levels of severity. To ensure they are readable at a glance, emojis are used (see @fig:logging-emojis)
 
-![Emojis](../images/logging-emojis.png){#fig:logging-emojis width=30% placement=H}
+![Emojis used in logging for observability](../images/logging-emojis.png){#fig:logging-emojis width=30% placement=h}
 
-Alloy collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to Loki. One instance of Alloy exists on each worker node. 
+[Grafana Alloy](https://grafana.com/docs/alloy/latest/) collects logs by gathering data from containers on the same docker environment. The gathered logs are sent to [Grafana Loki](https://grafana.com/oss/loki/). One instance of [Alloy](https://grafana.com/docs/alloy/latest/) exists on each worker node. 
 
-To ensure that logs are centralised, Loki only runs on the manager node, but collects data from all Alloy instances. The collected logs can be found via. Grafana->Drilldown->Logs. 
+To ensure that logs are centralised, [Loki](https://grafana.com/oss/loki/) only runs on the manager node, but collects data from all [Alloy](https://grafana.com/docs/alloy/latest/) instances. The collected logs can be found via. Grafana->Drilldown->Logs. 
 
-![Logging dashboard.](../images/logging-dashboard-post-swarm.png){#fig:logging-dashboard-post-swarm width=80% placement=H}
+![Logging dashboard.](../images/logging-dashboard-post-swarm.png){#fig:logging-dashboard-post-swarm width=80% placement=h}
 
-Loki is configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
+[Loki](https://grafana.com/oss/loki/) is configured to store logs in a folder called `tmp`. While this approach provides reliable log persistence, transitioning to an unbuffered stdout stream would be better to align with the principle that processes should not manage their own storage. 
 
 <!-- Practical Principles:
     - Oh no: A process should not worry about storage
@@ -158,8 +143,8 @@ Loki is configured to store logs in a folder called `tmp`. While this approach p
     - Yes: Logging should be done at the proper level: Mention emoji use-->
 
 ## Strategy for Scaling and Upgrades
-We used Docker Swarm with Docker Stack to reuse the already existing Docker compose configurations. 
-However, some changes were necessary to accommodate the Docker Stack specifications and issues related to splitting the services onto different droplets. 
+We used [Docker Swarm](https://docs.docker.com/engine/swarm/) with Docker `stack` command to reuse the already existing Docker compose configurations. 
+However, some changes were necessary to accommodate the Docker `stack` specifications and issues related to splitting the services onto different droplets. 
 
 The changes included:
 
@@ -171,11 +156,11 @@ The changes included:
 
 - Adjusting configurations across various technologies
 
-Docker has been configured to do rolling updates, as this is nativly supported on Docker Swarm.
+Docker has been configured to do rolling updates, as this is nativly supported on [Docker Swarm](https://docs.docker.com/engine/swarm/).
 Additionally, Docker has been configured to rollback if a minitwit-container crashes whithin 30 seconds of deployment.
 
 ## AI Use
-Throughout the development process, the team used the AIs ChatGPT, Claude, DeepSeek, and GitHub Copilot. 
+Throughout the development process, the team used the AIs: ChatGPT, Claude, DeepSeek, and GitHub Copilot. 
 
 These were used to:
 
@@ -183,4 +168,4 @@ These were used to:
 - Help format and phrase code and text
 - Provide inspiration during development 
 
-They were especially helpful for bug-fixing, and were always credited as co-authors on relevant commits.
+They were especially helpful for bug-fixing, and were credited as co-authors on relevant commits.
