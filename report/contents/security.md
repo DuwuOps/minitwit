@@ -32,6 +32,8 @@ To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports
 | **Likelihood: Medium** |               |                | Content Sniffing  |
 | **Likelihood: High**   | CSRF          |                | Slowloris         |
 
+Table: Overview of likelihood and impact-level of identified scenarios.
+
 Based on this analysis, we prioritized patches in the following order: Slowloris protection, CSRF mitigation, content-sniffing prevention, and clickjacking hardening.
 
 ## Mitigation and Remediation
