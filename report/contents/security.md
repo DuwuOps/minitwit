@@ -17,6 +17,8 @@ Ports 3000 and 9090 are default monitoring services, and should be privated. Exp
 
 To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports 22 and 80, which identified exposure to cross-site request forgery (CSRF) and Slowloris denial-of-service attacks. Given prior incidents of idle-connection exhaustion, the Slowloris finding was expected. A subsequent Nikto scan revealed missing security headers to prevent clickjacking and content sniffing.
 
+\newpage
+
 ## Risk Scenarios
 
 - A successful CSRF attack could trick authenticated users into unknowingly executing malicious actions.

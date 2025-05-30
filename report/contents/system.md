@@ -101,6 +101,8 @@ The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) 
 
 Table: Summarized quality metrics from SonarQube analysis. {#tbl:SonarQubeAnalysis}
 
+\newpage
+
 | **Metric**          | **Value**             |
 |---|---|
 | Lines of Code (LOC)    | 1,912                  |
