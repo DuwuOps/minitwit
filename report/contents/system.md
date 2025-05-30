@@ -54,11 +54,11 @@ Table: Comparison of select Go web frameworks.
 | **gorilla/securecookie**      | Secure cookie encoding/decoding for session safety.                                                |
 | **Gravatar**                  | External web service providing avatar images generated from email hashes. |
 
-Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/go.mod) for more details.) {#tbl:GoExternalDeps}
+Table: External dependencies for the Go implementation of MiniTwit. (see [`go.mod`](https://github.com/DuwuOps/minitwit/blob/main/go.mod) for more details.) {#tbl:GoExternalDeps}
 
 ### Design and Architecture
 
-The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src) is explored through two views:
+The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/main/src) is explored through two views:
 
 1. A module view of the MiniTwit implementation, depicted in a UML module diagram (see @fig:module-diagram), and table detailing each module with corresponding description (see @tbl:moduleslist).
 2. Two UML sequence diagrams (@fig:sequence-diagram-follow-ui and @fig:sequence-diagram-follow-api) showcasing the user requests processes of "follow"-interaction through respectively the *UI* and the testing *API* (note: these are separate endpoints).
@@ -115,18 +115,18 @@ Table: Summarized quality metrics from CodeClimate analysis. {#tbl:CodeClimateAn
 
 To streamline deployment, [Docker](https://www.docker.com/), [Docker-Compose](https://docs.docker.com/compose/), [Docker Swarm](https://docs.docker.com/engine/swarm/), and [Terraform](https://developer.hashicorp.com/terraform) were utilized.
 
-The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Each service has a corresponding Dockerfile, which details how the image is built. Some services also use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/c257ab0c416ca6df4fa02d8f03417c6c9c078eee/.infrastructure) (see @fig:dockerComposeViz).
+The implementation contains two separate docker compose files, defining core services (`app`, `prometheus`, `alloy`, `loki`, `grafana`, and `database`). Each service has a corresponding Dockerfile, which details how the image is built. Some services also use custom configuration specifications, found under [`/.infrastructure/`](https://github.com/DuwuOps/minitwit/tree/main/.infrastructure) (see @fig:dockerComposeViz).
 
 ![Informal depiction of docker services and respective configurations](../images/informal_context_diagram.png){#fig:dockerComposeViz width=50% position=h}
 
-- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system.
+- [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/main/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system.
 
-- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configurations. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup-specifications, with 1 manager node and at least 1 worker node, which enables horizontal scaling.
+- [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/main/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configurations. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup-specifications, with 1 manager node and at least 1 worker node, which enables horizontal scaling.
     - The Minitwit GoLang application (`app`) runs on every worker node.
     - Metrics aggregation and monitoring services (`prometheus`, `loki`, `grafana`) runs only on the manager node.
     - OpenTelemetry Collector distribution (`alloy`) runs on all nodes.
 
-Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. [Terraform](https://developer.hashicorp.com/terraform) files are located in [`.infrastructure/infrastructure-as-code/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/.infrastructure/infrastructure-as-code). Automatic deployment via Terraform is illustrated in @fig:sequence-diagram-iac.
+Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. [Terraform](https://developer.hashicorp.com/terraform) files are located in [`.infrastructure/infrastructure-as-code/`](https://github.com/DuwuOps/minitwit/tree/main/.infrastructure/infrastructure-as-code). Automatic deployment via Terraform is illustrated in @fig:sequence-diagram-iac.
 
 ![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h}
 
