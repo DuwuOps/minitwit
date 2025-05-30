@@ -13,27 +13,17 @@ A motivating factor was the suite of services supported natively in Github, of w
 ### CI/CD Pipelines
 In total, **7** pipelines are established (see @tbl:pipelines).
 
-+---------------------------+------------------------------------------------------------+---------------------------+
-| **File**                  | **Purpose**                                                | **Invoked On**            |
-+===========================+============================================================+===========================+
-| `continous-development.yml` | Primary CI/CD flow against PROD                         | Pushing `main`            |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `codeql.yml`              | Analyzes go source code using                             | Push & PRs to `main`      |
-|                           | [`CodeQL`](https://codeql.github.com/)                    |                           |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `generate-report.yml`     | Generates `report.pdf` from files in `/report/*`          | Push to `/report/*`       |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `linter-workflow.yml`     | Runs [golangci-lint](https://github.com/golangci/golangci-lint) | Push `main` or any PR   |
-|                           | on go source code                                          |                           |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `pull-request-tests.yml`  | Runs python tests                                          | All PRs                   |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `test-deployment.yml`     | Secondary CI/CD flow against TEST                         | Tag `test-env*`           |
-+---------------------------+------------------------------------------------------------+---------------------------+
-| `sonarcube_analysis.yml`  | Analyses go source code using SonarCloud                  | PRs to `main`             |
-+---------------------------+------------------------------------------------------------+---------------------------+
+| File    | Purpose | Invoked on |
+| ---- | ------ | --- |
+| `continous-development.yml`  | Primary CI/CD flow against PROD | Pushing `main` |
+| `codeql.yml` | Analyzes go source code using [`CodeQL`](https://codeql.github.com/) | Push & PRs to `main`. | 
+| `generate-report.yml`| Generates `report.pdf` from files in `/report/*` | Push to `/report/*` | 
+| `linter-workflow.yml`| Runs [golangci-lint](https://github.com/golangci/golangci-lint) on go source code. | Push `main` or any PR | 
+| `pull-request-tests.yml` | Runs python tests. | All PRs |
+| `test-deployment.yml`    | Secondary CI/CD flow against TEST. | Tag `test-env*` | 
+| `sonarcube_analysis.yml` | Analyses go source code using SonarCloud. | PRs to `main` |
 
-Table: List of GitHub Actions workflows employed. {#tbl:pipelines}
+Table:  List of GitHub Actions workflows employed. {#tbl:pipelines}
 
 
 ### CI/CD Specific Technologies
@@ -58,27 +48,12 @@ As such, the choice was between GitHub's [GitHub Actions](https://github.com/fea
 
 The self-hosted automation system [Jenkins](https://www.jenkins.io/) was considered, but the perceived learning curve along with the self-hosted infrastructure setup [@20_cicd_comparison] dissuaded us from this choice, as time-to-production for *establishing* CI/CD pipelines was an important factor for us.
 
-+-----------------------------+---------------------+---------------------+---------------------+---------------------------+
-| **Feature**                 | **GitHub Actions** | **Jenkins**         | **Azure DevOps**   | **TeamCity**              |
-|                             |                     |                     |                     | **(JetBrains)**           |
-+=============================+=====================+=====================+=====================+===========================+
-| **Ease-of-use**             | Simple              | Medium              | *Undetermined*      | *Undetermined*            |
-|                             | [@githubactions_vs_jenkins] | [@githubactions_vs_jenkins] |           |                           |
-+-----------------------------+---------------------+---------------------+---------------------+---------------------------+
-| **Version Control**         | Native GitHub       | Agnostic            | Agnostic            | Agnostic                  |
-|                             | Integration         | [@20_cicd_comparison] | [@20_cicd_comparison] | [@20_cicd_comparison]   |
-|                             | [@20_cicd_comparison] |                   |                     |                           |
-+-----------------------------+---------------------+---------------------+---------------------+---------------------------+
-| **Hosting**                 | Primarily           | Self-hosted         | Cloud-based         | Cloud-based or            |
-|                             | cloud-based         | [@20_cicd_comparison] | [@20_cicd_comparison] | self-hosted             |
-|                             | [@20_cicd_comparison] |                   |                     | [@20_cicd_comparison]     |
-+-----------------------------+---------------------+---------------------+---------------------+---------------------------+
-| **Pricing Model**           | Free for public     | Open-source         | Commercial with     | Commercial                |
-|                             | repositories,       | (MIT License),      | limited free tier   | [@20_cicd_comparison]     |
-|                             | tiered for private  | only cost is        | [@20_cicd_comparison] |                         |
-|                             | [@20_cicd_comparison] | hosting           |                     |                           |
-|                             |                     | [@20_cicd_comparison] |                   |                           |
-+-----------------------------+---------------------+---------------------+---------------------+---------------------------+
+| **CI/CD Tool / Platform** | **GitHub Actions** | **Jenkins** | **Azure DevOps** | **TeamCity (JetBrains)** |
+|--------|--------|--------|--------|--------|
+| **Ease-of-use** | Simple [@githubactions_vs_jenkins] | Medium [@githubactions_vs_jenkins] | *Undetermined* | *Undetermined* |
+| **Version Control** | Native GitHub Integration [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] | Agnostic [@20_cicd_comparison] |
+| **Hosting** | Primarily cloud-based [@20_cicd_comparison] | Self-hosted [@20_cicd_comparison] | Cloud-based [@20_cicd_comparison] | Cloud-based or self-hosted [@20_cicd_comparison] |
+| **Pricing Model** | Free for public repositories, tiered for private [@20_cicd_comparison] | Open-source (MIT License), only cost is for hosting [@20_cicd_comparison] | Commercial with a limited free tier [@20_cicd_comparison] | Commercial [@20_cicd_comparison] |
 
 Table: Comparison between CI/CD systems. {#tbl:cicd-comparison}
 
@@ -89,25 +64,16 @@ Table: Comparison between CI/CD systems. {#tbl:cicd-comparison}
 
 In our implementation, [Prometheus](https://prometheus.io/) scrapes application every 5 seconds (see [`prometheus.yml`](https://github.com/DuwuOps/minitwit/blob/6faf790cde505828b23b891698cd11fe85e31ad0/.infrastructure/prometheus/prometheus.yml)). Custom-made metrics are implemented in [Echo](https://echo.labstack.com/) to expose specific information from the GoLang implementation (see [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics)), these are outlined in @tbl:prometheus-metrics
 
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| **Operation**                  | **Type**    | **Purpose**                                                         |
-+================================+=============+=====================================================================+
-| User follower                  | Gauge       | Tracks the number of followers a user has                   |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| User followees                 | Gauge       | Tracks the number of users a specific user is following     |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| VM CPU usage                   | Gauge       | Monitors real-time CPU usage on a virtual machine                   |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| Messages posted (by time)      | Counter     | Counts the total number of messages posted over time                |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| Messages posted (by user)      | Gauge       | Tracks the message count for individual users               |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| Messages flagged (by user)     | Gauge       | Tracks how many messages a user has flagged                         |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| New user                       | Counter     | Counts the number of new users registered over time                 |
-+--------------------------------+-------------+---------------------------------------------------------------------+
-| Total users                    | Gauge       | Tracks the total number of users in the system              |
-+--------------------------------+-------------+---------------------------------------------------------------------+
+| Operation                     | Type    | Purpose                                                             |
+|------------------------------|---------|---------------------------------------------------------------------|
+| User follower                | Gauge   | Tracks the number of followers a user has                  |
+| User followees               | Gauge   | Tracks the number of users a specific user is following    |
+| VM CPU usage                 | Gauge   | Monitors real-time CPU usage on a virtual machine                  |
+| Messages posted (by time)    | Counter | Counts the total number of messages posted over time               |
+| Messages posted (by user)    | Gauge   | Tracks the message count for individual users              |
+| Messages flagged (by user)   | Gauge   | Tracks how many messages a user has flagged                        |
+| New user                     | Counter | Counts the number of new users registered over time                |
+| Total users                  | Gauge   | Tracks the total number of users in the system             |
 
 Table: Custom-made metrics for [Prometheus](https://prometheus.io/). **Note:** See [`src/metrics/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/src/metrics) for implementation. {#tbl:prometheus-metrics}
 
