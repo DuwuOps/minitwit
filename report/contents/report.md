@@ -1,5 +1,6 @@
 ---
-title: "DevOps Project: Minitwit - MSc. Group DuwuOps"
+title: "DevOps Project: Minitwit"
+subtitle: MSc. Group C - DuwuOps
 author: 
   - Babette Bækgaard (babb@itu.dk)
   - David Martin Sørensen (daso@itu.dk)
