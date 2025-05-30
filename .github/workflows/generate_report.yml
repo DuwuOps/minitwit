@@ -4,9 +4,6 @@ on:
   push:
     paths:
       - 'report/**'
-  pull_request:
-    paths:
-      - 'report/**'
   workflow_dispatch:
 
 permissions:
