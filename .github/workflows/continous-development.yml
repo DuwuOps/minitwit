@@ -145,9 +145,6 @@ jobs:
 
           gh release upload "${TAG}" \
             ${BINARY_NAME} \
-            --repo="$GITHUB_REPOSITORY"
-          
-          gh release upload "${TAG}" \
             report/build/MSc_group_c.pdf \
             --repo="$GITHUB_REPOSITORY"
 
