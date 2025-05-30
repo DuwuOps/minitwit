@@ -127,6 +127,10 @@ jobs:
         run: |
           go mod download
           go build -o minitwit ./src/main.go
+      
+      - name: Zip all report-files
+        run: |
+          zip -r report.zip ./report
 
       - name: Create release with binary files and PDF
         env:
@@ -145,7 +149,7 @@ jobs:
 
           gh release upload "${TAG}" \
             ${BINARY_NAME} \
-            report/build/MSc_group_c.pdf \
+            report.zip \
             --repo="$GITHUB_REPOSITORY"
 
   deploy:
