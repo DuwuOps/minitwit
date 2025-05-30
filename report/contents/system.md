@@ -11,7 +11,7 @@ The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csha
 This led to a comparison between [Go](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in @tbl:GoCrystalComparison.
 
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
-|--------------------------|-------------------------------------------|------------------------------------------|
+|---|------|------|
 | **Team Competences**     | Some prior exposure in small capacities   | No prior experience                      |
 | **Industry Usage**       | Extensive adoption [@stackoverflow_survey_2024] | Limited adoption [@stackoverflow_survey_2024]|
 | **Performance**          | Fast                                      | Fast                                     |
@@ -25,7 +25,7 @@ Table: Comparison between [Go](https://go.dev/) and [Crystal](https://crystal-la
 
 
 | **Framework** | **Gin** | **Chi** | **Echo** | **Gorilla** |
-|-----|---|---|---|---|
+| ------ | --- | --- | --- | --- |
 | **Prior Experience** | Some | None | None | None |
 | **Performance** | Fast [@MediumGoLangComp] | Fast [@MediumGoLangComp] | Fast [@MediumGoLangComp; @dailydev_top8goframeworks] | Fast [@yash_ginvsgorilla] |
 | **Features** | Moderate [@medium_ginchimux] | Many [@medium_ginchimux] | Many [@dailydev_top8goframeworks; @mattermost_ginvsecho] | Many [@yash_ginvsgorilla] |
@@ -41,7 +41,7 @@ Table: Comparison of select Go web frameworks.
 ### External dependencies in GoLang
 
 | **Dependency** | **Description** |
-| ----- | ------- |
+| --- | ------ |
 | **labstack/echo/v4**          | Web framework for routing and HTTP handling.                                                       |
 | **gorilla/sessions**          | Session management with secure cookie support.                                                     |
 | **lib/pq**                    | PostgreSQL driver for database connectivity.                                                       |
@@ -66,7 +66,7 @@ The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde
 ![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=100% position=h}  
 
 | **Module** | **Description** |
-|---|---------|
+|---|-------|
 | **`datalayer`** | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`. |
 | **`models`** | Contains data models: `User`, `Message`, `Follower`, and `LatestAccessed`. |
 | **`handlers`** | Central logic of the system. Orchestrates operations for each model. |
@@ -91,7 +91,7 @@ Table: Description of modules in GoLang MiniTwit implementation. {#tbl:modulesli
 The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized to gauge the complexity of the implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require attention for maintainability.
 
 | **Metric**             | **Value**              |
-|------------------------|------------------------|
+|-----|---|
 | Lines of Code (LOC)    | 1,591                  |
 | Code Duplication       | 4.1%                   |
 | Security Hotspots      | 8                      |
@@ -102,7 +102,7 @@ The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) 
 Table: Summarized quality metrics from SonarQube analysis. {#tbl:SonarQubeAnalysis}
 
 | **Metric**          | **Value**             |
-|------------------------|------------------------|
+|---|---|
 | Lines of Code (LOC)    | 1,912                  |
 | Code Duplication       | 0%                     |
 | Overall Rating         | A (Excellent quality)  |
@@ -137,7 +137,7 @@ Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. 
 To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use [@Quinn_2022] [@aliamin7] [@Finder_2023], and familiarity to the group through lecture demonstration.
 
 | **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
-|---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
+|-----|---|---|---|---|
 | **Virtual Machine Price** | ca. $12/mo [@digitalocean_price]      | ca. $15/mo [@azure_price]     | $13/mo [@oracle_price]            | ca. $12/mo [@aws_lightsail_price]     |
 | **Storage Price**         | 50GB included [@digitalocean_price]   | ca. $5 (64GB) [@azure_price]  | ca. $2.5 (50GB) [@oracle_price]   | ca. $12/mo [@aws_lightsail_price]  |
 | **Total Price**           | ca. $12/mo                            | ca. $20/mo                    | ca. $15.5/mo                      | ca. $12/mo                            |
@@ -163,7 +163,7 @@ The database runs on a separate, containerized droplet, with restricted access t
 We compared leading relational databases based on the Stack Overflow 2024 Developer Survey [@stackoverflow_survey_2024]. Only open-source, self-hosted Relational Database Management Systems (RDBMSs) were considered. The comparison is shown in @tbl:ComparisonOfRDBMSs.
 
 | **Database** | **SQLite** | **PostgreSQL** | **MySQL** | **Oracle** | **SQL Server** | **MariaDB** |
-| --- | --- | --- | --- | --- | --- | --- |
+| ----- | --- | --- | --- | --- | --- | --- |
 | **Popularity** | 33.1% [@stackoverflow_survey_2024] | 49.7% [@stackoverflow_survey_2024] | 40.3% [@stackoverflow_survey_2024] | 10.1% [@stackoverflow_survey_2024] | 25.3% [@stackoverflow_survey_2024] | 17.2% [@stackoverflow_survey_2024] |
 | **License** | Public-Domain [@sqlite_license] | Open-Source [@postgresql_license] | Open-Source & Proprietary [@MySQL_license] | Proprietary | Proprietary [@microsoftsqlserver_license] | Open-Source [@mariadb_license] |
 | **Standards Compliance** [@SQL_Standard_ISO] | Low [@do_dbcomparison] | Compliant [@do_dbcomparison] | Limited [@do_dbcomparison] | *Unknown* | *Unknown* | Fork of MySQL; Assumed limited |
