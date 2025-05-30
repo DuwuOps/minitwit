@@ -127,8 +127,12 @@ jobs:
         run: |
           go mod download
           go build -o minitwit ./src/main.go
+      
+      - name: Zip all report-files
+        run: |
+          zip -r report.zip ./report
 
-      - name: Create release with binary files
+      - name: Create release with binary files and PDF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.next-version.outputs.NEW_TAG }}
@@ -145,6 +149,7 @@ jobs:
 
           gh release upload "${TAG}" \
             ${BINARY_NAME} \
+            report.zip \
             --repo="$GITHUB_REPOSITORY"
 
   deploy:

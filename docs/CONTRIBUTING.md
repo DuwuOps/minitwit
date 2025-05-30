@@ -3,10 +3,12 @@
 This document describes the agreed upon contribution guidelines by group "*DuwuOps*"' regarding their MiniTwit DevOps project.
 
 ## Tasks & Cooperation
+* **Note:** Was changed in later iteration by unanimous vote, but served as guiding principle until halfway through development - as such, one contributor may complete a task by themselves.
 1. A task must be completed through *cooperation*.
-2. A task must be assigned to *at least* 2 contributors, who share the responsibility of it's completion.   
+2. A task must be assigned to *at least* 2 contributors, who share the responsibility of it's completion.
 3. The process of completing a task should, unless specified otherwise, be completed through [*pair-programming*](https://qentelli.com/thought-leadership/insights/introduction-pair-programming#:~:text=Pair%20programming%20is%20a%20concept,the%20accuracy%20of%20the%20code). 
     * Unless it is deemed unecessary for a task, in which case, a task will be assigned the label *exempt from pair programming*.
+    
 
 ## GitHub Issues
 
@@ -154,17 +156,17 @@ For example:
 ```
 <br/>
 
-## Testing
+# Coding Conventions
 
-* TBD
+## Logging
 
-## Deployment
+When logging or printing, use the "log/slog"-package and not "log" or "fmt".
 
-* TBD
+### When to use what
 
-## Coding Conventions
+If there is a context, please use a context based method, such as `slog.InfoContext` or `slog.ErrorContext`. Otherwise, do not feel the need to create a context. Just use non-context based methods such as `slog.Info` or `slog.Error`.
 
-* Formatting Rules - *TBD*
+Logging helper-methods go in `src/utils/logger.go`. Here already exists some helper-methods for echo-contexts, such as `InfoEchoContext`, such that there is no need for extracting the`context.Context`-object from the `echo.Context` everytime.
 
 
 ## Acknowledgements

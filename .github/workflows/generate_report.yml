@@ -4,9 +4,6 @@ on:
   push:
     paths:
       - 'report/**'
-  pull_request:
-    paths:
-      - 'report/**'
   workflow_dispatch:
 
 permissions:
@@ -22,11 +19,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Pandoc and LaTeX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended texlive-latex-extra
-
       - name: Build PDF report
         working-directory: ./report/contents
         run: |
@@ -41,7 +33,22 @@ jobs:
             }
             { print }
           ' report.md > ../build/report_full.md
-          pandoc --number-sections ../build/report_full.md -o ../build/MSc_group_c.pdf
+          sed -i 's/\.\.\/\.\.\///g' ../build/report_full.md
+          sed -i 's/\.\.\//report\//g' ../build/report_full.md
+
+      - name: Build PDF report with pandoc through Docker
+        uses: docker://pandoc/latex:latest
+        with:
+          args: >-
+            --number-sections
+            --filter pandoc-crossref
+            --citeproc
+            --figure-caption-position=below
+            --table-caption-position=below
+            report/build/report_full.md 
+            -o report/build/MSc_group_c.pdf 
+            --csl=report/contents/ieee.csl 
+            --bibliography=report/contents/main.bib
 
       - name: Commit and push updated PDF report
         env:
