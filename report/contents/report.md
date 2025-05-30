@@ -9,6 +9,11 @@ author:
   - Nikoline Burman (nibu@itu.dk)
   - Simone Haukjær Jakobsen (hasj@itu.dk)
 date: May, 2025
+header-includes:
+    - '\usepackage{float}'
+    - '\makeatletter'
+    - '\def\fps@figure{H}'
+    - '\makeatother'
 geometry: margin=2.5cm
 output:
   pdf_document:
