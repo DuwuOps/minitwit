@@ -7,7 +7,7 @@
 [GoLang](https://go.dev/) (Go) was chosen based on documentation [@go_documentation], community support [@go_support], industry adoption [@stackoverflow_survey_2024], and the notion of being ’lightweight’ - both in terms of syntax and performance overhead. The group additionally wanted to prioritize a language they had limited experience with.
 
 The programming languages [C#](https://dotnet.microsoft.com/en-us/languages/csharp), [Java](https://www.java.com/en/), [Go](https://go.dev/), and [Crystal](https://crystal-lang.org/) were considered.
-[Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates as they were considered to be verbose object-oriented languages, and the group had extensive previous experience with them.
+[Java](https://www.java.com/en/) and [C#](https://dotnet.microsoft.com/en-us/languages/csharp) were discarded as candidates as they were considered too verbose as object-oriented languages, and the group had extensive previous experience with them.
 This led to a comparison between [Go](https://go.dev/) and [Crystal](https://crystal-lang.org/), outlined in @tbl:GoCrystalComparison.
 
 | **Topic / Lang**         | **GoLang**                               | **Crystal**                             |
@@ -21,18 +21,18 @@ This led to a comparison between [Go](https://go.dev/) and [Crystal](https://cry
 
 Table: Comparison between [Go](https://go.dev/) and [Crystal](https://crystal-lang.org/). {#tbl:GoCrystalComparison}
 
-**Echo** was chosen as the Go web framework for the REST APIs due to its perceived ease-of-use, high-performance, and its native Prometheus interoperability. Table @tbl:Web-Framework-Comparison outlines the comparison between select web frameworks for Go.
+[Echo](https://echo.labstack.com/) was chosen as the Go web framework for the REST APIs due to its perceived ease-of-use [@mattermost_ginvsecho], high-performance [@MediumGoLangComp; @dailydev_top8goframeworks], and its native Prometheus interoperability. Table @tbl:Web-Framework-Comparison outlines the comparison between select web frameworks for Go.
 
 
-| **Framework**       | **Gin**                                                    | **Chi**                                         | **Echo**                                                             | **Gorilla**                                         |
-|---------------------|-------------------------------------------------------------|--------------------------------------------------|----------------------------------------------------------------------|------------------------------------------------------|
-| **Prior Experience** | Some                                                       | None                                             | None                                                                 | None                                                 |
-| **Performance**      | Fast [@MediumGoLangComp]                                   | Fast [@MediumGoLangComp]                         | Fast [@MediumGoLangComp; @dailydev_top8goframeworks]                | Fast [@yash_ginvsgorilla]                            |
-| **Features**         | Moderate [@medium_ginchimux]                               | Many [@medium_ginchimux]                         | Many [@dailydev_top8goframeworks; @mattermost_ginvsecho]            | Many [@yash_ginvsgorilla]                            |
-| **Scalability**      | Great [@medium_ginchimux]                                  | Great                                            | Good [@dailydev_top8goframeworks]                                   | Great [@yash_ginvsgorilla]                           |
-| **Community**        | Good [@dailydev_top8goframeworks]                          | Good                                             | Growing [@dailydev_top8goframeworks]                                | Stale [@yash_ginvsgorilla]                           |
-| **Ease of use**      | Good [@yash_ginvsgorilla; @medium_ginchimux]              | Complex [@bruno_choosingGoFramework]             | Great [@mattermost_ginvsecho]                                       | Complex [@yash_ginvsgorilla]                         |
-| **Popularity**       | High [@awesomego_ginvschi]                                 | Low [@awesomego_ginvschi; @awesomego_echovschi]  | Medium [@awesomego_echovschi]                                       | Low                                                  |
+| **Framework** | **Gin** | **Chi** | **Echo** | **Gorilla** |
+|-----|---|---|---|---|
+| **Prior Experience** | Some | None | None | None |
+| **Performance** | Fast [@MediumGoLangComp] | Fast [@MediumGoLangComp] | Fast [@MediumGoLangComp; @dailydev_top8goframeworks] | Fast [@yash_ginvsgorilla] |
+| **Features** | Moderate [@medium_ginchimux] | Many [@medium_ginchimux] | Many [@dailydev_top8goframeworks; @mattermost_ginvsecho] | Many [@yash_ginvsgorilla] |
+| **Scalability** | Great [@medium_ginchimux] | Great | Good [@dailydev_top8goframeworks] | Great [@yash_ginvsgorilla] |
+| **Community** | Good [@dailydev_top8goframeworks] | Good | Growing [@dailydev_top8goframeworks] | Stale [@yash_ginvsgorilla] |
+| **Ease of use** | Good [@yash_ginvsgorilla; @medium_ginchimux] | Complex [@bruno_choosingGoFramework] | Great [@mattermost_ginvsecho] | Complex [@yash_ginvsgorilla] |
+| **Popularity** | High [@awesomego_ginvschi] | Low [@awesomego_ginvschi; @awesomego_echovschi] | Medium [@awesomego_echovschi] | Low |
 
 Table: Comparison of select Go web frameworks. 
 {#tbl:Web-Framework-Comparison}
@@ -122,11 +122,11 @@ The implementation contains two separate docker compose files, defining core ser
 - [`docker-compose.yml`](https://github.com/DuwuOps/minitwit/blob/43dc04b02d3f733b8b540b03a6eb9a5959918a93/docker-compose.yml) is used for local deployment and image publishing. It uses `localhost` and includes configurable values (with associative default values) for the system.
 
 - [`docker-compose.deploy.yml`](https://github.com/DuwuOps/minitwit/blob/baf6703fd7a784728e966fddd13aaac9cc96d870/docker-compose.deploy.yml) is used for remote deployment. It builds on `docker-compose.yml` but overrides relevant configurations. This compose file contains the [Docker Swarm](https://docs.docker.com/engine/swarm/) setup-specifications, with 1 manager node and at least 1 worker node, which enables horizontal scaling.
-    - The application (`app`) is on 2 of the nodes
-    - Logging and monitoring aggregation services (`prometheus`, `loki`) are constrainted to only run on the manager
+    - The Minitwit GoLang application (`app`) runs on every worker node.
+    - Metrics aggregation and monitoring services (`prometheus`, `loki`, `grafana`) runs only on the manager node.
     - OpenTelemetry Collector distribution (`alloy`) runs on all nodes.
 
-Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. Terraform[@Terraform_MainPage] files are located in `.infrastructure/infrastructure-as-code/`. Automatic deployment via Terraform is illustrated in @fig:sequence-diagram-iac.
+Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. [Terraform](https://developer.hashicorp.com/terraform) files are located in [`.infrastructure/infrastructure-as-code/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde505828b23b891698cd11fe85e31ad0/.infrastructure/infrastructure-as-code). Automatic deployment via Terraform is illustrated in @fig:sequence-diagram-iac.
 
 ![Sequence diagram of Terraform for IaC. Note: Terraform executes the calls to DigitalOcean sequentially, but continuous "OK" responses from DigitalOcean were omitted for brevity.](../images/sequence_diagram_IaC.png){#fig:sequence-diagram-iac position=h}
 
@@ -134,7 +134,7 @@ Infrastructure-as-Code (IaC) is used to simplify the remote setup of the Swarm. 
 
 ### Virtual Private Server (VPS)
 
-To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use[@Quinn_2022] [@aliamin7] [@Finder_2023], and familiarity to the group through lecture demonstration.
+To host the system on a remote server, [DigitalOcean](https://www.digitalocean.com/products/droplets) was chosen as the VPS provider. This choice was based on pricing (see @tbl:vps-comparison), its apparent ease-of-use [@Quinn_2022] [@aliamin7] [@Finder_2023], and familiarity to the group through lecture demonstration.
 
 | **VPS**                   | **DigitalOcean**                      |  **Microsoft Azure**          | **Oracle**                        | **AWS (Lightsail)**                   |
 |---------------------------|---------------------------------------|-------------------------------|-----------------------------------|---------------------------------------|
@@ -146,7 +146,7 @@ To host the system on a remote server, [DigitalOcean](https://www.digitalocean.c
 
 ### Infrastructure-as-Code
 
-The Terraform setup ensures a consistent and automatic creation of infrastructure on DigitalOcean. Terraform has an easy-to-use built-in provider for DigitalOcean[@Anicas_Hogan_2022].
+The [Terraform](https://developer.hashicorp.com/terraform) setup ensures a consistent and automatic creation of infrastructure on [DigitalOcean](https://www.digitalocean.com/products/droplets). [Terraform](https://developer.hashicorp.com/terraform) has an easy-to-use built-in provider for [DigitalOcean](https://www.digitalocean.com/products/droplets) [@Anicas_Hogan_2022].
 
 ### Allocation Viewpoint
 
@@ -154,7 +154,7 @@ The Terraform setup ensures a consistent and automatic creation of infrastructur
 
 ## Database
 
-The database runs on a separate, containerized droplet, with restricted access through firewall to ensure security and isolation between environments (see Figure 1).
+The database runs on a separate, containerized droplet, with restricted access through firewall to ensure security and isolation between environments (see @fig:informal-system-depiction).
 
 [PostgreSQL](https://www.postgresql.org/) was chosen to replace the SQLite setup, due to strong SQL standards compliance [@do_dbcomparison], high community adoption [@stackoverflow_survey_2024], and advanced features [@tooljet_mariavspostgres], [@Medium_Peymaan_DB_Comparison].
 

@@ -3,7 +3,7 @@
 
 An overview of the system is provided in Figure 1.
 
-![Informal system depiction diagram and a legend](../images/Informal%20System%20Depiction.png){#fig:informal-system-depiction width=80% placement=H}
+![Informal system depiction diagram and a legend](../images/Informal%20System%20Depiction.png){#fig:informal-system-depiction width=100% placement=H}
 
 ## Tech-Stack Overview
 
