@@ -65,7 +65,7 @@ The architecture of [`src/`](https://github.com/DuwuOps/minitwit/tree/6faf790cde
 
 ![Module (Package) diagram of the GoLang MiniTwit implementation. **Note** `handlers` module is expanded to include GoLang implementations, in order to highlight its complexity.](../images/module_diagram.png){#fig:module-diagram width=100% position=h}  
 
-| Module | Description |
+| **Module** | **Description** |
 |---|---------|
 | **`datalayer`** | Responsible for database connection and initialization. Implements the data access layer through `repository.go` and its interface `irepository.go`. |
 | **`models`** | Contains data models: `User`, `Message`, `Follower`, and `LatestAccessed`. |
@@ -90,7 +90,7 @@ Table: Description of modules in GoLang MiniTwit implementation. {#tbl:modulesli
 
 The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) and [CodeClimate](https://codeclimate.com/) were utilized to gauge the complexity of the implementation (see @tbl:SonarQubeAnalysis and @tbl:CodeClimateAnalysis). Both tools show that the `handlers` module has relatively high complexity, which may require attention for maintainability.
 
-| Metric                 | Value                  |
+| **Metric**             | **Value**              |
 |------------------------|------------------------|
 | Lines of Code (LOC)    | 1,591                  |
 | Code Duplication       | 4.1%                   |
@@ -101,7 +101,7 @@ The analysis tools [SonarQube](https://www.sonarsource.com/products/sonarqube/) 
 
 Table: Summarized quality metrics from SonarQube analysis. {#tbl:SonarQubeAnalysis}
 
-| Metric                 | Value                  |
+| **Metric**          | **Value**             |
 |------------------------|------------------------|
 | Lines of Code (LOC)    | 1,912                  |
 | Code Duplication       | 0%                     |

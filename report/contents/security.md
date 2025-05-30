@@ -26,7 +26,7 @@ To uncover vulnerabilities, we used Nmap’s vulnerability scripts against ports
 
 ## Risk Analysis
 
-|                        | Impact: Low   | Impact: Medium | Impact: High      |
+|                        | **Impact: Low** | **Impact: Medium** | **Impact: High**      |
 |------------------------|:-------------:|:--------------:|:-----------------:|
 | **Likelihood: Low**    | Clickjacking  |                |                   |
 | **Likelihood: Medium** |               |                | Content Sniffing  |
