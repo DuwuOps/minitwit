@@ -128,7 +128,7 @@ jobs:
           go mod download
           go build -o minitwit ./src/main.go
 
-      - name: Create release with binary files
+      - name: Create release with binary files and PDF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.next-version.outputs.NEW_TAG }}
@@ -145,6 +145,10 @@ jobs:
 
           gh release upload "${TAG}" \
             ${BINARY_NAME} \
+            --repo="$GITHUB_REPOSITORY"
+          
+          gh release upload "${TAG}" \
+            report/build/MSc_group_c.pdf \
             --repo="$GITHUB_REPOSITORY"
 
   deploy:
