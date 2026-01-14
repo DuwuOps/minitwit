@@ -29,7 +29,7 @@ RUN go build -o minitwit ./src/main.go
 
 ####################  RUN BINARY  ####################
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 # Install run-dependencies for virtual machine
 RUN apk add --no-cache sqlite
